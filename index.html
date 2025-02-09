@@ -1,46 +1,203 @@
-Content-type: text/html
-
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<title>C Language Website</title>
-<meta charset="UTF-8">
-<style>
-pre { background-color: #f5f5f5; padding: 15px; border-radius: 5px; }
-body { font-family: monospace; max-width: 800px; margin: 20px auto; padding: 0 20px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        nav {
+            background-color: var(--secondary-color);
+            padding: 1rem 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ecf0f1;
+        }
+
+        .main-content {
+            padding: 3rem 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1>C语言编写的网站</h1>
-<pre>
-#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
+    <header>
+        <div class="container">
+            <h1>My Portfolio</h1>
+            <p>Welcome to my personal website</p>
+        </div>
+    </header>
 
-int main() {
-    printf("Welcome to my C website!\n");
-    return 0;
-}
-</pre>
-<h2>特点：</h2>
-<pre>
-1. 使用C语言编写
-2. 高效的内存管理
-3. 直接系统调用
-4. 快速执行速度
-</pre>
-<h2>代码示例：</h2>
-<pre>
-/* 高效的内存管理示例 */
-void *memory = malloc(1024);
-if (memory != NULL) {
-    /* 使用内存 */
-    free(memory);
-}
-</pre>
-<h2>系统信息：</h2>
-<pre>
-Compiled time: Feb  9 2025 23:20:20
-File: index.c
-</pre>
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <section id="about" class="card">
+                <h2>About Me</h2>
+                <p>A passionate developer interested in web development and technology.</p>
+            </section>
+
+            <section id="projects">
+                <h2>My Projects</h2>
+                <div class="projects">
+                    <div class="project-card">
+                        <div class="card">
+                            <h3>Project 1</h3>
+                            <p>Description of project 1</p>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="card">
+                            <h3>Project 2</h3>
+                            <p>Description of project 2</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="card">
+                <h2>Contact Me</h2>
+                <p>Get in touch:</p>
+                <p>Email: example@domain.com</p>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 My Portfolio. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // 添加平滑滚动效果
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // 添加暗色模式切换功能
+        const darkModeToggle = document.createElement('button');
+        darkModeToggle.innerHTML = '?';
+        darkModeToggle.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+        `;
+        
+        document.body.appendChild(darkModeToggle);
+        
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            darkModeToggle.innerHTML = document.body.classList.contains('dark-mode') ? '??' : '?';
+        });
+    </script>
 </body>
 </html>
