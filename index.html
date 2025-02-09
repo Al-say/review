@@ -4,109 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --bg-color: #f5f5f5;
-            --text-color: #333;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-        }
-
-        nav {
-            background-color: var(--secondary-color);
-            padding: 1rem 0;
-        }
-
-        nav ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-
-        nav a:hover {
-            color: #ecf0f1;
-        }
-
-        .main-content {
-            padding: 3rem 0;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .projects {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 2rem 0;
-        }
-
-        .project-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s;
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-        }
-
-        footer {
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            nav ul {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <header>
@@ -130,7 +28,7 @@
         <div class="container">
             <section id="about" class="card">
                 <h2>About Me</h2>
-                <p>A passionate developer interested in web development and technology.</p>
+                <p>A passionate developer with expertise in web development, focusing on creating beautiful and functional user experiences. I love working with modern technologies and am always eager to learn new things.</p>
             </section>
 
             <section id="projects">
@@ -138,14 +36,23 @@
                 <div class="projects">
                     <div class="project-card">
                         <div class="card">
-                            <h3>Project 1</h3>
-                            <p>Description of project 1</p>
+                            <h3>Web Portfolio</h3>
+                            <p>A responsive personal portfolio website built with HTML5, CSS3, and JavaScript. Features include dark mode, smooth animations, and mobile responsiveness.</p>
+                            <p><strong>Technologies:</strong> HTML, CSS, JavaScript</p>
                         </div>
                     </div>
                     <div class="project-card">
                         <div class="card">
-                            <h3>Project 2</h3>
-                            <p>Description of project 2</p>
+                            <h3>Task Manager</h3>
+                            <p>A modern task management application with features like task categorization, due dates, and priority levels.</p>
+                            <p><strong>Technologies:</strong> React, Node.js, MongoDB</p>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="card">
+                            <h3>Weather App</h3>
+                            <p>Real-time weather application providing detailed forecasts and weather information for locations worldwide.</p>
+                            <p><strong>Technologies:</strong> JavaScript, Weather API, CSS</p>
                         </div>
                     </div>
                 </div>
@@ -153,8 +60,10 @@
 
             <section id="contact" class="card">
                 <h2>Contact Me</h2>
-                <p>Get in touch:</p>
-                <p>Email: example@domain.com</p>
+                <p>I'm always interested in new opportunities and collaborations. Feel free to get in touch!</p>
+                <p><strong>Email:</strong> example@domain.com</p>
+                <p><strong>LinkedIn:</strong> linkedin.com/in/example</p>
+                <p><strong>GitHub:</strong> github.com/example</p>
             </section>
         </div>
     </main>
@@ -165,39 +74,6 @@
         </div>
     </footer>
 
-    <script>
-        // 添加平滑滚动效果
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-
-        // 添加暗色模式切换功能
-        const darkModeToggle = document.createElement('button');
-        darkModeToggle.innerHTML = '?';
-        darkModeToggle.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px;
-            border-radius: 50%;
-            border: none;
-            background: var(--primary-color);
-            color: white;
-            cursor: pointer;
-            font-size: 20px;
-        `;
-        
-        document.body.appendChild(darkModeToggle);
-        
-        darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            darkModeToggle.innerHTML = document.body.classList.contains('dark-mode') ? '??' : '?';
-        });
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>
