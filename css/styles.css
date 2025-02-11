@@ -77,16 +77,8 @@ header {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.site-logo {
-    max-width: 120px;
-    height: auto;
-    margin: 1rem auto;
-    display: block;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 .site-subtitle {
+    margin-top: 0;
     font-size: 1.2rem;
     font-weight: 500;
     margin-top: 0.5rem;
