@@ -3,23 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Portfolio</title>
+    <title>我的作品集</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>My Portfolio</h1>
-            <p>Crafting beautiful and functional digital experiences</p>
+            <h1>我的作品集</h1>
+            <p>打造精美且实用的数字体验</p>
+            <div class="weather-widget">
+                <i class="fas fa-cloud"></i>
+                <div class="weather-info">
+                    <span class="weather-city">加载中...</span>
+                    <span class="weather-temp"></span>
+                    <span class="weather-desc"></span>
+                </div>
+            </div>
         </div>
     </header>
 
     <nav>
-        <div class="container">
-            <ul>
-                <li><a href="#about">About</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#contact">Contact</a></li>
+        <div class="container nav-container">
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links">
+                <li><a href="#about"><i class="fas fa-user"></i> 关于我</a></li>
+                <li><a href="#projects"><i class="fas fa-code"></i> 项目</a></li>
+                <li><a href="#contact"><i class="fas fa-envelope"></i> 联系我</a></li>
             </ul>
         </div>
     </nav>
@@ -27,38 +39,38 @@
     <main class="main-content">
         <div class="container">
             <section id="about" class="card">
-                <h2>About Me</h2>
-                <p>I'm a passionate full-stack developer with a keen eye for design and user experience. I specialize in creating modern, responsive web applications that not only look beautiful but also provide seamless functionality.</p>
-                <p>With expertise in modern web technologies, I focus on writing clean, maintainable code that scales well and delivers exceptional user experiences.</p>
+                <h2>关于我</h2>
+                <p>我是一位热衷于设计和用户体验的全栈开发者。我专注于创建现代化、响应式的网络应用，不仅注重美观，更追求完美的功能性。</p>
+                <p>凭借现代网络技术的专业知识，我致力于编写整洁、可维护的代码，确保良好的扩展性和卓越的用户体验。</p>
             </section>
 
             <section id="projects">
-                <h2>Featured Projects</h2>
+                <h2>精选项目</h2>
                 <div class="projects">
                     <div class="project-card">
                         <div class="card">
-                            <h3>Modern Portfolio</h3>
-                            <p>A responsive personal portfolio website showcasing projects and skills. Features include dark mode, smooth animations, and mobile-first design.</p>
+                            <h3>现代作品集</h3>
+                            <p>一个响应式的个人作品集网站，展示项目和技能。特色功能包括暗色模式、流畅动画和移动优先设计。</p>
                             <div class="technologies">
-                                <strong>Technologies:</strong> HTML5, CSS3, JavaScript
+                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript
                             </div>
                         </div>
                     </div>
                     <div class="project-card">
                         <div class="card">
-                            <h3>Task Manager Pro</h3>
-                            <p>A comprehensive task management application with real-time updates, drag-and-drop organization, and team collaboration features.</p>
+                            <h3>任务管理专业版</h3>
+                            <p>一个全面的任务管理应用，具有实时更新、拖放组织和团队协作功能。</p>
                             <div class="technologies">
-                                <strong>Technologies:</strong> React, Node.js, MongoDB
+                                <strong>技术栈：</strong> React, Node.js, MongoDB
                             </div>
                         </div>
                     </div>
                     <div class="project-card">
                         <div class="card">
-                            <h3>Weather Dashboard</h3>
-                            <p>An elegant weather application providing detailed forecasts, interactive maps, and severe weather alerts for locations worldwide.</p>
+                            <h3>天气仪表板</h3>
+                            <p>一个优雅的天气应用，提供全球详细天气预报、交互式地图和恶劣天气警报。</p>
                             <div class="technologies">
-                                <strong>Technologies:</strong> JavaScript, Weather API, CSS Grid
+                                <strong>技术栈：</strong> JavaScript, Weather API, CSS Grid
                             </div>
                         </div>
                     </div>
@@ -66,18 +78,29 @@
             </section>
 
             <section id="contact" class="card">
-                <h2>Get in Touch</h2>
-                <p>I'm always interested in new opportunities and collaborations. Let's work together to bring your ideas to life!</p>
-                <p><strong>Email:</strong> contact@example.com</p>
-                <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/example">linkedin.com/in/example</a></p>
-                <p><strong>GitHub:</strong> <a href="https://github.com/example">github.com/example</a></p>
+                <h2>联系方式</h2>
+                <p>我始终对新的机会和合作保持开放态度。让我们一起将您的想法变为现实！</p>
+                <div class="contact-links">
+        <a href="mailto:me@alsay.net" class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>me@alsay.net</span>
+        </a>
+        <a href="tel:191665955242" class="contact-item">
+            <i class="fas fa-phone"></i>
+            <span>191665955242</span>
+                    </a>
+                    <a href="https://github.com/example" class="contact-item">
+                        <i class="fab fa-github"></i>
+                        <span>github.com/example</span>
+                    </a>
+                </div>
             </section>
         </div>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2024 My Portfolio. All rights reserved.</p>
+            <p>&copy; 2025 我的作品集。保留所有权利。</p>
         </div>
     </footer>
 

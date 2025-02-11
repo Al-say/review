@@ -1,3 +1,46 @@
+// Weather widget functionality using MCP weather server
+async function updateWeather() {
+    try {
+        const weatherWidget = document.querySelector('.weather-widget');
+        const cityElement = weatherWidget.querySelector('.weather-city');
+        const tempElement = weatherWidget.querySelector('.weather-temp');
+        const descElement = weatherWidget.querySelector('.weather-desc');
+        const weatherIcon = weatherWidget.querySelector('i');
+
+        const response = await fetch('js/weather-data.json');
+        const weatherData = await response.json();
+        
+        // Update weather icon based on conditions
+        const weatherIconMap = {
+            'clear': 'sun',
+            'overcast clouds': 'cloud',
+            'scattered clouds': 'cloud',
+            'broken clouds': 'cloud',
+            'rain': 'cloud-rain',
+            'snow': 'snowflake',
+            'thunderstorm': 'bolt',
+            'drizzle': 'cloud-rain',
+            'mist': 'smog'
+        };
+
+        // Update weather information
+        cityElement.textContent = '北京';
+        tempElement.textContent = `${Math.round(weatherData.temperature)}°C`;
+        const weatherText = `${weatherData.conditions}，湿度${weatherData.humidity}%`;
+        descElement.textContent = weatherText;
+        
+        // Update icon based on conditions
+        const iconName = weatherData.conditions.includes('云') ? 'cloud' : 'sun';
+        weatherIcon.className = `fas fa-${iconName}`;
+    } catch (error) {
+        console.error('天气获取失败:', error);
+    }
+}
+
+// Initialize weather and update every 5 minutes
+updateWeather();
+setInterval(updateWeather, 300000);
+
 // Smooth scroll functionality with improved easing
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -101,16 +144,78 @@ window.addEventListener('scroll', () => {
     header.style.backgroundPositionY = scrolled * 0.5 + 'px';
 });
 
-// Add hover effect for links
+// Mobile menu functionality
+const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+const navLinks = document.querySelector('.nav-links');
+
+mobileMenuToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+    mobileMenuToggle.innerHTML = navLinks.classList.contains('active') 
+        ? '<i class="fas fa-times"></i>' 
+        : '<i class="fas fa-bars"></i>';
+});
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('nav') && navLinks.classList.contains('active')) {
+        navLinks.classList.remove('active');
+        mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+    }
+});
+
+// Back to top functionality
+const backToTopButton = document.createElement('button');
+backToTopButton.className = 'back-to-top';
+backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+document.body.appendChild(backToTopButton);
+
+const toggleBackToTop = () => {
+    if (window.scrollY > 300) {
+        backToTopButton.classList.add('visible');
+    } else {
+        backToTopButton.classList.remove('visible');
+    }
+};
+
+window.addEventListener('scroll', toggleBackToTop);
+
+backToTopButton.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+
+// Enhanced link hover effects
 document.querySelectorAll('a').forEach(link => {
-    if (!link.closest('nav')) { // Exclude nav links as they have their own styling
-        link.style.transition = 'color 0.3s ease';
+    if (!link.closest('nav')) {
+        link.style.transition = 'all var(--transition-speed) ease';
         link.style.color = 'var(--primary-color)';
+        
         link.addEventListener('mouseenter', () => {
             link.style.color = 'var(--accent-color)';
+            link.style.transform = 'translateX(5px)';
         });
+        
         link.addEventListener('mouseleave', () => {
             link.style.color = 'var(--primary-color)';
+            link.style.transform = 'translateX(0)';
         });
     }
+});
+
+// Add loading animation for project cards
+document.querySelectorAll('.project-card').forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.2}s`;
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+});
+
+// Trigger loading animation after page load
+window.addEventListener('load', () => {
+    document.querySelectorAll('.project-card').forEach(card => {
+        card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    });
 });
