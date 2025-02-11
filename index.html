@@ -3,18 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alsay || Wallfacer</title>
+    <meta name="description" content="Alsay - 全栈开发工程师，专注于现代化Web应用开发，提供响应式设计和用户体验优化服务">
+    <meta name="keywords" content="全栈开发, Web开发, JavaScript, React, Node.js, 响应式设计, 用户体验">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Alsay">
+    <link rel="canonical" href="https://alsay.net" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Alsay - 全栈开发工程师">
+    <meta property="og:description" content="专注于现代化Web应用开发，提供响应式设计和用户体验优化服务">
+    <meta property="og:image" content="https://alsay.net/images/logo.png">
+    <meta property="og:url" content="https://alsay.net">
+    <meta property="og:type" content="website">
+    
+    <title>Alsay - 全栈开发工程师 | Wallfacer</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Schema.org markup for Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "Person",
+      "name": "Alsay",
+      "jobTitle": "全栈开发工程师",
+      "description": "专注于现代化Web应用开发，提供响应式设计和用户体验优化服务",
+      "email": "me@alsay.net",
+      "telephone": "191665955242",
+      "url": "https://alsay.net",
+      "sameAs": [
+        "https://github.com/example"
+      ]
+    }
+    </script>
 </head>
-<body>
+<body itemscope itemtype="http://schema.org/WebPage">
     <header>
         <div class="container">
-            <h1>Alsay</h1>
-            <p class="site-subtitle">Wallfacer</p>
-            <div class="weather-widget">
-                <i class="fas fa-cloud"></i>
+            <h1 itemprop="name">Alsay</h1>
+            <p class="site-subtitle" itemprop="description">全栈开发工程师</p>
+            <div class="weather-widget" aria-label="天气信息">
+                <i class="fas fa-cloud" aria-hidden="true"></i>
                 <div class="weather-info">
                     <span class="weather-city">加载中...</span>
                     <span class="weather-temp"></span>
@@ -26,52 +56,52 @@
 
     <nav>
         <div class="container nav-container">
-            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <button class="mobile-menu-toggle" aria-label="切换菜单">
                 <i class="fas fa-bars"></i>
             </button>
             <ul class="nav-links">
-                <li><a href="#about"><i class="fas fa-user"></i> About</a></li>
-                <li><a href="#projects"><i class="fas fa-code"></i> Projects</a></li>
-                <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+                <li><a href="#about"><i class="fas fa-user" aria-hidden="true"></i> 关于我</a></li>
+                <li><a href="#projects"><i class="fas fa-code" aria-hidden="true"></i> 项目</a></li>
+                <li><a href="#contact"><i class="fas fa-envelope" aria-hidden="true"></i> 联系我</a></li>
             </ul>
         </div>
     </nav>
 
     <main class="main-content">
         <div class="container">
-            <section id="about" class="card">
-                <h2>About Me</h2>
-                <p>I am a passionate full-stack developer with a keen eye for design and user experience. I focus on creating modern, responsive web applications that are both beautiful and functional.</p>
-                <p>With expertise in modern web technologies, I strive to write clean, maintainable code that ensures good scalability and exceptional user experience.</p>
+            <section id="about" class="card" itemprop="about">
+                <h2>关于我</h2>
+                <p itemprop="description">我是一名热衷于设计和用户体验的全栈开发工程师。专注于创建既美观又实用的现代响应式Web应用。</p>
+                <p>凭借现代Web技术的专业知识，我致力于编写整洁、可维护的代码，确保良好的可扩展性和卓越的用户体验。</p>
             </section>
 
             <section id="projects">
-                <h2>Projects</h2>
+                <h2>项目展示</h2>
                 <div class="projects">
-                    <div class="project-card">
+                    <div class="project-card" itemscope itemtype="http://schema.org/CreativeWork">
                         <div class="card">
-                            <h3>Modern Portfolio</h3>
-                            <p>A responsive personal portfolio website showcasing projects and skills. Features include dark mode, smooth animations, and mobile-first design.</p>
-                            <div class="technologies">
-                                <strong>Tech Stack:</strong> HTML5, CSS3, JavaScript
+                            <h3 itemprop="name">现代化个人作品集</h3>
+                            <p itemprop="description">一个展示项目和技能的响应式个人作品集网站。特点包括深色模式、流畅动画和移动优先设计。</p>
+                            <div class="technologies" itemprop="keywords">
+                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript
                             </div>
                         </div>
                     </div>
-                    <div class="project-card">
+                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication">
                         <div class="card">
-                            <h3>Task Manager Pro</h3>
-                            <p>A comprehensive task management application with real-time updates, drag-and-drop organization, and team collaboration features.</p>
-                            <div class="technologies">
-                                <strong>Tech Stack:</strong> React, Node.js, MongoDB
+                            <h3 itemprop="name">任务管理器Pro</h3>
+                            <p itemprop="description">一个全面的任务管理应用，具有实时更新、拖放组织和团队协作功能。</p>
+                            <div class="technologies" itemprop="applicationCategory">
+                                <strong>技术栈：</strong> React, Node.js, MongoDB
                             </div>
                         </div>
                     </div>
-                    <div class="project-card">
+                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication">
                         <div class="card">
-                            <h3>Weather Dashboard</h3>
-                            <p>An elegant weather application providing detailed forecasts, interactive maps, and severe weather alerts for locations worldwide.</p>
-                            <div class="technologies">
-                                <strong>Tech Stack:</strong> JavaScript, Weather API, CSS Grid
+                            <h3 itemprop="name">天气仪表板</h3>
+                            <p itemprop="description">一个优雅的天气应用程序，为全球各地提供详细的天气预报、交互式地图和恶劣天气警报。</p>
+                            <div class="technologies" itemprop="applicationCategory">
+                                <strong>技术栈：</strong> JavaScript, Weather API, CSS Grid
                             </div>
                         </div>
                     </div>
@@ -79,19 +109,19 @@
             </section>
 
             <section id="contact" class="card">
-                <h2>Contact</h2>
-                <p>I'm always open to new opportunities and collaborations. Let's bring your ideas to life!</p>
+                <h2>联系方式</h2>
+                <p>我随时欢迎新的机会和合作。让我们一起将您的想法变为现实！</p>
                 <div class="contact-links">
-        <a href="mailto:me@alsay.net" class="contact-item">
-            <i class="fas fa-envelope"></i>
-            <span>me@alsay.net</span>
-        </a>
-        <a href="tel:191665955242" class="contact-item">
-            <i class="fas fa-phone"></i>
-            <span>191665955242</span>
+                    <a href="mailto:me@alsay.net" class="contact-item" itemprop="email">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        <span>me@alsay.net</span>
                     </a>
-                    <a href="https://github.com/example" class="contact-item">
-                        <i class="fab fa-github"></i>
+                    <a href="tel:191665955242" class="contact-item" itemprop="telephone">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                        <span>191665955242</span>
+                    </a>
+                    <a href="https://github.com/example" class="contact-item" itemprop="sameAs">
+                        <i class="fab fa-github" aria-hidden="true"></i>
                         <span>github.com/example</span>
                     </a>
                 </div>
@@ -101,7 +131,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 Alsay || Wallfacer. All rights reserved.</p>
+            <p>&copy; 2025 Alsay - 全栈开发工程师. All rights reserved.</p>
         </div>
     </footer>
 
