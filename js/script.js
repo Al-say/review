@@ -24,7 +24,7 @@ async function updateWeather() {
         };
 
         // Update weather information
-        cityElement.textContent = '北京';
+        cityElement.textContent = '马鞍山';
         tempElement.textContent = `${Math.round(weatherData.temperature)}°C`;
         const weatherText = `${weatherData.conditions}，湿度${weatherData.humidity}%`;
         descElement.textContent = weatherText;

@@ -2,12 +2,12 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 const path = require('path');
 
-function updateWeather() {
+async function updateWeather() {
     try {
         // 使用 MCP 工具获取天气数据
-        const response = require('@modelcontextprotocol/sdk');
-        const weatherData = await response.use_mcp_tool('weather', 'get_weather', {
-            city: 'Beijing'
+        const MCP = require('@modelcontextprotocol/sdk');
+        const weatherData = await MCP.use_mcp_tool('weather', 'get_weather', {
+            city: 'Maanshan'
         });
 
         // 将天气数据写入文件
