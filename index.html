@@ -19,7 +19,17 @@
     <title>Alsay - 全栈开发工程师 | Wallfacer</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Preload critical assets -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/script.js" as="script">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+          integrity="sha384-3B6NwesSXE7YJlcLI9RpRqGf2p/EfVyTXLm07IYh0q2/m/ExxUWfZKi8P+XlUGjr" 
+          crossorigin="anonymous"
+          media="print" 
+          onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </noscript>
 
     <!-- Schema.org markup for Google -->
     <script type="application/ld+json">
@@ -56,10 +66,13 @@
 
     <nav>
         <div class="container nav-container">
-            <button class="mobile-menu-toggle" aria-label="切换菜单">
+            <button class="mobile-menu-toggle" 
+                    aria-label="切换菜单" 
+                    aria-expanded="false"
+                    aria-controls="nav-menu">
                 <i class="fas fa-bars"></i>
             </button>
-            <ul class="nav-links">
+            <ul class="nav-links" id="nav-menu" role="menu">
                 <li><a href="#about"><i class="fas fa-user" aria-hidden="true"></i> 关于我</a></li>
                 <li><a href="#projects"><i class="fas fa-code" aria-hidden="true"></i> 项目</a></li>
                 <li><a href="#contact"><i class="fas fa-envelope" aria-hidden="true"></i> 联系我</a></li>

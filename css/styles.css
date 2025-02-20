@@ -1,14 +1,27 @@
 :root {
+    /* Colors */
     --primary-color: #2563eb;
     --secondary-color: #3b82f6;
     --accent-color: #10b981;
     --bg-color: #f8fafc;
     --text-color: #334155;
+    --focus-ring-color: #3b82f6;
+    
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #2563eb, #3b82f6);
     --gradient-secondary: linear-gradient(135deg, #10b981, #3b82f6);
+    
+    /* Shadows */
     --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --focus-ring-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+    
+    /* Animation */
     --transition-speed: 0.3s;
+    
+    /* Layout */
     --border-radius: 12px;
+    --content-width: 1200px;
+    --spacing-unit: 1rem;
 }
 
 .dark-mode {
@@ -17,9 +30,11 @@
     --accent-color: #059669;
     --bg-color: #0f172a;
     --text-color: #f1f5f9;
+    --focus-ring-color: #60a5fa;
     --gradient-primary: linear-gradient(135deg, #1e40af, #1d4ed8);
     --gradient-secondary: linear-gradient(135deg, #059669, #1d4ed8);
     --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --focus-ring-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
 }
 
 .dark-mode .card,
@@ -173,9 +188,15 @@ nav a i {
     font-size: 1.1rem;
 }
 
-nav a:hover {
+nav a:hover,
+nav a:focus {
     background-color: rgba(255,255,255,0.15);
     transform: translateY(-2px);
+    outline: none;
+}
+
+nav a:focus-visible {
+    box-shadow: var(--focus-ring-shadow);
 }
 
 .main-content {
@@ -282,6 +303,14 @@ footer {
     backdrop-filter: blur(5px);
 }
 
+.theme-toggle:focus {
+    outline: none;
+}
+
+.theme-toggle:focus-visible {
+    box-shadow: var(--focus-ring-shadow);
+}
+
 .theme-toggle:hover {
     transform: scale(1.1) rotate(8deg);
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
@@ -360,9 +389,46 @@ footer {
     visibility: visible;
 }
 
-.back-to-top:hover {
+.back-to-top:hover,
+.back-to-top:focus {
     transform: translateY(-5px);
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    outline: none;
+}
+
+.back-to-top:focus-visible {
+    box-shadow: var(--focus-ring-shadow);
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+.will-change-transform {
+    will-change: transform;
+}
+
+/* Print styles */
+@media print {
+    .theme-toggle,
+    .back-to-top,
+    .mobile-menu-toggle {
+        display: none !important;
+    }
+    
+    * {
+        color: #000 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+    }
 }
 
 @media (max-width: 768px) {
