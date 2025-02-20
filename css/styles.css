@@ -408,17 +408,99 @@ footer {
     margin: 0 0.5rem;
 }
 
-/* 评论区样式 */
-#gitalk-container {
-    max-width: var(--content-width);
-    margin: 2rem auto;
-    padding: 0 20px;
+/* GitHub组件样式 */
+.github-stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1rem 0;
 }
 
-.dark-mode .gt-container {
-    --gt-color-main: var(--primary-color) !important;
-    --gt-color-text: var(--text-color) !important;
-    --gt-color-bg: var(--bg-color) !important;
+.github-stats-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+}
+
+/* 评论区样式 */
+.utterances {
+    max-width: 100% !important;
+    margin: 2rem auto !important;
+}
+
+/* 搜索功能样式 */
+#search-container {
+    margin: 2rem auto;
+    max-width: 600px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    background: var(--bg-color);
+    color: var(--text-color);
+    transition: all var(--transition-speed) ease;
+}
+
+#search-input:focus {
+    outline: none;
+    box-shadow: var(--focus-ring-shadow);
+}
+
+#results-container {
+    list-style: none;
+    margin-top: 1rem;
+    padding: 0;
+    background: var(--bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+}
+
+#results-container li {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+#results-container li:last-child {
+    border-bottom: none;
+}
+
+#results-container a {
+    color: var(--text-color);
+    text-decoration: none;
+    display: block;
+    transition: all var(--transition-speed) ease;
+}
+
+#results-container a:hover {
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+/* Code Examples 样式 */
+.gist {
+    margin: 2rem 0;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+}
+
+.dark-mode .gist {
+    filter: invert(0.9) hue-rotate(180deg);
+}
+
+@media (max-width: 768px) {
+    .github-stats-container {
+        flex-direction: column;
+    }
+    
+    .github-stats-container img {
+        width: 100%;
+    }
 }
 
 /* Performance optimizations */
