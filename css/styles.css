@@ -283,11 +283,14 @@ footer {
     position: relative;
 }
 
-.theme-toggle {
+/* 主题切换按钮和回到顶部按钮的共享样式 */
+.theme-toggle,
+.back-to-top {
     position: fixed;
     bottom: 30px;
-    right: 30px;
-    padding: 15px;
+    width: 50px;
+    height: 50px;
+    padding: 0;
     border-radius: 50%;
     border: none;
     background: var(--gradient-primary);
@@ -297,20 +300,51 @@ footer {
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     transition: all var(--transition-speed);
     z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 主题切换按钮位置 */
+.theme-toggle {
+    right: 30px;
     backdrop-filter: blur(5px);
 }
 
-.theme-toggle:focus {
+/* 回到顶部按钮位置 */
+.back-to-top {
+    left: 30px;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* 按钮焦点状态 */
+.theme-toggle:focus,
+.back-to-top:focus {
     outline: none;
 }
 
-.theme-toggle:focus-visible {
+.theme-toggle:focus-visible,
+.back-to-top:focus-visible {
     box-shadow: var(--focus-ring-shadow);
 }
 
+/* 按钮悬停状态 */
+.theme-toggle:hover,
+.back-to-top:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+/* 主题按钮特殊动画 */
 .theme-toggle:hover {
     transform: scale(1.1) rotate(8deg);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+/* 回到顶部按钮可见状态 */
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 @keyframes slideIn {
@@ -361,40 +395,6 @@ footer {
 
 .contact-item i {
     font-size: 1.5rem;
-}
-
-.back-to-top {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    padding: 15px;
-    border-radius: 50%;
-    border: none;
-    background: var(--gradient-primary);
-    color: white;
-    cursor: pointer;
-    font-size: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: all var(--transition-speed);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-}
-
-.back-to-top.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-.back-to-top:hover,
-.back-to-top:focus {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-    outline: none;
-}
-
-.back-to-top:focus-visible {
-    box-shadow: var(--focus-ring-shadow);
 }
 
 /* 访问统计样式 */
