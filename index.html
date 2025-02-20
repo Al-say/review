@@ -19,7 +19,6 @@
     <title>Alsay - 全栈开发工程师 | Wallfacer</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="stylesheet" href="css/styles.css">
-    <!-- Preload critical assets -->
     <link rel="preload" href="css/styles.css" as="style">
     <link rel="preload" href="js/script.js" as="script">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
@@ -40,10 +39,9 @@
       "jobTitle": "全栈开发工程师",
       "description": "专注于现代化Web应用开发，提供响应式设计和用户体验优化服务",
       "email": "me@alsay.net",
-      "telephone": "191665955242",
       "url": "https://alsay.net",
       "sameAs": [
-        "https://github.com/example"
+        "https://github.com/alsay"
       ]
     }
     </script>
@@ -53,11 +51,18 @@
         <div class="container">
             <h1 itemprop="name">Alsay</h1>
             <p class="site-subtitle" itemprop="description">全栈开发工程师</p>
-    <!-- 天气预报嵌入代码 来自 https://weatherwidget.org -->
-    <a class="weatherwidget-io" href="https://forecast7.com/zh/31d67118d51/maanshan/" data-label_1="马鞍山" data-label_2="天气" data-font="微软雅黑" data-icons="Climacons Animated" data-theme="dark" data-basecolor="rgba(255, 255, 255, 0.1)" data-textcolor="#ffffff" >马鞍山 天气</a>
-    <script>
-    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-    </script>
+            <!-- 天气预报组件 -->
+            <a class="weatherwidget-io" href="https://forecast7.com/zh/31d67118d51/maanshan/" 
+               data-label_1="马鞍山" 
+               data-label_2="天气" 
+               data-font="微软雅黑" 
+               data-icons="Climacons Animated" 
+               data-theme="dark" 
+               data-basecolor="rgba(255, 255, 255, 0.1)" 
+               data-textcolor="#ffffff">马鞍山 天气</a>
+            <script>
+            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+            </script>
         </div>
     </header>
 
@@ -126,13 +131,9 @@
                         <i class="fas fa-envelope" aria-hidden="true"></i>
                         <span>me@alsay.net</span>
                     </a>
-                    <a href="tel:191665955242" class="contact-item" itemprop="telephone">
-                        <i class="fas fa-phone" aria-hidden="true"></i>
-                        <span>191665955242</span>
-                    </a>
-                    <a href="https://github.com/example" class="contact-item" itemprop="sameAs">
+                    <a href="https://github.com/alsay" class="contact-item" itemprop="sameAs">
                         <i class="fab fa-github" aria-hidden="true"></i>
-                        <span>github.com/example</span>
+                        <span>github.com/alsay</span>
                     </a>
                 </div>
             </section>
@@ -143,30 +144,19 @@
     <section id="github-stats" class="container card">
         <h2>GitHub 统计</h2>
         <div class="github-stats-container">
-            <img src="https://github-readme-stats.vercel.app/api?username=Al-say&show_icons=true&theme=vue&locale=cn" alt="GitHub Stats" />
-            <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=Al-say&layout=compact&theme=vue&locale=cn" alt="Most Used Languages" />
+            <img src="https://github-readme-stats.vercel.app/api?username=alsay&show_icons=true&theme=vue&locale=cn&cache_seconds=1800" alt="GitHub Stats" />
+            <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=alsay&layout=compact&theme=vue&locale=cn&cache_seconds=1800" alt="Most Used Languages" />
         </div>
     </section>
-
-    <!-- Code Examples -->
-    <section id="code-examples" class="container card">
-        <h2>代码示例</h2>
-        <script src="https://gist.github.com/Al-say/your-gist-id.js"></script>
-    </section>
-
-    <!-- Search -->
-    <div id="search-container" class="container">
-        <input type="text" id="search-input" placeholder="搜索...">
-        <ul id="results-container"></ul>
-    </div>
 
     <!-- Comments -->
     <section id="comments" class="container">
         <h2>评论</h2>
         <script src="https://utteranc.es/client.js"
-                repo="Al-say/review"
+                repo="alsay/review"
                 issue-term="pathname"
-                theme="github-light"
+                label="💬 评论"
+                theme="preferred-color-scheme"
                 crossorigin="anonymous"
                 async>
         </script>
