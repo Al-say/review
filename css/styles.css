@@ -397,6 +397,30 @@ footer {
     box-shadow: var(--focus-ring-shadow);
 }
 
+/* 访问统计样式 */
+.site-stats {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.site-stats span {
+    margin: 0 0.5rem;
+}
+
+/* 评论区样式 */
+#gitalk-container {
+    max-width: var(--content-width);
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.dark-mode .gt-container {
+    --gt-color-main: var(--primary-color) !important;
+    --gt-color-text: var(--text-color) !important;
+    --gt-color-bg: var(--bg-color) !important;
+}
+
 /* Performance optimizations */
 @media (prefers-reduced-motion: reduce) {
     *,

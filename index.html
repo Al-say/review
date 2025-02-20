@@ -139,11 +139,43 @@
         </div>
     </main>
 
+    <section id="comments" class="container">
+        <div id="gitalk-container"></div>
+    </section>
+
     <footer>
         <div class="container">
             <p>&copy; 2025 Alsay - 全栈开发工程师. All rights reserved.</p>
+            <p class="site-stats">
+                <span id="busuanzi_container_site_pv">
+                    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+                </span> | 
+                <span id="busuanzi_container_site_uv">
+                    访客数 <span id="busuanzi_value_site_uv"></span> 人
+                </span>
+            </p>
         </div>
     </footer>
+
+    <!-- 不蒜子统计 -->
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <!-- Gitalk -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+    <script>
+        const gitalk = new Gitalk({
+            clientID: 'YOUR_GITHUB_CLIENT_ID',
+            clientSecret: 'YOUR_GITHUB_CLIENT_SECRET',
+            repo: 'review',      // GitHub 仓库名
+            owner: 'Al-say',     // GitHub 用户名
+            admin: ['Al-say'],   // 管理员用户名
+            id: location.pathname.slice(0, 50),    // 页面唯一标识
+            language: 'zh-CN',   // 语言设置
+            distractionFreeMode: false
+        });
+        gitalk.render('gitalk-container');
+    </script>
 
     <script src="js/script.js"></script>
 </body>
