@@ -1,10 +1,5 @@
 // Cache DOM elements
 const DOM = {
-    weatherWidget: document.querySelector('.weather-widget'),
-    weatherCity: document.querySelector('.weather-widget .weather-city'),
-    weatherTemp: document.querySelector('.weather-widget .weather-temp'),
-    weatherDesc: document.querySelector('.weather-widget .weather-desc'),
-    weatherIcon: document.querySelector('.weather-widget i'),
     mobileMenuBtn: document.querySelector('.mobile-menu-toggle'),
     navLinks: document.querySelector('.nav-links'),
     header: document.querySelector('header'),
@@ -24,99 +19,6 @@ const debounce = (func, wait) => {
         timeout = setTimeout(later, wait);
     };
 };
-
-// Weather widget functionality with JSONP
-function updateWeather() {
-    const API_KEY = 'YOUR_API_KEY'; // 替换为你的OpenWeatherMap API Key
-    const CITY_LAT = 31.6733; // 马鞍山纬度
-    const CITY_LON = 118.5070; // 马鞍山经度
-
-    // 创建script标签加载JSONP
-    const script = document.createElement('script');
-    script.src = `https://api.openweathermap.org/data/2.5/weather?lat=${CITY_LAT}&lon=${CITY_LON}&appid=${API_KEY}&units=metric&lang=zh_cn&callback=handleWeatherData`;
-    document.body.appendChild(script);
-
-    // 移除script标签
-    script.onload = function() {
-        document.body.removeChild(script);
-    };
-}
-
-// JSONP回调函数
-window.handleWeatherData = function(data) {
-    try {
-
-        // 天气状况映射
-        const weatherIconMap = {
-            '01d': 'sun', // 晴天
-            '01n': 'moon',
-            '02d': 'cloud-sun', // 少云
-            '02n': 'cloud-moon',
-            '03d': 'cloud', // 多云
-            '03n': 'cloud',
-            '04d': 'cloud', // 阴天
-            '04n': 'cloud',
-            '09d': 'cloud-rain', // 小雨
-            '09n': 'cloud-rain',
-            '10d': 'cloud-showers-heavy', // 大雨
-            '10n': 'cloud-showers-heavy',
-            '11d': 'bolt', // 雷雨
-            '11n': 'bolt',
-            '13d': 'snowflake', // 雪
-            '13n': 'snowflake',
-            '50d': 'smog', // 雾
-            '50n': 'smog'
-        };
-
-        const iconCode = data.weather[0].icon;
-        const iconName = weatherIconMap[iconCode] || 'cloud';
-
-        // 更新DOM元素
-        DOM.weatherCity.textContent = '马鞍山';
-        DOM.weatherTemp.textContent = `${Math.round(data.main.temp)}°C`;
-        DOM.weatherDesc.textContent = `${data.weather[0].description}，湿度${data.main.humidity}%`;
-        DOM.weatherIcon.className = `fas fa-${iconName}`;
-
-        // 添加accessibility标题
-        DOM.weatherWidget.title = `当前天气：${data.weather[0].description}，温度${Math.round(data.main.temp)}°C，湿度${data.main.humidity}%`;
-    } catch (error) {
-        console.error('天气数据处理失败:', error);
-        handleWeatherError();
-    }
-};
-
-// 错误处理函数
-function handleWeatherError() {
-    DOM.weatherCity.textContent = '马鞍山';
-    DOM.weatherTemp.textContent = 'N/A';
-    DOM.weatherDesc.textContent = '天气数据获取失败';
-    DOM.weatherIcon.className = 'fas fa-cloud';
-}
-
-// 超时处理
-window.setTimeout(() => {
-    if (!window.handleWeatherData.called) {
-        handleWeatherError();
-    }
-}, 5000);
-
-// 初始化天气，并每30分钟更新一次
-updateWeather();
-const weatherInterval = setInterval(updateWeather, 30 * 60 * 1000);
-
-// 标记是否已调用回调
-window.handleWeatherData.called = false;
-window.handleWeatherData.original = window.handleWeatherData;
-window.handleWeatherData = function(data) {
-    window.handleWeatherData.called = true;
-    window.handleWeatherData.original(data);
-};
-
-// 页面卸载时清理
-window.addEventListener('unload', () => {
-    clearInterval(weatherInterval);
-    delete window.handleWeatherData;
-});
 
 // Smooth scroll functionality with performance optimization
 function initSmoothScroll() {

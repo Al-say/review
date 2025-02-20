@@ -2,16 +2,13 @@
 
 这是一个使用现代前端技术构建的静态个人作品集网站，托管在 GitHub Pages 上。
 
-## 配置说明
+## 天气组件
 
-1. 在 js/script.js 中替换 OpenWeatherMap API Key：
-```javascript
-const API_KEY = 'YOUR_API_KEY'; // 替换为你的API密钥
-```
-获取 API Key:
-1. 访问 [OpenWeatherMap](https://openweathermap.org/api)
-2. 注册账号并获取免费的 API Key
-3. 等待API Key激活（可能需要几小时）
+本站使用 [WeatherWidget.io](https://weatherwidget.io) 提供的天气预报组件，无需配置，直接集成马鞍山地区的天气信息。特点：
+- 自动更新的天气数据
+- 响应式设计
+- 深色主题适配
+- 动画效果
 
 ## 特点
 

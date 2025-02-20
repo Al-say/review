@@ -114,27 +114,24 @@ header p {
     margin: 0 auto;
 }
 
-.weather-widget {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
-    margin-top: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    color: white;
-    font-size: 1.1rem;
+/* Weather Widget Styles */
+.weatherwidget-io {
+    border-radius: var(--border-radius) !important;
+    overflow: hidden !important;
+    margin: 1rem auto !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
 }
 
-.weather-widget i {
-    font-size: 1.5rem;
+.dark-mode .weatherwidget-io {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
 }
 
-.weather-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+@media (max-width: 768px) {
+    .weatherwidget-io {
+        width: 90% !important;
+        margin: 1rem auto !important;
+    }
 }
 
 nav {

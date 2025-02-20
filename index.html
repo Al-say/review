@@ -53,14 +53,11 @@
         <div class="container">
             <h1 itemprop="name">Alsay</h1>
             <p class="site-subtitle" itemprop="description">全栈开发工程师</p>
-            <div class="weather-widget" aria-label="天气信息">
-                <i class="fas fa-cloud" aria-hidden="true"></i>
-                <div class="weather-info">
-                    <span class="weather-city">加载中...</span>
-                    <span class="weather-temp"></span>
-                    <span class="weather-desc"></span>
-                </div>
-            </div>
+    <!-- 天气预报嵌入代码 来自 https://weatherwidget.org -->
+    <a class="weatherwidget-io" href="https://forecast7.com/zh/31d67118d51/maanshan/" data-label_1="马鞍山" data-label_2="天气" data-font="微软雅黑" data-icons="Climacons Animated" data-theme="dark" data-basecolor="rgba(255, 255, 255, 0.1)" data-textcolor="#ffffff" >马鞍山 天气</a>
+    <script>
+    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+    </script>
         </div>
     </header>
 
