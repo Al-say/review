@@ -272,6 +272,39 @@ nav a:focus-visible {
     border-top: 1px solid rgba(0,0,0,0.1);
     font-size: 0.9rem;
     color: var(--accent-color);
+    margin-bottom: 1rem;
+}
+
+.project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--gradient-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    transition: all var(--transition-speed);
+    margin-top: auto;
+}
+
+.project-link:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+}
+
+.project-link i {
+    font-size: 0.9em;
+    transition: transform var(--transition-speed);
+}
+
+.project-link:hover i {
+    transform: translate(3px, -3px);
+}
+
+.dark-mode .project-link {
+    background: var(--gradient-secondary);
 }
 
 footer {
