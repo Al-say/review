@@ -156,7 +156,7 @@ function initMobileMenu() {
 function initBackToTop() {
     const backToTopButton = document.createElement('button');
     backToTopButton.className = 'back-to-top';
-    backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    backToTopButton.innerHTML = '<i class="fas fa-chevron-up"></i>';
     backToTopButton.setAttribute('aria-label', '回到顶部');
     document.body.appendChild(backToTopButton);
 
