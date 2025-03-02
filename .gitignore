@@ -1,11 +1,54 @@
 # Dependencies
 node_modules/
 package-lock.json
+yarn.lock
+.pnp.*
+.yarn/*
 
 # IDE
 .vscode/
 .idea/
+*.sublime-*
+*.swp
+*.swo
 
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+out/
+coverage/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Miscellaneous
+*.bak
+.history/
+.vercel/
+.netlify/

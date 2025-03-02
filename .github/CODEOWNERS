@@ -1,0 +1,17 @@
+# 默认代码所有者
+* @Al-say
+
+# 前端相关文件
+*.html @Al-say
+*.css @Al-say
+*.js @Al-say
+
+# 配置文件
+*.json @Al-say
+*.md @Al-say
+
+# GitHub特定文件
+.github/* @Al-say
+SECURITY.md @Al-say
+CONTRIBUTING.md @Al-say
+LICENSE @Al-say
