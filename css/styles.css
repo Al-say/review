@@ -1,11 +1,22 @@
 :root {
-    /* Colors */
+    /* System Colors */
     --primary-color: #2563eb;
     --secondary-color: #3b82f6;
     --accent-color: #10b981;
     --bg-color: #f8fafc;
     --text-color: #334155;
     --focus-ring-color: #3b82f6;
+    
+    /* Container Query Breakpoints */
+    --container-sm: 20rem;
+    --container-md: 40rem;
+    --container-lg: 60rem;
+    
+    /* Font Properties */
+    --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 600;
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, #2563eb, #3b82f6);
@@ -591,25 +602,44 @@ footer {
     }
 }
 
+/* Responsive Design with Container Queries */
+@container (min-width: var(--container-sm)) {
+    .card {
+        padding: 1.5rem;
+    }
+}
+
+@container (min-width: var(--container-md)) {
+    .card {
+        padding: 2rem;
+    }
+}
+
+@container (min-width: var(--container-lg)) {
+    .card {
+        padding: 2.5rem;
+    }
+}
+
+/* Media Queries - Grouped by breakpoint */
 @media (max-width: 768px) {
+    /* Header */
     header {
         padding: 3rem 0;
     }
-
+    
     header h1 {
         font-size: 2.5rem;
     }
-
+    
+    /* Navigation */
     .mobile-menu-toggle {
         display: block;
     }
-
+    
     .nav-links {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        inset: 0;
         background: var(--gradient-secondary);
         flex-direction: column;
         justify-content: center;
@@ -618,30 +648,38 @@ footer {
         transform: translateX(-100%);
         transition: transform var(--transition-speed);
     }
-
+    
     .nav-links.active {
         transform: translateX(0);
     }
-
+    
+    /* Layout */
     .projects {
         grid-template-columns: 1fr;
     }
-
-    .card {
-        padding: 2rem;
-    }
-
+    
     .contact-links {
         grid-template-columns: 1fr;
     }
-
-    .theme-toggle {
-        bottom: 20px;
-        right: 20px;
-    }
-
+    
+    /* Fixed Elements */
+    .theme-toggle,
     .back-to-top {
         bottom: 20px;
+    }
+    
+    .theme-toggle {
+        right: 20px;
+    }
+    
+    .back-to-top {
         left: 20px;
     }
+}
+
+/* Font Loading Optimization */
+@font-face {
+    font-family: 'Segoe UI';
+    font-display: swap;
+    src: local('Segoe UI');
 }

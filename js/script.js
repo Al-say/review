@@ -234,21 +234,44 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(style);
 });
 
-// Project cards loading animation
-document.addEventListener('DOMLoaded', () => {
-    DOM.projectCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.2}s`;
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-    });
+// Project cards loading animation with error handling
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        DOM.projectCards.forEach((card, index) => {
+            if (card) {
+                card.style.animationDelay = `${index * 0.2}s`;
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing project cards:', error);
+    }
 });
 
+// Cleanup function for event listeners
+function cleanup() {
+    window.removeEventListener('scroll', handleScroll);
+    document.removeEventListener('click', handleDocumentClick);
+    document.removeEventListener('keydown', handleKeyDown);
+}
+
+// Handle animation errors and cleanup
 window.addEventListener('load', () => {
-    DOM.projectCards.forEach(card => {
-        requestAnimationFrame(() => {
-            card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
+    try {
+        DOM.projectCards.forEach(card => {
+            if (card) {
+                requestAnimationFrame(() => {
+                    card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                });
+            }
         });
-    });
+    } catch (error) {
+        console.error('Error animating project cards:', error);
+    }
 });
+
+// Cleanup on page unload
+window.addEventListener('unload', cleanup);
