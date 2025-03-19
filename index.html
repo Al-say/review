@@ -17,19 +17,47 @@
     <meta property="og:type" content="website">
     
     <title>Alsay - 全栈开发工程师 | Wallfacer</title>
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="//weatherwidget.io">
+    <link rel="dns-prefetch" href="//busuanzi.ibruce.info">
+    <link rel="dns-prefetch" href="//unpkg.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://weatherwidget.io" crossorigin>
+    <link rel="preconnect" href="https://busuanzi.ibruce.info" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    
+    <!-- Preload Critical Resources -->
     <link rel="preload" href="css/styles.css" as="style">
-    <link rel="preload" href="js/script.js" as="script">
+    <link rel="preload" href="js/script.js" as="script" fetchpriority="high">
+    <link rel="preload" href="images/logo.png" as="image" type="image/png" fetchpriority="high">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" crossorigin>
+    
+    <!-- Stylesheets -->
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="stylesheet" href="css/styles.css" fetchpriority="high">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
           integrity="sha384-3B6NwesSXE7YJlcLI9RpRqGf2p/EfVyTXLm07IYh0q2/m/ExxUWfZKi8P+XlUGjr" 
           crossorigin="anonymous"
+          fetchpriority="high"
           media="print" 
-          onload="this.media='all'">
+          onload="this.media='all'"
+          referrerpolicy="no-referrer">
     <noscript>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </noscript>
 
+    <!-- Prevent Flash of Unstyled Content -->
+    <style>
+        /* Critical CSS */
+        body { visibility: hidden; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        header { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 4rem 0; text-align: center; }
+        nav { background: linear-gradient(135deg, #10b981, #3b82f6); padding: 1rem 0; position: sticky; top: 0; z-index: 1000; }
+        .nav-links { list-style: none; display: flex; justify-content: center; gap: 2rem; }
+        .main-content { padding: 4rem 0; }
+    </style>
+    
     <!-- Schema.org markup for Google -->
     <script type="application/ld+json">
     {
@@ -187,23 +215,27 @@
         </div>
     </footer>
 
-    <!-- 不蒜子统计 -->
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <!-- 统计脚本 - 低优先级加载 -->
+    <script async defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
-    <!-- Simple-Jekyll-Search -->
-    <script src="https://unpkg.com/simple-jekyll-search@latest/dest/simple-jekyll-search.min.js"></script>
+    <!-- 搜索功能 - 按需加载 -->
+    <script defer src="https://unpkg.com/simple-jekyll-search@latest/dest/simple-jekyll-search.min.js" 
+            onload="initSearch()"></script>
     <script>
-        SimpleJekyllSearch({
-            searchInput: document.getElementById('search-input'),
-            resultsContainer: document.getElementById('results-container'),
-            json: '/search.json',
-            searchResultTemplate: '<li><a href="{url}">{title}</a></li>',
-            noResultsText: '没有找到相关结果',
-            limit: 10,
-            fuzzy: false
-        });
+        function initSearch() {
+            SimpleJekyllSearch({
+                searchInput: document.getElementById('search-input'),
+                resultsContainer: document.getElementById('results-container'),
+                json: '/search.json',
+                searchResultTemplate: '<li><a href="{url}">{title}</a></li>',
+                noResultsText: '没有找到相关结果',
+                limit: 10,
+                fuzzy: false
+            });
+        }
     </script>
 
-    <script src="js/script.js"></script>
+    <!-- 核心脚本 -->
+    <script defer src="js/script.js" type="module"></script>
 </body>
 </html>
