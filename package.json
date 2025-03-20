@@ -1,8 +1,9 @@
 {
   "name": "alsay-portfolio",
   "version": "1.0.0",
-  "description": "Alsay's personal portfolio website",
+  "description": "Alsay's personal portfolio website with Apple-style design",
   "scripts": {
+    "start": "npx serve",
     "test": "echo \"No tests specified\"",
     "build": "echo \"No build required\""
   },
@@ -12,12 +13,17 @@
   },
   "keywords": [
     "portfolio",
-    "personal-website"
+    "personal-website",
+    "apple-style",
+    "responsive-design"
   ],
   "author": "Alsay",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Al-say/review/issues"
   },
-  "homepage": "https://al-say.github.io/review/"
+  "homepage": "https://al-say.github.io/review/",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
 }
