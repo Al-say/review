@@ -1,153 +1,205 @@
-// 移动菜单
-const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-const navLinks = document.querySelector('.nav-links');
+// 导航控制
+class Navigation {
+    constructor() {
+        this.nav = document.querySelector('nav');
+        this.mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        this.navLinks = document.querySelector('.nav-links');
+        this.lastScroll = 0;
+        this.isMenuOpen = false;
 
-if (mobileMenuToggle && navLinks) {
-    mobileMenuToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        mobileMenuToggle.setAttribute('aria-expanded', navLinks.classList.contains('active'));
-    });
+        this.init();
+    }
 
-    // 点击链接时关闭菜单
-    navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            mobileMenuToggle.setAttribute('aria-expanded', 'false');
-        });
-    });
-}
+    init() {
+        this.handleMobileMenu();
+        this.handleScroll();
+        this.handleNavLinks();
+    }
 
-// 平滑滚动
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+    handleMobileMenu() {
+        if (this.mobileMenuToggle) {
+            this.mobileMenuToggle.addEventListener('click', () => {
+                this.isMenuOpen = !this.isMenuOpen;
+                this.navLinks.classList.toggle('active');
+                this.mobileMenuToggle.setAttribute('aria-expanded', this.isMenuOpen);
+                document.body.style.overflow = this.isMenuOpen ? 'hidden' : '';
             });
         }
-    });
-});
+    }
 
-// 滚动动画
-const observeScroll = () => {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-                observer.unobserve(entry.target);
+    handleScroll() {
+        let ticking = false;
+        
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    this.updateNavigation();
+                    ticking = false;
+                });
+                ticking = true;
             }
         });
-    }, {
-        threshold: 0.1
-    });
+    }
 
-    document.querySelectorAll('.card, .skill-item, .section-content').forEach(el => {
-        el.classList.add('animate-on-scroll');
-        observer.observe(el);
-    });
-};
-
-// 导航栏滚动效果
-const handleNavScroll = () => {
-    const nav = document.querySelector('nav');
-    let lastScroll = 0;
-
-    window.addEventListener('scroll', () => {
+    updateNavigation() {
         const currentScroll = window.pageYOffset;
         
+        // 如果在顶部，移除所有类
         if (currentScroll <= 0) {
-            nav.classList.remove('scroll-up');
+            this.nav.classList.remove('scroll-up', 'scroll-down');
             return;
         }
-        
-        if (currentScroll > lastScroll && !nav.classList.contains('scroll-down')) {
-            nav.classList.remove('scroll-up');
-            nav.classList.add('scroll-down');
-        } else if (currentScroll < lastScroll && nav.classList.contains('scroll-down')) {
-            nav.classList.remove('scroll-down');
-            nav.classList.add('scroll-up');
+
+        // 向下滚动
+        if (currentScroll > this.lastScroll && !this.nav.classList.contains('scroll-down')) {
+            this.nav.classList.remove('scroll-up');
+            this.nav.classList.add('scroll-down');
+            // 如果菜单打开，关闭它
+            if (this.isMenuOpen) {
+                this.closeMenu();
+            }
         }
-        
-        lastScroll = currentScroll;
-    });
-};
+        // 向上滚动
+        else if (currentScroll < this.lastScroll && this.nav.classList.contains('scroll-down')) {
+            this.nav.classList.remove('scroll-down');
+            this.nav.classList.add('scroll-up');
+        }
 
-// 视差滚动效果
-const handleParallax = () => {
-    const parallaxElements = document.querySelectorAll('.parallax');
-    
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        
-        parallaxElements.forEach(element => {
-            const speed = element.dataset.speed || 0.5;
-            const yPos = -(scrolled * speed);
-            element.style.transform = `translateY(${yPos}px)`;
-        });
-    });
-};
+        this.lastScroll = currentScroll;
+    }
 
-// 主题切换动画
-const initThemeTransition = () => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const root = document.documentElement;
+    handleNavLinks() {
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeMenu();
+                
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    const headerOffset = 60;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-    const updateTheme = (e) => {
-        root.style.setProperty('--theme-transition', 'all 0.3s ease');
-        setTimeout(() => {
-            root.style.removeProperty('--theme-transition');
-        }, 300);
-    };
-
-    mediaQuery.addListener(updateTheme);
-};
-
-// 鼠标移动效果
-const handleMouseEffect = () => {
-    const cards = document.querySelectorAll('.card');
-    
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            
-            const rotateX = (y - centerY) / 20;
-            const rotateY = (centerX - x) / 20;
-            
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-        });
-        
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'none';
-        });
-    });
-};
-
-// 加载完成后初始化
-document.addEventListener('DOMContentLoaded', () => {
-    observeScroll();
-    handleNavScroll();
-    handleParallax();
-    initThemeTransition();
-    handleMouseEffect();
-});
-
-// Service Worker注册
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .then(registration => {
-                console.log('ServiceWorker registration successful');
-            })
-            .catch(err => {
-                console.log('ServiceWorker registration failed:', err);
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
             });
-    });
+        });
+    }
+
+    closeMenu() {
+        this.isMenuOpen = false;
+        this.navLinks.classList.remove('active');
+        this.mobileMenuToggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
 }
+
+// 滚动动画
+class ScrollAnimations {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.setupIntersectionObserver();
+        this.handleParallax();
+    }
+
+    setupIntersectionObserver() {
+        const options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+    }
+
+    handleParallax() {
+        const parallaxElements = document.querySelectorAll('.parallax');
+        let ticking = false;
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrolled = window.pageYOffset;
+                    parallaxElements.forEach(element => {
+                        const speed = element.dataset.speed || 0.5;
+                        const yPos = -(scrolled * speed);
+                        element.style.transform = `translate3d(0, ${yPos}px, 0)`;
+                    });
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    }
+}
+
+// 暗色模式处理
+class ThemeManager {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.handleThemeTransition();
+    }
+
+    handleThemeTransition() {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        mediaQuery.addListener(() => {
+            document.documentElement.style.setProperty('--theme-transition', 'all 0.3s ease');
+            setTimeout(() => {
+                document.documentElement.style.removeProperty('--theme-transition');
+            }, 300);
+        });
+    }
+}
+
+// 页面加载优化
+class PageLoader {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+            this.hideLoader();
+        });
+    }
+
+    hideLoader() {
+        const loader = document.querySelector('.initial-loader');
+        if (loader) {
+            loader.classList.add('hidden');
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        }
+    }
+}
+
+// 初始化所有功能
+document.addEventListener('DOMContentLoaded', () => {
+    new Navigation();
+    new ScrollAnimations();
+    new ThemeManager();
+    new PageLoader();
+});
