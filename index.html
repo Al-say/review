@@ -8,6 +8,7 @@
     <meta name="robots" content="index, follow">
     <meta name="author" content="Alsay">
     <link rel="canonical" href="https://alsay.net" />
+    <link rel="manifest" href="manifest.json">
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Alsay - 全栈开发工程师">
@@ -17,129 +18,142 @@
     <meta property="og:type" content="website">
     
     <title>Alsay - 全栈开发工程师 | Wallfacer</title>
+
+    <!-- Critical CSS -->
+    <style>
+        :root {
+            --font-system: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+            --accent-color: #10b981;
+        }
+        body {
+            margin: 0;
+            font-family: var(--font-system);
+            line-height: 1.6;
+            opacity: 1;
+            background: #f8fafc;
+            color: #334155;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        nav {
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .project-card {
+            margin-bottom: 2rem;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #0f172a;
+                color: #f1f5f9;
+            }
+            .card {
+                background: rgba(255, 255, 255, 0.05);
+            }
+        }
+    </style>
+
     <!-- Resource Hints -->
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
     <link rel="dns-prefetch" href="//weatherwidget.io">
     <link rel="dns-prefetch" href="//busuanzi.ibruce.info">
     <link rel="dns-prefetch" href="//unpkg.com">
     
-    <!-- Preload Critical Resources -->
-    <link rel="preload" href="css/styles.css" as="style">
-    <link rel="preload" href="js/script.js" as="script">
-    <link rel="preload" href="images/logo.png" as="image" type="image/png">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    
     <!-- Stylesheets -->
-    <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
-          integrity="sha384-3B6NwesSXE7YJlcLI9RpRqGf2p/EfVyTXLm07IYh0q2/m/ExxUWfZKi8P+XlUGjr" 
           crossorigin="anonymous"
-          fetchpriority="high"
           media="print" 
           onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    </noscript>
-
-    <!-- Schema.org markup for Google -->
-    <script type="application/ld+json">
-    {
-      "@context": "http://schema.org",
-      "@type": "Person",
-      "name": "Alsay",
-      "jobTitle": "全栈开发工程师",
-      "description": "专注于现代化Web应用开发，提供响应式设计和用户体验优化服务",
-      "email": "me@alsay.net",
-      "url": "https://alsay.net",
-      "sameAs": [
-        "https://github.com/Al-say"
-      ]
-    }
-    </script>
 </head>
-<body itemscope itemtype="http://schema.org/WebPage">
-    <header>
-        <div class="container">
-            <h1 itemprop="name">Alsay</h1>
-            <p class="site-subtitle" itemprop="description">全栈开发工程师</p>
-            <!-- 天气预报组件 -->
-            <a class="weatherwidget-io" href="https://forecast7.com/zh/31d67118d51/maanshan/" 
-               data-label_1="马鞍山" 
-               data-label_2="天气" 
-               data-font="微软雅黑" 
-               data-icons="Climacons Animated" 
-               data-theme="dark" 
-               data-basecolor="rgba(255, 255, 255, 0.1)" 
-               data-textcolor="#ffffff">马鞍山 天气</a>
-            <script>
-            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-            </script>
-        </div>
-    </header>
-
+<body>
     <nav>
         <div class="container nav-container">
-            <button class="mobile-menu-toggle" 
-                    aria-label="切换菜单" 
-                    aria-expanded="false"
-                    aria-controls="nav-menu">
+            <button class="mobile-menu-toggle" aria-label="切换菜单">
                 <i class="fas fa-bars"></i>
             </button>
-            <ul class="nav-links" id="nav-menu" role="menu">
-                <li><a href="#about"><i class="fas fa-user" aria-hidden="true"></i> 关于我</a></li>
-                <li><a href="#projects"><i class="fas fa-code" aria-hidden="true"></i> 项目</a></li>
-                <li><a href="#contact"><i class="fas fa-envelope" aria-hidden="true"></i> 联系我</a></li>
+            <ul class="nav-links" role="menu">
+                <li><a href="#about"><i class="fas fa-user"></i> 关于我</a></li>
+                <li><a href="#projects"><i class="fas fa-code"></i> 项目</a></li>
+                <li><a href="#contact"><i class="fas fa-envelope"></i> 联系我</a></li>
             </ul>
         </div>
     </nav>
 
+    <header>
+        <div class="container">
+            <h1>Alsay</h1>
+            <p class="site-subtitle">全栈开发工程师</p>
+        </div>
+    </header>
+
     <main class="main-content">
         <div class="container">
-            <section id="about" class="card" itemprop="about">
+            <section id="about" class="card">
                 <h2>关于我</h2>
-                <p itemprop="description">我是一名热衷于设计和用户体验的全栈开发工程师。专注于创建既美观又实用的现代响应式Web应用。</p>
+                <p>我是一名热衷于设计和用户体验的全栈开发工程师。专注于创建既美观又实用的现代响应式Web应用。</p>
                 <p>凭借现代Web技术的专业知识，我致力于编写整洁、可维护的代码，确保良好的可扩展性和卓越的用户体验。</p>
             </section>
 
             <section id="projects">
                 <h2>项目展示</h2>
                 <div class="projects">
-                <div class="project-card" itemscope itemtype="http://schema.org/CreativeWork">
-                    <div class="card">
-                        <h3 itemprop="name">HTML-CSS-JS 作品展示</h3>
-                        <p itemprop="description">一个展示前端开发项目的响应式网站，收集和展示使用 HTML、CSS 和 JavaScript 构建的各种实用组件和交互效果。</p>
-                        <div class="technologies" itemprop="keywords">
-                            <strong>技术栈：</strong> HTML5, CSS3, JavaScript, 响应式设计
-                        </div>
-                        <a href="https://al-say.github.io/HTML-CSS-JS/" class="project-link" target="_blank" rel="noopener noreferrer">
-                            <i class="fas fa-external-link-alt"></i> 查看项目
-                        </a>
-                    </div>
-                </div>
-                <div class="project-card" itemscope itemtype="http://schema.org/CreativeWork">
-                    <div class="card">
-                        <h3 itemprop="name">现代化个人作品集</h3>
-                        <p itemprop="description">一个展示项目和技能的响应式个人作品集网站。特点包括深色模式、流畅动画和移动优先设计。</p>
-                        <div class="technologies" itemprop="keywords">
-                            <strong>技术栈：</strong> HTML5, CSS3, JavaScript
-                        </div>
-                    </div>
-                </div>
-                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication">
+                    <div class="project-card">
                         <div class="card">
-                            <h3 itemprop="name">任务管理器Pro</h3>
-                            <p itemprop="description">一个全面的任务管理应用，具有实时更新、拖放组织和团队协作功能。</p>
-                            <div class="technologies" itemprop="applicationCategory">
+                            <h3>HTML-CSS-JS 作品展示</h3>
+                            <p>一个展示前端开发项目的响应式网站，收集和展示使用 HTML、CSS 和 JavaScript 构建的各种实用组件和交互效果。</p>
+                            <div class="technologies">
+                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript, 响应式设计
+                            </div>
+                            <a href="https://al-say.github.io/HTML-CSS-JS/" class="project-link" target="_blank" rel="noopener noreferrer">
+                                <i class="fas fa-external-link-alt"></i> 查看项目
+                            </a>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="card">
+                            <h3>现代化个人作品集</h3>
+                            <p>一个展示项目和技能的响应式个人作品集网站。特点包括深色模式、流畅动画和移动优先设计。</p>
+                            <div class="technologies">
+                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="card">
+                            <h3>任务管理器Pro</h3>
+                            <p>一个全面的任务管理应用，具有实时更新、拖放组织和团队协作功能。</p>
+                            <div class="technologies">
                                 <strong>技术栈：</strong> React, Node.js, MongoDB
                             </div>
                         </div>
                     </div>
-                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication">
+                    <div class="project-card">
                         <div class="card">
-                            <h3 itemprop="name">天气仪表板</h3>
-                            <p itemprop="description">一个优雅的天气应用程序，为全球各地提供详细的天气预报、交互式地图和恶劣天气警报。</p>
-                            <div class="technologies" itemprop="applicationCategory">
+                            <h3>天气仪表板</h3>
+                            <p>一个优雅的天气应用程序，为全球各地提供详细的天气预报、交互式地图和恶劣天气警报。</p>
+                            <div class="technologies">
                                 <strong>技术栈：</strong> JavaScript, Weather API, CSS Grid
                             </div>
                         </div>
@@ -151,12 +165,12 @@
                 <h2>联系方式</h2>
                 <p>我随时欢迎新的机会和合作。让我们一起将您的想法变为现实！</p>
                 <div class="contact-links">
-                    <a href="mailto:me@alsay.net" class="contact-item" itemprop="email">
-                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                    <a href="mailto:me@alsay.net" class="contact-item">
+                        <i class="fas fa-envelope"></i>
                         <span>me@alsay.net</span>
                     </a>
-                    <a href="https://github.com/Al-say" class="contact-item" itemprop="sameAs">
-                        <i class="fab fa-github" aria-hidden="true"></i>
+                    <a href="https://github.com/Al-say" class="contact-item">
+                        <i class="fab fa-github"></i>
                         <span>github.com/Al-say</span>
                     </a>
                 </div>
@@ -164,57 +178,21 @@
         </div>
     </main>
 
-    <!-- GitHub Stats -->
-    <section id="github-stats" class="container card">
-        <h2>GitHub 统计</h2>
-        <div class="github-stats-container">
-            <img src="https://metrics.lecoq.io/Al-say?template=classic&base=header%2C%20activity%2C%20community%2C%20repositories%2C%20metadata&base.indepth=false&base.hireable=false&base.skip=false&config.timezone=Asia%2FShanghai" alt="GitHub 统计概览" />
-        </div>
-    </section>
-
-    <!-- Comments -->
-    <section id="comments" class="container">
-        <h2>评论</h2>
-        <script src="https://utteranc.es/client.js"
-                repo="Al-say/review"
-                issue-term="pathname"
-                label="💬 评论"
-                theme="preferred-color-scheme"
-                crossorigin="anonymous"
-                async>
-        </script>
-    </section>
-
     <footer>
         <div class="container">
             <p>&copy; 2025 Alsay - 全栈开发工程师. All rights reserved.</p>
-            <p class="site-stats">
-                <span id="busuanzi_container_site_pv">
-                    总访问量 <span id="busuanzi_value_site_pv"></span> 次
-                </span> | 
-                <span id="busuanzi_container_site_uv">
-                    访客数 <span id="busuanzi_value_site_uv"></span> 人
-                </span>
-            </p>
         </div>
     </footer>
 
-    <!-- 统计脚本 - 低优先级加载 -->
-    <script async defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-    <!-- 搜索功能 - 按需加载 -->
-    <script defer src="https://unpkg.com/simple-jekyll-search@latest/dest/simple-jekyll-search.min.js" 
-            onload="initSearch()"></script>
+    <!-- Service Worker Registration -->
     <script>
-        function initSearch() {
-            SimpleJekyllSearch({
-                searchInput: document.getElementById('search-input'),
-                resultsContainer: document.getElementById('results-container'),
-                json: '/search.json',
-                searchResultTemplate: '<li><a href="{url}">{title}</a></li>',
-                noResultsText: '没有找到相关结果',
-                limit: 10,
-                fuzzy: false
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed:', err);
+                });
             });
         }
     </script>
