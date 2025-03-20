@@ -1,13 +1,13 @@
 const CACHE_NAME = 'alsay-cache-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/css/styles.css',
-    '/js/script.js',
-    '/images/logo.png',
-    '/images/logo.webp',
-    '/fonts/SegoeUI-Regular.woff2',
-    '/fonts/SegoeUI-Bold.woff2'
+    './',
+    './index.html',
+    './css/styles.css',
+    './js/script.js',
+    './images/logo.png',
+    './images/logo.webp',
+    './fonts/SegoeUI-Regular.woff2',
+    './fonts/SegoeUI-Bold.woff2'
 ];
 
 // Install service worker
@@ -75,7 +75,7 @@ self.addEventListener('fetch', event => {
             .catch(() => {
                 // Return offline fallback for HTML requests
                 if (event.request.headers.get('accept').includes('text/html')) {
-                    return caches.match('/offline.html');
+                    return caches.match('./offline.html');
                 }
                 return new Response('Network error occurred', {
                     status: 408,
@@ -91,8 +91,8 @@ self.addEventListener('fetch', event => {
 self.addEventListener('push', event => {
     const options = {
         body: event.data.text(),
-        icon: '/images/logo.png',
-        badge: '/images/logo.png'
+        icon: './images/logo.png',
+        badge: './images/logo.png'
     };
 
     event.waitUntil(

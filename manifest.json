@@ -2,20 +2,20 @@
     "name": "Alsay - 全栈开发工程师",
     "short_name": "Alsay",
     "description": "专注于现代化Web应用开发，提供响应式设计和用户体验优化服务",
-    "start_url": "/",
+    "start_url": "./",
     "display": "standalone",
     "background_color": "#f8fafc",
     "theme_color": "#2563eb",
     "orientation": "any",
     "icons": [
         {
-            "src": "/images/icon-192.png",
+            "src": "./images/icon-192.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/images/icon-512.png",
+            "src": "./images/icon-512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
@@ -24,25 +24,25 @@
     "shortcuts": [
         {
             "name": "项目",
-            "url": "/#projects",
+            "url": "./#projects",
             "description": "查看我的项目展示"
         },
         {
             "name": "联系",
-            "url": "/#contact",
+            "url": "./#contact",
             "description": "联系我"
         }
     ],
     "categories": ["portfolio", "development", "productivity"],
     "screenshots": [
         {
-            "src": "/images/screenshot1.webp",
+            "src": "./images/screenshot1.webp",
             "sizes": "1280x720",
             "type": "image/webp",
             "platform": "wide"
         },
         {
-            "src": "/images/screenshot2.webp",
+            "src": "./images/screenshot2.webp",
             "sizes": "1280x720",
             "type": "image/webp",
             "platform": "wide"
@@ -53,7 +53,7 @@
     "protocol_handlers": [
         {
             "protocol": "mailto",
-            "url": "/contact?email=%s"
+            "url": "./contact?email=%s"
         }
     ]
 }
