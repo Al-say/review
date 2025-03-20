@@ -10,10 +10,10 @@
     <meta name="robots" content="index, follow">
     <meta name="author" content="Alsay">
     <link rel="canonical" href="https://alsay.net" />
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/images/icon-192.png">
+    <link rel="apple-touch-icon" href="images/icon-192.png">
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Alsay - 全栈开发工程师">
@@ -41,8 +41,8 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" crossorigin>
     
     <!-- Preload Critical Fonts -->
-    <link rel="preload" href="/fonts/SegoeUI-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/SegoeUI-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/SegoeUI-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/SegoeUI-Bold.woff2" as="font" type="font/woff2" crossorigin>
     
     <!-- Stylesheets -->
     <link rel="icon" type="image/png" href="images/logo.png">
@@ -250,7 +250,7 @@
             SimpleJekyllSearch({
                 searchInput: document.getElementById('search-input'),
                 resultsContainer: document.getElementById('results-container'),
-                json: '/search.json',
+                json: 'search.json',
                 searchResultTemplate: '<li><a href="{url}">{title}</a></li>',
                 noResultsText: '没有找到相关结果',
                 limit: 10,
@@ -265,9 +265,9 @@
         function sendToAnalytics(metric) {
             const body = JSON.stringify(metric);
             if (navigator.sendBeacon) {
-                navigator.sendBeacon('/analytics', body);
+                navigator.sendBeacon('analytics', body);
             } else {
-                fetch('/analytics', {
+                    fetch('analytics', {
                     body,
                     method: 'POST',
                     keepalive: true
@@ -321,7 +321,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(registration => {
+                navigator.serviceWorker.register('./sw.js').then(registration => {
                     console.log('ServiceWorker registration successful');
                 }).catch(err => {
                     console.log('ServiceWorker registration failed:', err);
