@@ -3,201 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Alsay - 全栈开发工程师，专注于现代化Web应用开发，提供响应式设计和用户体验优化服务">
-    <meta name="keywords" content="全栈开发, Web开发, JavaScript, React, Node.js, 响应式设计, 用户体验">
-    <meta name="robots" content="index, follow">
+    <meta name="description" content="Alsay - 全栈开发工程师，专注于创建优雅且高性能的现代Web应用">
+    <meta name="keywords" content="全栈开发, Web开发, JavaScript, React, Node.js, UI设计">
     <meta name="author" content="Alsay">
-    <link rel="canonical" href="https://alsay.net" />
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Alsay - 全栈开发工程师">
-    <meta property="og:description" content="专注于现代化Web应用开发，提供响应式设计和用户体验优化服务">
-    <meta property="og:image" content="https://alsay.net/images/logo.png">
-    <meta property="og:url" content="https://alsay.net">
-    <meta property="og:type" content="website">
-    
-    <title>Alsay - 全栈开发工程师 | Wallfacer</title>
+    <title>Alsay - 全栈开发工程师</title>
 
-    <!-- Critical CSS -->
+    <!-- 关键CSS -->
     <style>
         :root {
-            --font-system: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            --primary-color: #2563eb;
-            --secondary-color: #3b82f6;
-            --accent-color: #10b981;
+            --system-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         body {
             margin: 0;
-            font-family: var(--font-system);
-            line-height: 1.6;
-            opacity: 1;
-            background: #f8fafc;
-            color: #334155;
+            font-family: var(--system-ui);
+            -webkit-font-smoothing: antialiased;
         }
         .container {
-            max-width: 1200px;
+            max-width: 980px;
             margin: 0 auto;
-            padding: 0 20px;
-        }
-        header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 4rem 0;
-            text-align: center;
-        }
-        nav {
-            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .project-card {
-            margin-bottom: 2rem;
-        }
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: #0f172a;
-                color: #f1f5f9;
-            }
-            .card {
-                background: rgba(255, 255, 255, 0.05);
-            }
+            padding: 0 22px;
         }
     </style>
-
-    <!-- Resource Hints -->
-    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="//weatherwidget.io">
-    <link rel="dns-prefetch" href="//busuanzi.ibruce.info">
-    <link rel="dns-prefetch" href="//unpkg.com">
     
-    <!-- Stylesheets -->
+    <!-- 外部资源 -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
-          crossorigin="anonymous"
-          media="print" 
-          onload="this.media='all'">
+          crossorigin="anonymous" media="print" onload="this.media='all'">
 </head>
 <body>
     <nav>
         <div class="container nav-container">
-            <button class="mobile-menu-toggle" aria-label="切换菜单">
+            <a href="#" class="nav-logo">Alsay</a>
+            <button class="mobile-menu-toggle" aria-label="菜单">
                 <i class="fas fa-bars"></i>
             </button>
-            <ul class="nav-links" role="menu">
-                <li><a href="#about"><i class="fas fa-user"></i> 关于我</a></li>
-                <li><a href="#projects"><i class="fas fa-code"></i> 项目</a></li>
-                <li><a href="#contact"><i class="fas fa-envelope"></i> 联系我</a></li>
+            <ul class="nav-links">
+                <li><a href="#about">关于</a></li>
+                <li><a href="#projects">项目</a></li>
+                <li><a href="#contact">联系</a></li>
             </ul>
         </div>
     </nav>
 
     <header>
         <div class="container">
-            <h1>Alsay</h1>
-            <p class="site-subtitle">全栈开发工程师</p>
+            <h1>构建优雅的Web体验</h1>
+            <p class="site-subtitle">全栈开发工程师，专注于创造美好的数字产品</p>
+            <div class="header-cta">
+                <a href="#projects" class="cta-primary">查看作品</a>
+                <a href="#contact" class="cta-secondary">联系我</a>
+            </div>
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="container">
-            <section id="about" class="card">
-                <h2>关于我</h2>
-                <p>我是一名热衷于设计和用户体验的全栈开发工程师。专注于创建既美观又实用的现代响应式Web应用。</p>
-                <p>凭借现代Web技术的专业知识，我致力于编写整洁、可维护的代码，确保良好的可扩展性和卓越的用户体验。</p>
-            </section>
-
-            <section id="projects">
-                <h2>项目展示</h2>
-                <div class="projects">
-                    <div class="project-card">
-                        <div class="card">
-                            <h3>HTML-CSS-JS 作品展示</h3>
-                            <p>一个展示前端开发项目的响应式网站，收集和展示使用 HTML、CSS 和 JavaScript 构建的各种实用组件和交互效果。</p>
-                            <div class="technologies">
-                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript, 响应式设计
-                            </div>
-                            <a href="https://al-say.github.io/HTML-CSS-JS/" class="project-link" target="_blank" rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt"></i> 查看项目
-                            </a>
+    <main>
+        <section id="about" class="section-about">
+            <div class="container">
+                <div class="section-content">
+                    <h2>关于我</h2>
+                    <p class="large-text">作为一名全栈开发工程师，我致力于将复杂的技术转化为优雅的用户体验。</p>
+                    <div class="skills-grid">
+                        <div class="skill-item">
+                            <i class="fas fa-code"></i>
+                            <h3>前端开发</h3>
+                            <p>创建响应式和直观的用户界面</p>
                         </div>
-                    </div>
-                    <div class="project-card">
-                        <div class="card">
-                            <h3>现代化个人作品集</h3>
-                            <p>一个展示项目和技能的响应式个人作品集网站。特点包括深色模式、流畅动画和移动优先设计。</p>
-                            <div class="technologies">
-                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript
-                            </div>
+                        <div class="skill-item">
+                            <i class="fas fa-server"></i>
+                            <h3>后端开发</h3>
+                            <p>构建可靠和高性能的服务端系统</p>
                         </div>
-                    </div>
-                    <div class="project-card">
-                        <div class="card">
-                            <h3>任务管理器Pro</h3>
-                            <p>一个全面的任务管理应用，具有实时更新、拖放组织和团队协作功能。</p>
-                            <div class="technologies">
-                                <strong>技术栈：</strong> React, Node.js, MongoDB
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card">
-                        <div class="card">
-                            <h3>天气仪表板</h3>
-                            <p>一个优雅的天气应用程序，为全球各地提供详细的天气预报、交互式地图和恶劣天气警报。</p>
-                            <div class="technologies">
-                                <strong>技术栈：</strong> JavaScript, Weather API, CSS Grid
-                            </div>
+                        <div class="skill-item">
+                            <i class="fas fa-paint-brush"></i>
+                            <h3>UI设计</h3>
+                            <p>打造富有美感的用户界面设计</p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section id="contact" class="card">
-                <h2>联系方式</h2>
-                <p>我随时欢迎新的机会和合作。让我们一起将您的想法变为现实！</p>
+        <section id="projects" class="section-projects">
+            <div class="container">
+                <h2>精选项目</h2>
+                <div class="projects">
+                    <div class="card">
+                        <h3>HTML-CSS-JS 作品展示</h3>
+                        <p>一个展示前端开发技术的响应式网站集合，包含各种实用组件和交互效果。</p>
+                        <div class="technologies">
+                            <span>HTML5</span>
+                            <span>CSS3</span>
+                            <span>JavaScript</span>
+                        </div>
+                        <a href="https://al-say.github.io/HTML-CSS-JS/" class="project-link" target="_blank" rel="noopener">
+                            了解更多 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="card">
+                        <h3>现代化个人作品集</h3>
+                        <p>一个展示项目和技能的响应式个人作品集网站。融合了优雅的动画和现代设计理念。</p>
+                        <div class="technologies">
+                            <span>React</span>
+                            <span>Next.js</span>
+                            <span>TailwindCSS</span>
+                        </div>
+                        <a href="#" class="project-link">
+                            了解更多 <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section-contact">
+            <div class="container">
+                <h2>让我们开始合作</h2>
+                <p class="large-text">无论是项目咨询还是职业机会，我都很乐意与您交流。</p>
                 <div class="contact-links">
                     <a href="mailto:me@alsay.net" class="contact-item">
                         <i class="fas fa-envelope"></i>
-                        <span>me@alsay.net</span>
+                        <div>
+                            <h3>发送邮件</h3>
+                            <span>me@alsay.net</span>
+                        </div>
                     </a>
-                    <a href="https://github.com/Al-say" class="contact-item">
+                    <a href="https://github.com/Al-say" class="contact-item" target="_blank" rel="noopener">
                         <i class="fab fa-github"></i>
-                        <span>github.com/Al-say</span>
+                        <div>
+                            <h3>GitHub</h3>
+                            <span>@Al-say</span>
+                        </div>
                     </a>
                 </div>
-            </section>
-        </div>
+            </div>
+        </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 Alsay - 全栈开发工程师. All rights reserved.</p>
+            <p class="copyright">&copy; 2025 Alsay. 保留所有权利。</p>
         </div>
     </footer>
 
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful');
-                }).catch(err => {
-                    console.log('ServiceWorker registration failed:', err);
-                });
-            });
-        }
-    </script>
-
-    <!-- 核心脚本 -->
-    <script defer src="js/script.js"></script>
+    <!-- 脚本加载 -->
+    <script type="module" src="js/script.js"></script>
 </body>
 </html>
