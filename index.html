@@ -9,29 +9,72 @@
     <link rel="manifest" href="manifest.json">
     <title>Alsay - 全栈开发工程师</title>
 
-    <!-- 关键CSS -->
+    <!-- 加载动画样式 -->
     <style>
         :root {
-            --system-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --primary-color: #06c;
+            --background-color: #fbfbfd;
+            --text-color: #1d1d1f;
+            --text-secondary: #86868b;
         }
-        body {
-            margin: 0;
-            font-family: var(--system-ui);
-            -webkit-font-smoothing: antialiased;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #000;
+                --text-color: #f5f5f7;
+                --text-secondary: #86868b;
+            }
         }
-        .container {
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 0 22px;
+        .initial-loader {
+            position: fixed;
+            inset: 0;
+            background: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
         }
+        .initial-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loader-content {
+            text-align: center;
+        }
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader-text {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        body.loaded { opacity: 1; }
     </style>
-    
-    <!-- 外部资源 -->
+
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
           crossorigin="anonymous" media="print" onload="this.media='all'">
 </head>
 <body>
+    <!-- 加载动画 -->
+    <div class="initial-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">正在加载精彩内容...</p>
+        </div>
+    </div>
+
     <nav>
         <div class="container nav-container">
             <a href="#" class="nav-logo">Alsay</a>
@@ -48,11 +91,16 @@
 
     <header>
         <div class="container">
-            <h1>构建优雅的Web体验</h1>
-            <p class="site-subtitle">全栈开发工程师，专注于创造美好的数字产品</p>
+            <div class="parallax" data-speed="0.5">
+                <h1 class="gradient-text">构建优雅的Web体验</h1>
+                <p class="site-subtitle">全栈开发工程师，专注于创造美好的数字产品</p>
+            </div>
             <div class="header-cta">
                 <a href="#projects" class="cta-primary">查看作品</a>
                 <a href="#contact" class="cta-secondary">联系我</a>
+            </div>
+            <div class="scroll-indicator">
+                <i class="fas fa-chevron-down"></i>
             </div>
         </div>
     </header>
@@ -60,8 +108,8 @@
     <main>
         <section id="about" class="section-about">
             <div class="container">
-                <div class="section-content">
-                    <h2>关于我</h2>
+                <div class="section-content animate-on-scroll">
+                    <h2 class="gradient-text">关于我</h2>
                     <p class="large-text">作为一名全栈开发工程师，我致力于将复杂的技术转化为优雅的用户体验。</p>
                     <div class="skills-grid">
                         <div class="skill-item">
@@ -86,7 +134,7 @@
 
         <section id="projects" class="section-projects">
             <div class="container">
-                <h2>精选项目</h2>
+                <h2 class="gradient-text">精选项目</h2>
                 <div class="projects">
                     <div class="card">
                         <h3>HTML-CSS-JS 作品展示</h3>
@@ -118,7 +166,7 @@
 
         <section id="contact" class="section-contact">
             <div class="container">
-                <h2>让我们开始合作</h2>
+                <h2 class="gradient-text">让我们开始合作</h2>
                 <p class="large-text">无论是项目咨询还是职业机会，我都很乐意与您交流。</p>
                 <div class="contact-links">
                     <a href="mailto:me@alsay.net" class="contact-item">
@@ -146,7 +194,17 @@
         </div>
     </footer>
 
-    <!-- 脚本加载 -->
+    <!-- 初始化脚本 -->
+    <script>
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+            setTimeout(() => {
+                document.querySelector('.initial-loader').classList.add('hidden');
+            }, 500);
+        });
+    </script>
+
+    <!-- 核心脚本 -->
     <script type="module" src="js/script.js"></script>
 </body>
 </html>
