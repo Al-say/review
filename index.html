@@ -2,12 +2,18 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1e40af" media="(prefers-color-scheme: dark)">
     <meta name="description" content="Alsay - 全栈开发工程师，专注于现代化Web应用开发，提供响应式设计和用户体验优化服务">
     <meta name="keywords" content="全栈开发, Web开发, JavaScript, React, Node.js, 响应式设计, 用户体验">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Alsay">
     <link rel="canonical" href="https://alsay.net" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/images/icon-192.png">
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Alsay - 全栈开发工程师">
@@ -31,10 +37,16 @@
     <link rel="preload" href="css/styles.css" as="style">
     <link rel="preload" href="js/script.js" as="script" fetchpriority="high">
     <link rel="preload" href="images/logo.png" as="image" type="image/png" fetchpriority="high">
+    <link rel="preload" href="images/logo.webp" as="image" type="image/webp" fetchpriority="high">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" crossorigin>
+    
+    <!-- Preload Critical Fonts -->
+    <link rel="preload" href="/fonts/SegoeUI-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/SegoeUI-Bold.woff2" as="font" type="font/woff2" crossorigin>
     
     <!-- Stylesheets -->
     <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="icon" type="image/webp" href="images/logo.webp">
     <link rel="stylesheet" href="css/styles.css" fetchpriority="high">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
           integrity="sha384-3B6NwesSXE7YJlcLI9RpRqGf2p/EfVyTXLm07IYh0q2/m/ExxUWfZKi8P+XlUGjr" 
@@ -50,7 +62,8 @@
     <!-- Prevent Flash of Unstyled Content -->
     <style>
         /* Critical CSS */
-        body { visibility: hidden; }
+        body { visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
+        .fonts-loaded body { visibility: visible; opacity: 1; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         header { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 4rem 0; text-align: center; }
         nav { background: linear-gradient(135deg, #10b981, #3b82f6); padding: 1rem 0; position: sticky; top: 0; z-index: 1000; }
@@ -75,6 +88,11 @@
     </script>
 </head>
 <body itemscope itemtype="http://schema.org/WebPage">
+    <!-- Offline status banner -->
+    <div id="offline-status" style="display: none; background: #ef4444; color: white; text-align: center; padding: 0.5rem;">
+        您当前处于离线状态。某些功能可能无法使用。
+    </div>
+
     <header>
         <div class="container">
             <h1 itemprop="name">Alsay</h1>
@@ -121,28 +139,29 @@
             <section id="projects">
                 <h2>项目展示</h2>
                 <div class="projects">
-                <div class="project-card" itemscope itemtype="http://schema.org/CreativeWork">
-                    <div class="card">
-                        <h3 itemprop="name">HTML-CSS-JS 作品展示</h3>
-                        <p itemprop="description">一个展示前端开发项目的响应式网站，收集和展示使用 HTML、CSS 和 JavaScript 构建的各种实用组件和交互效果。</p>
-                        <div class="technologies" itemprop="keywords">
-                            <strong>技术栈：</strong> HTML5, CSS3, JavaScript, 响应式设计
-                        </div>
-                        <a href="https://al-say.github.io/HTML-CSS-JS/" class="project-link" target="_blank" rel="noopener noreferrer">
-                            <i class="fas fa-external-link-alt"></i> 查看项目
-                        </a>
-                    </div>
-                </div>
-                <div class="project-card" itemscope itemtype="http://schema.org/CreativeWork">
-                    <div class="card">
-                        <h3 itemprop="name">现代化个人作品集</h3>
-                        <p itemprop="description">一个展示项目和技能的响应式个人作品集网站。特点包括深色模式、流畅动画和移动优先设计。</p>
-                        <div class="technologies" itemprop="keywords">
-                            <strong>技术栈：</strong> HTML5, CSS3, JavaScript
+                    <!-- Project cards with lazy loading -->
+                    <div class="project-card" itemscope itemtype="http://schema.org/CreativeWork" loading="lazy">
+                        <div class="card">
+                            <h3 itemprop="name">HTML-CSS-JS 作品展示</h3>
+                            <p itemprop="description">一个展示前端开发项目的响应式网站，收集和展示使用 HTML、CSS 和 JavaScript 构建的各种实用组件和交互效果。</p>
+                            <div class="technologies" itemprop="keywords">
+                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript, 响应式设计
+                            </div>
+                            <a href="https://al-say.github.io/HTML-CSS-JS/" class="project-link" target="_blank" rel="noopener noreferrer">
+                                <i class="fas fa-external-link-alt"></i> 查看项目
+                            </a>
                         </div>
                     </div>
-                </div>
-                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication">
+                    <div class="project-card" itemscope itemtype="http://schema.org/CreativeWork" loading="lazy">
+                        <div class="card">
+                            <h3 itemprop="name">现代化个人作品集</h3>
+                            <p itemprop="description">一个展示项目和技能的响应式个人作品集网站。特点包括深色模式、流畅动画和移动优先设计。</p>
+                            <div class="technologies" itemprop="keywords">
+                                <strong>技术栈：</strong> HTML5, CSS3, JavaScript
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication" loading="lazy">
                         <div class="card">
                             <h3 itemprop="name">任务管理器Pro</h3>
                             <p itemprop="description">一个全面的任务管理应用，具有实时更新、拖放组织和团队协作功能。</p>
@@ -151,7 +170,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication">
+                    <div class="project-card" itemscope itemtype="http://schema.org/SoftwareApplication" loading="lazy">
                         <div class="card">
                             <h3 itemprop="name">天气仪表板</h3>
                             <p itemprop="description">一个优雅的天气应用程序，为全球各地提供详细的天气预报、交互式地图和恶劣天气警报。</p>
@@ -180,11 +199,15 @@
         </div>
     </main>
 
-    <!-- GitHub Stats -->
+    <!-- GitHub Stats with lazy loading -->
     <section id="github-stats" class="container card">
         <h2>GitHub 统计</h2>
         <div class="github-stats-container">
-            <img src="https://metrics.lecoq.io/Al-say?template=classic&base=header%2C%20activity%2C%20community%2C%20repositories%2C%20metadata&base.indepth=false&base.hireable=false&base.skip=false&config.timezone=Asia%2FShanghai" alt="GitHub 统计概览" />
+            <img src="https://metrics.lecoq.io/Al-say?template=classic&base=header%2C%20activity%2C%20community%2C%20repositories%2C%20metadata&base.indepth=false&base.hireable=false&base.skip=false&config.timezone=Asia%2FShanghai" 
+                 alt="GitHub 统计概览"
+                 loading="lazy"
+                 width="800"
+                 height="400" />
         </div>
     </section>
 
@@ -215,6 +238,7 @@
         </div>
     </footer>
 
+    <!-- Optimized Script Loading -->
     <!-- 统计脚本 - 低优先级加载 -->
     <script async defer src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
@@ -235,7 +259,87 @@
         }
     </script>
 
+    <!-- Performance Monitoring -->
+    <script>
+        // Report Web Vitals
+        function sendToAnalytics(metric) {
+            const body = JSON.stringify(metric);
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/analytics', body);
+            } else {
+                fetch('/analytics', {
+                    body,
+                    method: 'POST',
+                    keepalive: true
+                });
+            }
+        }
+
+        // Monitor offline status
+        function updateOfflineStatus() {
+            const banner = document.getElementById('offline-status');
+            if (!navigator.onLine) {
+                banner.style.display = 'block';
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('online', updateOfflineStatus);
+        window.addEventListener('offline', updateOfflineStatus);
+        updateOfflineStatus();
+    </script>
+
+    <!-- Font Loading -->
+    <script>
+        if ("fonts" in document) {
+            Promise.all([
+                document.fonts.load("1em Segoe UI"),
+                document.fonts.load("600 1em Segoe UI")
+            ]).then(() => {
+                document.documentElement.classList.add("fonts-loaded");
+            });
+        } else {
+            document.documentElement.classList.add("fonts-loaded");
+        }
+    </script>
+
+    <!-- Error Boundary -->
+    <script>
+        window.addEventListener('error', function(event) {
+            console.error('Global error caught:', event.error);
+            event.preventDefault();
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            event.preventDefault();
+        });
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed:', err);
+                });
+            });
+        }
+    </script>
+
     <!-- 核心脚本 -->
     <script defer src="js/script.js" type="module"></script>
+
+    <!-- Web Vitals -->
+    <script type="module">
+        import {onCLS, onFID, onLCP} from 'https://unpkg.com/web-vitals?module';
+
+        onCLS(sendToAnalytics);
+        onFID(sendToAnalytics);
+        onLCP(sendToAnalytics);
+    </script>
 </body>
 </html>

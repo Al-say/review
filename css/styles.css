@@ -486,7 +486,8 @@ footer {
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
     transition: transform var(--transition-speed);
-    loading: lazy;
+    content-visibility: auto;
+    contain-intrinsic-size: 400px;
 }
 
 .github-stats-container img:hover {

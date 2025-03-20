@@ -1,54 +1,36 @@
-# Dependencies
-node_modules/
-package-lock.json
-yarn.lock
-.pnp.*
-.yarn/*
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# IDE
-.vscode/
+# Editor directories and files
 .idea/
-*.sublime-*
+.vscode/
 *.swp
 *.swo
+*~
 
-# OS
-.DS_Store
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Distribution directories
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
 
 # Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-debug.log
-*.log
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Build output
-dist/
-build/
-out/
-coverage/
-
-# Cache directories
-.cache/
-.parcel-cache/
-.npm/
-.eslintcache
-
-# Temporary files
-*.tmp
-*.temp
-*~
-
-# Miscellaneous
-*.bak
-.history/
-.vercel/
-.netlify/
+# Local files
+*.local
