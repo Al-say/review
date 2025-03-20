@@ -1,0 +1,23 @@
+{
+  "name": "alsay-portfolio",
+  "version": "1.0.0",
+  "description": "Alsay's personal portfolio website",
+  "scripts": {
+    "test": "echo \"No tests specified\"",
+    "build": "echo \"No build required\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Al-say/review.git"
+  },
+  "keywords": [
+    "portfolio",
+    "personal-website"
+  ],
+  "author": "Alsay",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Al-say/review/issues"
+  },
+  "homepage": "https://al-say.github.io/review/"
+}
