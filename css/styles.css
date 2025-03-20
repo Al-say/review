@@ -1,203 +1,363 @@
-/* 继承之前的基础样式，添加新的动画和过渡效果 */
+/* 重置和基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 :root {
     --primary-color: #06c;
     --secondary-color: #2997ff;
     --background-color: #fbfbfd;
     --text-color: #1d1d1f;
     --text-secondary: #86868b;
-    --accent-color: #2ac55e;
     --spacing-unit: clamp(1rem, 2vw, 2rem);
-    --theme-transition: none;
+    --container-width: 1200px;
+    --header-height: 44px;
 }
 
-/* 添加全局过渡效果 */
-* {
-    transition: var(--theme-transition);
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.47059;
+    letter-spacing: -0.022em;
 }
 
-/* 视差滚动元素 */
-.parallax {
-    will-change: transform;
-    transform: translateZ(0);
+.container {
+    width: min(var(--container-width), 90%);
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
-/* 滚动显示动画 */
-.animate-on-scroll {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.fade-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* 导航栏滚动效果 */
+/* 导航栏 */
 nav {
-    transform: translateY(0);
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-nav.scroll-down {
-    transform: translateY(-100%);
-}
-
-nav.scroll-up {
-    transform: translateY(0);
-    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* 卡片悬浮效果 */
-.card {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
-    will-change: transform;
-    transform-style: preserve-3d;
-}
-
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-/* 按钮悬浮效果 */
-.cta-primary, .cta-secondary {
-    position: relative;
-    overflow: hidden;
-}
-
-.cta-primary::after,
-.cta-secondary::after {
-    content: '';
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    right: 0;
+    height: var(--header-height);
+    background: rgba(251, 251, 253, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    z-index: 1000;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
     height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(-100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-logo {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+.nav-links a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.8235294118em;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+    padding: 0.5rem 0;
+}
+
+.nav-links a:hover {
+    opacity: 1;
+}
+
+/* 头部区域 */
+header {
+    min-height: 100vh;
+    padding-top: calc(var(--header-height) + var(--spacing-unit) * 2);
+    display: flex;
+    align-items: center;
+    text-align: center;
+    background: var(--background-color);
+}
+
+.header-content {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-unit) 0;
+}
+
+h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 600;
+    letter-spacing: -0.003em;
+    margin-bottom: 0.5em;
+    line-height: 1.1;
+}
+
+.site-subtitle {
+    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    color: var(--text-secondary);
+    margin: 1em auto 2em;
+    max-width: 28em;
+}
+
+/* CTA按钮 */
+.header-cta {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.cta-primary,
+.cta-secondary {
+    padding: 0.8em 2em;
+    border-radius: 980px;
+    font-size: 1.0588235294em;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-width: 160px;
+}
+
+.cta-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.cta-secondary {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
+}
+
+/* 内容区域 */
+section {
+    padding: calc(var(--spacing-unit) * 4) 0;
+}
+
+.section-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.large-text {
+    font-size: clamp(1.2rem, 2vw, 1.5rem);
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    line-height: 1.4;
+}
+
+/* 技能网格 */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.skill-item {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
     transition: transform 0.3s ease;
 }
 
-.cta-primary:hover::after,
-.cta-secondary:hover::after {
-    transform: translateX(0);
-}
-
-/* 技能图标动画 */
 .skill-item i {
-    transition: transform 0.3s ease, color 0.3s ease;
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
 }
 
-.skill-item:hover i {
-    transform: scale(1.2);
-    color: var(--secondary-color);
+/* 项目卡片 */
+.projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: calc(var(--spacing-unit) * 2);
+    padding: var(--spacing-unit) 0;
 }
 
-/* 联系方式卡片效果 */
+.card {
+    background: var(--background-color);
+    border-radius: 20px;
+    padding: 2rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.card p {
+    flex: 1;
+    margin-bottom: 1.5rem;
+}
+
+.technologies {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+}
+
+.technologies span {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.3em 0.8em;
+    border-radius: 980px;
+    font-size: 0.9em;
+}
+
+/* 联系部分 */
+.contact-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
 .contact-item {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 16px;
+    text-decoration: none;
+    color: var(--text-color);
 }
 
-.contact-item:hover {
-    transform: scale(1.03) translateY(-4px);
+.contact-item i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
 }
 
-/* 文本渐变效果 */
+/* 页脚 */
+footer {
+    padding: calc(var(--spacing-unit) * 2) 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #000;
+        --text-color: #f5f5f7;
+        --text-secondary: #86868b;
+    }
+
+    nav {
+        background: rgba(0, 0, 0, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card {
+        background: #1c1c1e;
+    }
+
+    .technologies span {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .contact-item {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cta-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+
+    .nav-links {
+        display: none;
+        position: fixed;
+        inset: var(--header-height) 0 0 0;
+        background: var(--background-color);
+        flex-direction: column;
+        align-items: center;
+        padding: var(--spacing-unit);
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 1.5rem;
+        padding: 0.5rem;
+        cursor: pointer;
+    }
+
+    .header-cta {
+        flex-direction: column;
+        padding: 0 2rem;
+    }
+
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .projects {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-on-scroll {
+    animation: fadeUp 0.6s ease-out backwards;
+}
+
+/* 移动端菜单按钮 */
+.mobile-menu-toggle {
+    display: none;
+}
+
+/* 辅助类 */
 .gradient-text {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-}
-
-/* 滚动指示器 */
-.scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-20px);
-    }
-    60% {
-        transform: translateY(-10px);
-    }
-}
-
-/* 加载动画 */
-.loading {
-    position: fixed;
-    inset: 0;
-    background: var(--background-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.3s ease;
-}
-
-.loading.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* 暗色模式过渡 */
-@media (prefers-color-scheme: dark) {
-    .card, .skill-item, .contact-item {
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                    background-color 0.3s ease,
-                    box-shadow 0.3s ease;
-    }
-}
-
-/* 响应式动画调整 */
-@media (max-width: 768px) {
-    .card:hover {
-        transform: translateY(-4px);
-    }
-
-    .contact-item:hover {
-        transform: scale(1.02);
-    }
-
-    .skill-item:hover i {
-        transform: scale(1.1);
-    }
-}
-
-/* 减少动画 */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
 }
