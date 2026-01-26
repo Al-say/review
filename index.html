@@ -1,211 +1,39 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!DOCTYPE html> <!-- 声明文档类型为 HTML5 -->
+<html lang="zh-CN"> <!-- 设置页面语言为中文（中国） -->
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Alsay - 全栈开发工程师，专注于创建优雅且高性能的现代Web应用">
-    <meta name="keywords" content="全栈开发, Web开发, JavaScript, React, Node.js, UI设计">
-    <meta name="author" content="Alsay">
-    <link rel="manifest" href="manifest.json">
-    <title>Alsay - 测试全栈开发工程师</title>
-    
-
-    <!-- 加载动画样式 -->
-    <style>
-        :root {
-            --primary-color: #06c;
-            --background-color: #fbfbfd;
-            --text-color: #1d1d1f;
-            --text-secondary: #86868b;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --background-color: #000;
-                --text-color: #f5f5f7;
-                --text-secondary: #86868b;
-            }
-        }
-        .initial-loader {
-            position: fixed;
-            inset: 0;
-            background: var(--background-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 0.5s ease-out;
-        }
-        .initial-loader.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .loader-content {
-            text-align: center;
-        }
-        .loader-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0, 0, 0, 0.1);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .loader-text {
-            margin-top: 1rem;
-            color: var(--text-secondary);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        body { opacity: 0; transition: opacity 0.3s ease; }
-        body.loaded { opacity: 1; }
-    </style>
-
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
-          crossorigin="anonymous" media="print" onload="this.media='all'">
+    <meta charset="UTF-8"> <!-- 设置字符编码为 UTF-8，支持中文显示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 响应式设计，适配不同设备宽度 -->
+    <title>My Web Page</title> <!-- 网页标题，显示在浏览器标签上 -->
+    <link rel="stylesheet" href="css/style.css"> <!-- 引入外部 CSS 样式文件 -->
+    <link rel="icon" href="photo/aisay_logo.png" type="image/png"> <!-- 浏览器标签页图标（favicon） -->
 </head>
 <body>
-    <!-- 加载动画 -->
-    <div class="initial-loader">
-        <div class="loader-content">
-            <div class="loader-spinner"></div>
-            <p class="loader-text">正在加载精彩内容...</p>
-        </div>
+    <div class="container"> <!-- 页面主要内容容器 -->
+        <header>
+            
+            <h1>欢迎来到我的网站</h1> <!-- 网站主标题 -->
+        </header>
+        
+        <main> <!-- 主要内容区域 -->
+            <section>
+                <h2>网站内容</h2> <!-- 区块标题 -->
+                <p>这里是网站的主要内容区域。</p> <!-- 主要内容描述 -->
+            </section>
+        </main>
     </div>
-
-    <nav>
-        <div class="container nav-container">
-            <a href="#" class="nav-logo">Alsay</a>
-            <button class="mobile-menu-toggle" aria-label="菜单">
-                <i class="fas fa-bars"></i>
-            </button>
-            <ul class="nav-links">
-                <li><a href="#about">关于</a></li>
-                <li><a href="#projects">项目</a></li>
-                <li><a href="#contact">联系</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <header>
-        <div class="container">
-            <div class="parallax" data-speed="0.5">
-                <h1 class="gradient-text">构建优雅的Web体验</h1>
-                <p class="site-subtitle">全栈开发工程师，专注于创造美好的数字产品</p>
-            </div>
-            <div class="header-cta">
-                <a href="#projects" class="cta-primary">查看作品</a>
-                <a href="#contact" class="cta-secondary">联系我</a>
-            </div>
-            <div class="scroll-indicator">
-                <i class="fas fa-chevron-down"></i>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <section id="about" class="section-about">
-            <div class="container">
-                <div class="section-content animate-on-scroll">
-                    <h2 class="gradient-text">关于我</h2>
-                    <p class="large-text">作为一名全栈开发工程师，我致力于将复杂的技术转化为优雅的用户体验。</p>
-                    <div class="skills-grid">
-                        <div class="skill-item">
-                            <i class="fas fa-code"></i>
-                            <h3>前端开发</h3>
-                            <p>创建响应式和直观的用户界面</p>
-                        </div>
-                        <div class="skill-item">
-                            <i class="fas fa-server"></i>
-                            <h3>后端开发</h3>
-                            <p>构建可靠和高性能的服务端系统</p>
-                        </div>
-                        <div class="skill-item">
-                            <i class="fas fa-paint-brush"></i>
-                            <h3>UI设计</h3>
-                            <p>打造富有美感的用户界面设计</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="projects" class="section-projects">
-            <div class="container">
-                <h2 class="gradient-text">精选项目</h2>
-                <div class="projects">
-                    <div class="card">
-                        <h3>HTML-CSS-JS 作品展示</h3>
-                        <p>一个展示前端开发技术的响应式网站集合，包含各种实用组件和交互效果。</p>
-                        <div class="technologies">
-                            <span>HTML5</span>
-                            <span>CSS3</span>
-                            <span>JavaScript</span>
-                        </div>
-                        <a href="https://al-say.github.io/HTML-CSS-JS/" class="project-link" target="_blank" rel="noopener">
-                            了解更多 <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="card">
-                        <h3>现代化个人作品集</h3>
-                        <p>一个展示项目和技能的响应式个人作品集网站。融合了优雅的动画和现代设计理念。</p>
-                        <div class="technologies">
-                            <span>React</span>
-                            <span>Next.js</span>
-                            <span>TailwindCSS</span>
-                        </div>
-                        <a href="#" class="project-link">
-                            了解更多 <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section-contact">
-            <div class="container">
-                <h2 class="gradient-text">让我们开始合作</h2>
-                <p class="large-text">无论是项目咨询还是职业机会，我都很乐意与您交流。</p>
-                <div class="contact-links">
-                    <a href="mailto:me@alsay.net" class="contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <div>
-                            <h3>发送邮件</h3>
-                            <span>me@alsay.net</span>
-                        </div>
-                    </a>
-                    <a href="https://github.com/Al-say" class="contact-item" target="_blank" rel="noopener">
-                        <i class="fab fa-github"></i>
-                        <div>
-                            <h3>GitHub</h3>
-                            <span>@Al-say</span>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p class="copyright">&copy; 2025 Alsay. 保留所有权利。</p>
+    
+    <footer id="footer" class="footer"> <!-- 页脚区域，包含版权和备案信息 -->
+        <div class="footer-content">
+            <p>
+                安全检测能力由 
+                <a class="footer-waflink" href="https://waf-ce.chaitin.cn/">雷池 WAF</a> 
+                驱动 <!-- 安全检测服务说明及链接 -->
+            </p>
+            <p class="icp-info">备案号：皖ICP备2025082417号-1</p> <!-- 网站备案号信息 -->
+            <p class="copyright">© 2025 Alsay.net, Inc.</p> <!-- 版权信息 -->
         </div>
     </footer>
-
-    <!-- 初始化脚本 -->
-    <script>
-        window.addEventListener('load', () => {
-            document.body.classList.add('loaded');
-            setTimeout(() => {
-                document.querySelector('.initial-loader').classList.add('hidden');
-            }, 500);
-        });
-    </script>
-
-    <!-- 核心脚本 -->
-    <script type="module" src="js/script.js"></script>
+    
+    <script src="js/main.js"></script> <!-- 引入外部 JavaScript 文件 -->
 </body>
 </html>
