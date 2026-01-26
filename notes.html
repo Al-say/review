@@ -212,6 +212,62 @@
       border-radius: 999px;
       font-size: 12px;
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nm-reader-tools button:focus,
+    .nm-reader-tools button:focus-visible {
+      outline: 2px solid var(--nm-accent);
+      outline-offset: 2px;
+    }
+
+    .nm-reader-tools button:hover {
+      background: rgba(90, 211, 183, 0.15);
+      border-color: var(--nm-accent);
+    }
+
+    .nm-note-card:focus,
+    .nm-note-card:focus-visible {
+      outline: 2px solid var(--nm-accent);
+      outline-offset: 2px;
+    }
+
+    /* 加载动画 */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .nm-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--nm-muted);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* 键盘快捷键提示 */
+    .shortcut-hint {
+      font-size: 10px;
+      color: var(--nm-muted);
+      margin-left: 4px;
+      padding: 2px 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    /* 阅读进度条 */
+    .nm-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: var(--nm-accent);
+      transition: width 0.1s ease-out;
+      z-index: 1001;
+      box-shadow: 0 2px 8px rgba(90, 211, 183, 0.4);
     }
 
     .nm-form-grid {
@@ -378,11 +434,14 @@
       font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    .nm-preview pre code .kw { color: #82aaff; }
-    .nm-preview pre code .fn { color: #c792ea; }
+    .nm-preview pre code .kw { color: #89ddff; }
+    .nm-preview pre code .fn { color: #82aaff; }
     .nm-preview pre code .str { color: #c3e88d; }
     .nm-preview pre code .num { color: #f78c6c; }
-    .nm-preview pre code .com { color: #7f8ea3; font-style: italic; }
+    .nm-preview pre code .com { color: #546e7a; font-style: italic; }
+    .nm-preview pre code .bi { color: #ffcb6b; }
+    .nm-preview pre code .sel { color: #f07178; }
+    .nm-preview pre code .prop { color: #82aaff; }
 
     .nm-preview blockquote {
       border-left: 3px solid var(--nm-accent);
@@ -493,7 +552,7 @@
           </div>
           <div class="nm-footer">
             <span id="statusText">未加载</span>
-            <span>提示：从 data/search.json 读取索引</span>
+            <span>快捷键: <span class="shortcut-hint">J/K</span> 导航 · <span class="shortcut-hint">Ctrl+G</span> 搜索 · <span class="shortcut-hint">T</span> 主题 · <span class="shortcut-hint">Esc</span> 清除</span>
           </div>
         </div>
       </section>
@@ -619,13 +678,13 @@
     function renderList() {
       const list = getFilteredNotes();
       if (!list.length) {
-        els.noteList.innerHTML = '<div class="nm-note-card">没有匹配的笔记</div>';
+        els.noteList.innerHTML = '<div class="nm-note-card" role="status" aria-live="polite">没有匹配的笔记</div>';
         return;
       }
-      els.noteList.innerHTML = list.map(note => {
+      els.noteList.innerHTML = list.map((note, index) => {
         const isActive = note.id === state.activeId;
         return `
-          <div class="nm-note-card ${isActive ? 'active' : ''}" data-id="${note.id}">
+          <div class="nm-note-card ${isActive ? 'active' : ''}" data-id="${note.id}" tabindex="0" role="button" aria-label="阅读: ${note.title}" data-index="${index}">
             <h3>${note.title}</h3>
             <div class="nm-note-meta">
               <span>ID: ${note.id}</span>
@@ -694,6 +753,90 @@
       onScroll();
     }
 
+    // 防抖函数
+    function debounce(fn, delay = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    // 节流函数
+    function throttle(fn, limit = 100) {
+      let inThrottle;
+      return (...args) => {
+        if (!inThrottle) {
+          fn.apply(this, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      };
+    }
+
+    // 防抖和节流的列表渲染、进度更新
+    const renderListDebounced = debounce(renderList, 150);
+    const updateProgressThrottled = throttle(function updateProgress() {
+      if (!els.progressBar) return;
+      const doc = document.documentElement;
+      const total = doc.scrollHeight - doc.clientHeight;
+      const scrolled = total > 0 ? (doc.scrollTop / total) * 100 : 0;
+      els.progressBar.style.width = `${Math.min(100, Math.max(0, scrolled))}%`;
+    }, 50);
+
+    // 键盘快捷键处理
+    function handleKeyboardShortcuts(e) {
+      const target = e.target;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return;
+
+      const key = e.key.toLowerCase();
+
+      // j/k 导航笔记列表
+      if (key === 'j') {
+        e.preventDefault();
+        navigateList(1);
+      } else if (key === 'k') {
+        e.preventDefault();
+        navigateList(-1);
+      }
+      // Ctrl/Cmd + G 聚焦搜索框
+      else if (key === 'g' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        els.searchInput.focus();
+      }
+      // Ctrl/Cmd + R 重新加载
+      else if (key === 'r' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+        e.preventDefault();
+        loadIndex();
+      }
+      // Esc 清除搜索
+      else if (key === 'escape') {
+        if (document.activeElement === els.searchInput) {
+          els.searchInput.value = '';
+          els.searchInput.blur();
+          renderListDebounced();
+        }
+      }
+      // t 切换主题
+      else if (key === 't' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        els.themeToggleBtn.click();
+      }
+    }
+
+    // 笔记列表导航
+    function navigateList(direction) {
+      const cards = Array.from(els.noteList.querySelectorAll('.nm-note-card'));
+      if (!cards.length) return;
+      const currentIndex = cards.findIndex(card => card.classList.contains('active'));
+      let nextIndex = direction > 0 ? currentIndex + 1 : currentIndex - 1;
+      if (nextIndex >= cards.length) nextIndex = 0;
+      if (nextIndex < 0) nextIndex = cards.length - 1;
+      setActiveNote(cards[nextIndex].dataset.id);
+      cards[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      cards[nextIndex].focus();
+    }
+
     function updateProgress() {
       if (!els.progressBar) return;
       const doc = document.documentElement;
@@ -707,19 +850,66 @@
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
+
+      // 语言特定的关键字和规则
+      const langRules = {
+        javascript: {
+          keywords: ['const', 'let', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'class', 'new', 'try', 'catch', 'finally', 'throw', 'async', 'await', 'import', 'export', 'from', 'default', 'extends', 'super', 'this', 'true', 'false', 'null', 'undefined', 'typeof', 'instanceof', 'delete', 'void', 'in', 'of', 'do', 'typeof'],
+          builtins: ['console', 'window', 'document', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Date', 'Math', 'JSON', 'Promise', 'Set', 'Map', 'Error', 'RegExp', 'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval', 'fetch'],
+        },
+        python: {
+          keywords: ['def', 'class', 'return', 'if', 'elif', 'else', 'for', 'while', 'break', 'continue', 'try', 'except', 'finally', 'raise', 'import', 'from', 'as', 'pass', 'global', 'nonlocal', 'lambda', 'yield', 'with', 'True', 'False', 'None', 'and', 'or', 'not', 'in', 'is', 'assert', 'del', 'async', 'await'],
+          builtins: ['print', 'len', 'range', 'list', 'dict', 'set', 'tuple', 'str', 'int', 'float', 'bool', 'open', 'input', 'type', 'isinstance', 'hasattr', 'getattr', 'setattr', 'dir'],
+        },
+        html: {
+          keywords: ['<!DOCTYPE', '<html', '<head', '<body', '<div', '<span', '<p', '<a', '<img', '<script', '<style', '<link', '<meta', '<title', '<header', '<footer', '<nav', '<section', '<article', '<aside', '<main', '<form', '<input', '<button', '<select', '<option', '<textarea', '<label', '<table', '<tr', '<td', '<th'],
+        },
+        css: {
+          keywords: ['@import', '@media', '@keyframes', '@font-face', '@supports'],
+        },
+        typescript: {
+          keywords: ['const', 'let', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'class', 'interface', 'type', 'enum', 'new', 'try', 'catch', 'finally', 'throw', 'async', 'await', 'import', 'export', 'from', 'default', 'extends', 'implements', 'super', 'this', 'true', 'false', 'null', 'undefined', 'typeof', 'instanceof', 'private', 'public', 'protected', 'readonly', 'static', 'abstract'],
+          builtins: ['console', 'window', 'document', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Date', 'Math', 'JSON', 'Promise', 'Set', 'Map', 'Error', 'RegExp'],
+        },
+      };
+
+      const rules = langRules[lang] || langRules.javascript;
+
       const patterns = [
         { re: /(\/\/.*$)/gm, cls: 'com' },
         { re: /(\/\*[\s\S]*?\*\/)/gm, cls: 'com' },
         { re: /(["'`])(?:\\.|(?!\1).)*\1/gm, cls: 'str' },
-        { re: /\b(\d+(\.\d+)?)\b/gm, cls: 'num' },
+        { re: /\b(\d+(\.\d+)?([eE][+-]?\d+)?)\b/gm, cls: 'num' },
       ];
+
       let output = escaped;
-      const kwList = /(const|let|var|function|return|if|else|for|while|switch|case|break|continue|class|new|try|catch|finally|throw|async|await|import|export|from|default|extends|super|this|true|false|null|undefined)\b/g;
-      output = output.replace(kwList, '<span class="kw">$1</span>');
+
+      // 先处理注释（避免在关键字中误匹配）
       patterns.forEach(({ re, cls }) => {
         output = output.replace(re, `<span class="${cls}">$1</span>`);
       });
+
+      // 处理关键字
+      const keywords = rules.keywords.join('|');
+      const kwRegex = new RegExp(`\\b(${keywords})\\b`, 'g');
+      output = output.replace(kwRegex, '<span class="kw">$1</span>');
+
+      // 处理内置对象/函数
+      if (rules.builtins) {
+        const builtins = rules.builtins.join('|');
+        const builtinRegex = new RegExp(`\\b(${builtins})\\b`, 'g');
+        output = output.replace(builtinRegex, '<span class="bi">$1</span>');
+      }
+
+      // 处理函数调用
       output = output.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()/g, '<span class="fn">$1</span>');
+
+      // 处理 CSS 特殊语法
+      if (lang === 'css') {
+        output = output.replace(/([.#]?[a-zA-Z_][a-zA-Z0-9_-]*)\s*\{/g, '<span class="sel">$1</span>{');
+        output = output.replace(/([a-zA-Z-]+)\s*:/g, '<span class="prop">$1</span>:');
+      }
+
       return output;
     }
 
@@ -796,13 +986,13 @@
           note.content = await res.text();
         } catch (err) {
           console.error(err);
-          els.preview.textContent = '读取 Markdown 失败，请检查路径。';
-          renderList();
+          els.preview.innerHTML = '<div class="nm-loading" role="status" aria-live="assertive">读取 Markdown 失败，请检查路径。</div>';
+          renderListDebounced();
           return;
         }
       }
       renderPreview(note.content || '');
-      renderList();
+      renderListDebounced();
     }
 
     els.noteList.addEventListener('click', (e) => {
@@ -811,12 +1001,25 @@
       setActiveNote(card.dataset.id);
     });
 
-    ['input', 'change'].forEach(evt => {
-      els.searchInput.addEventListener(evt, renderList);
-      els.topicFilter.addEventListener(evt, renderList);
-      els.sortSelect.addEventListener(evt, renderList);
+    // 键盘导航支持
+    els.noteList.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const card = e.target.closest('.nm-note-card');
+        if (card && card.dataset.id) {
+          e.preventDefault();
+          setActiveNote(card.dataset.id);
+        }
+      }
     });
 
+    // 使用防抖的列表渲染
+    ['input', 'change'].forEach(evt => {
+      els.searchInput.addEventListener(evt, renderListDebounced);
+      els.topicFilter.addEventListener(evt, renderListDebounced);
+      els.sortSelect.addEventListener(evt, renderListDebounced);
+    });
+
+    // 按钮事件
     els.loadIndexBtn.addEventListener('click', loadIndex);
     els.fontDecBtn.addEventListener('click', () => updateReaderPrefs(-1, 0));
     els.fontIncBtn.addEventListener('click', () => updateReaderPrefs(1, 0));
@@ -829,7 +1032,10 @@
     });
     els.tocToggleBtn.addEventListener('click', () => {
       const panel = document.querySelector('.nm-toc-panel');
-      if (panel) panel.classList.toggle('open');
+      if (panel) {
+        panel.classList.toggle('open');
+        panel.hidden = !panel.classList.contains('open');
+      }
     });
     els.resetReaderBtn.addEventListener('click', () => {
       readerPrefs.fontSize = 15;
@@ -841,10 +1047,14 @@
       applyReaderPrefs();
     });
 
+    // 全局键盘快捷键
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+
+    // 初始化
     applyReaderPrefs();
     loadIndex();
-    window.addEventListener('scroll', updateProgress, { passive: true });
-    updateProgress();
+    window.addEventListener('scroll', updateProgressThrottled, { passive: true });
+    updateProgressThrottled();
   </script>
 </body>
 </html>

@@ -34,10 +34,12 @@ import { router } from './router.js';
 import { store } from './store.js';
 import { NoteDetailRenderer } from './render/note-detail.js';
 import { SearchPanel } from './ui/search-panel.js';
+import { ShortcutsPanel } from './ui/shortcuts-panel.js';
 
 // 全局变量
 let noteDetailRenderer = null;
 let searchPanel = null;
+let shortcutsPanel = null;
 let renderToken = 0; // 路由渲染token，防止旧请求覆盖新页面
 
 // 页面初始化
@@ -64,6 +66,17 @@ async function initApp() {
         // 初始化搜索面板
         searchPanel = new SearchPanel(store, router);
 
+        // 初始化快捷键面板
+        shortcutsPanel = new ShortcutsPanel();
+
+        // 绑定快捷键按钮
+        const shortcutsBtn = document.getElementById('shortcuts-btn');
+        if (shortcutsBtn) {
+            shortcutsBtn.addEventListener('click', () => {
+                shortcutsPanel.toggle();
+            });
+        }
+
         console.log('Alsay Portfolio - 加载完成');
 
     } catch (error) {
@@ -76,10 +89,24 @@ function initRoutes() {
     // 首页路由
     router.addRoute('/', showHome);
 
+    // 笔记列表路由
+    router.addRoute('/notes', showNotesList);
+
     // 笔记详情路由
     router.addRoute('/note/:id', (route) => {
         const noteId = route.split('/')[2]; // 提取笔记 ID
         showNoteDetail(noteId);
+    });
+
+    // 知识图谱路由
+    router.addRoute('/graph', showGraph);
+
+    // 时间线路由
+    router.addRoute('/timeline', showTimeline);
+
+    // 搜索路由
+    router.addRoute('/search', () => {
+        if (searchPanel) searchPanel.open();
     });
 
     // 默认路由
@@ -137,53 +164,32 @@ function showHome() {
                 <h1>学习笔记可视化</h1>
                 <p class="tagline">构建 · 连接 · 发现</p>
                 <p class="description">
-                    基于双向链接的个人知识库，<br>
-                    支持全文搜索、知识图谱和时间线浏览。
+                    双向链接知识库，聚焦检索与关联。
                 </p>
 
-                <!-- 主要入口区域 -->
                 <div class="main-entries">
                     <div class="entry-grid">
                         <a href="#/notes" class="main-entry">
                             <div class="entry-icon">📝</div>
                             <div class="entry-content">
                                 <h3>笔记库</h3>
-                                <p>浏览所有学习笔记</p>
+                                <p>浏览全部笔记</p>
                             </div>
                         </a>
                         <a href="#/search" class="main-entry" onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: '/'}))">
                             <div class="entry-icon">🔍</div>
                             <div class="entry-content">
-                                <h3>智能搜索</h3>
-                                <p>按 / 键快速搜索</p>
-                            </div>
-                        </a>
-                        <a href="#/graph" class="main-entry">
-                            <div class="entry-icon">🕸️</div>
-                            <div class="entry-content">
-                                <h3>知识图谱</h3>
-                                <p>可视化知识连接</p>
-                            </div>
-                        </a>
-                        <a href="#/timeline" class="main-entry">
-                            <div class="entry-icon">⏰</div>
-                            <div class="entry-content">
-                                <h3>时间线</h3>
-                                <p>按时间浏览笔记</p>
+                                <h3>快速搜索</h3>
+                                <p>按 / 立即搜索</p>
                             </div>
                         </a>
                     </div>
                 </div>
 
-                <!-- 学习系统状态 -->
                 <div class="learning-stats">
                     <div class="stat-item">
                         <div class="stat-number">${store.getNotes().length}</div>
                         <div class="stat-label">笔记</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">${store.getAllTopics().length}</div>
-                        <div class="stat-label">主题</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-number">${store.getAllTags().length}</div>
@@ -193,60 +199,6 @@ function showHome() {
                         <div class="stat-number">${Array.from(new Set(store.getNotes().flatMap(n => n.linksOut || []))).length}</div>
                         <div class="stat-label">连接</div>
                     </div>
-                </div>
-
-                <!-- 技能标签云 -->
-                <div class="skills">
-                    <div class="skills-title">技术栈 · Tech Stack</div>
-                    <div class="skill-tags">
-                        <span class="skill-tag highlight">JavaScript</span>
-                        <span class="skill-tag highlight">React</span>
-                        <span class="skill-tag highlight">Node.js</span>
-                        <span class="skill-tag">Python</span>
-                        <span class="skill-tag">Docker</span>
-                        <span class="skill-tag">TypeScript</span>
-                        <span class="skill-tag">Vue.js</span>
-                        <span class="skill-tag">MongoDB</span>
-                        <span class="skill-tag">Git</span>
-                        <span class="skill-tag">AWS</span>
-                    </div>
-                </div>
-
-                <!-- 作品与代码仓库 -->
-                <div class="projects">
-                    <div class="projects-title">作品 · Works</div>
-                    <div class="project-cards">
-                        <a href="https://github.com/Al-say" class="project-card" target="_blank" rel="noopener">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                            </svg>
-                            GitHub 仓库
-                        </a>
-                        <a href="https://mzjh.top" class="project-card">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                            </svg>
-                            知识库系统
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 社交链接 -->
-                <div class="social-links">
-                    <a href="https://github.com/Al-say" class="social-link" target="_blank" rel="noopener">
-                        <i class="fab fa-github"></i>
-                    </a>
-                    <a href="https://twitter.com/alsay_dev" class="social-link" target="_blank" rel="noopener">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="mailto:contact@alsay.net" class="social-link">
-                        <i class="fas fa-envelope"></i>
-                    </a>
-                </div>
-
-                <div class="status">
-                    <span class="status-dot"></span>
-                    系统状态：正常运行
                 </div>
             </div>
         `;

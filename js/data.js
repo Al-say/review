@@ -137,7 +137,7 @@ export async function loadGraphData() {
 
 // 搜索功能
 export async function search(query, options = {}) {
-    const data = await loadSearchData();
+    const data = await loadSearchIndex();
     const { limit = 10, caseSensitive = false } = options;
 
     if (!query || query.trim() === '') {

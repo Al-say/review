@@ -12,6 +12,8 @@ export class SearchPanel {
             tags: [],
             sortBy: 'relevance' // 'relevance' | 'updatedAt'
         };
+        this.searchTimer = null;
+        this.debounceDelay = 300; // 300ms 防抖延迟
 
         this.init();
     }
@@ -80,10 +82,19 @@ export class SearchPanel {
     }
 
     bindEvents() {
-        // 输入事件
+        // 输入事件 - 带防抖
         this.input.addEventListener('input', (e) => {
             this.currentQuery = e.target.value.trim();
-            this.performSearch();
+
+            // 清除之前的定时器
+            if (this.searchTimer) {
+                clearTimeout(this.searchTimer);
+            }
+
+            // 设置新的定时器
+            this.searchTimer = setTimeout(() => {
+                this.performSearch();
+            }, this.debounceDelay);
         });
 
         // 键盘导航
@@ -156,6 +167,13 @@ export class SearchPanel {
         this.input.value = '';
         this.results = [];
         this.selectedIndex = 0;
+
+        // 清除搜索定时器
+        if (this.searchTimer) {
+            clearTimeout(this.searchTimer);
+            this.searchTimer = null;
+        }
+
         document.body.style.overflow = '';
     }
 
