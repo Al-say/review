@@ -660,3 +660,273 @@ footer a:hover {
         border-bottom-color: #4dabf7;
     }
 }
+
+/* 顶部工具栏样式 */
+.top-toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border-bottom: 1px solid #e1e5e9;
+    z-index: 100;
+    padding: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.toolbar-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.8rem;
+}
+
+.toolbar-btn:hover {
+    background: var(--bg-color);
+}
+
+.toolbar-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.toolbar-btn span {
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* 主要入口区域样式 */
+.main-entries {
+    margin: 2rem 0;
+}
+
+.entry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.main-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-color);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.main-entry:hover {
+    background: var(--card-bg);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.entry-icon {
+    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 8px;
+}
+
+.entry-content h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.entry-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* 学习系统状态样式 */
+.learning-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.learning-stats .stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-color);
+    border-radius: 8px;
+}
+
+.learning-stats .stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.learning-stats .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 调整容器边距，为固定工具栏让位 */
+.container {
+    padding-top: 5rem;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .top-toolbar {
+        padding: 0.25rem;
+    }
+
+    .toolbar-buttons {
+        gap: 0.5rem;
+    }
+
+    .toolbar-btn {
+        padding: 0.25rem;
+        min-width: 60px;
+    }
+
+    .toolbar-btn span {
+        display: none;
+    }
+
+    .entry-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .main-entry {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .entry-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1.5rem;
+    }
+
+    .entry-content h3 {
+        font-size: 1rem;
+    }
+
+    .entry-content p {
+        font-size: 0.8rem;
+    }
+
+    .learning-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .learning-stats .stat-item {
+        padding: 0.75rem;
+    }
+
+    .learning-stats .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .container {
+        padding-top: 4rem;
+    }
+}
+
+/* ===== Bigger Layout Override ===== */
+
+/* 1) 全局字号略增，提升"页面大"的直观感受 */
+:root{
+  --base-font-size: 16px; /* 你原来如果是 14/15，这里会明显变大 */
+  --card-max-width: 720px; /* 原来多半是 520~620 */
+}
+
+html{
+  font-size: var(--base-font-size);
+}
+
+/* 2) 容器留白减少一点，让主体更"铺开" */
+.container{
+  padding: 32px 16px; /* 原来若更大，会让主体显小 */
+}
+
+/* 3) 卡片变宽 + 内边距变大 */
+.card{
+  max-width: var(--card-max-width);
+  width: min(92vw, var(--card-max-width));
+  padding: 48px 44px;   /* 原来多半 32 左右 */
+  border-radius: 22px;  /* 视觉更现代，配合更大尺寸 */
+}
+
+/* 4) 关键标题与文案字号增大 */
+.card h1{
+  font-size: 2rem;      /* 约 32px */
+  line-height: 1.2;
+}
+
+.tagline{
+  font-size: 1.1rem;
+}
+
+.description{
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+/* 5) 标签与卡片按钮更大更好点 */
+.skill-tag{
+  font-size: 0.95rem;
+  padding: 8px 14px;
+}
+
+.project-card{
+  padding: 14px 16px;
+  font-size: 1rem;
+}
+
+/* 6) 统计区更大 */
+.stat-number{
+  font-size: 1.6rem;
+}
+
+.stat-label{
+  font-size: 0.95rem;
+}
+
+/* 7) 移动端仍保持舒适 */
+@media (max-width: 480px){
+  :root{ --card-max-width: 94vw; }
+  .card{ padding: 34px 22px; }
+  .card h1{ font-size: 1.7rem; }
+}

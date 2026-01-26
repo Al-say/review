@@ -1,29 +1,49 @@
 // data.js - 数据处理模块
-import { BASE_URL } from './app.js';
+import { urlOf, safeJsonParse } from './utils.js';
 
 let searchData = null;
 let graphData = null;
 
 // 安全的JSON获取函数
-async function fetchJson(url) {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${url}`);
-  return res.json();
+export async function fetchJson(path) {
+  const res = await fetch(urlOf(path), { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${path}`);
+  const text = await res.text();
+  return safeJsonParse(text);
 }
 
 // 安全的文本获取函数
-async function fetchText(url) {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${url}`);
+export async function fetchText(path) {
+  const res = await fetch(urlOf(path), { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${path}`);
   return res.text();
 }
 
-// 搜索索引结构断言
+// 搜索索引结构断言 - 增强版本校验
 function assertSearchIndex(data) {
-  if (!data || !Array.isArray(data.items)) throw new Error("Invalid search index: items missing");
-  for (const it of data.items) {
-    if (!it.id || !it.title) throw new Error(`Invalid item: id/title missing for ${it.id || 'unknown'}`);
+  if (!data) throw new Error("Search index is null or undefined");
+
+  // 版本校验
+  if (typeof data.version !== "number") throw new Error("Invalid search index: version missing or not a number");
+
+  // 生成时间校验
+  if (!data.generatedAt || typeof data.generatedAt !== "string") {
+    console.warn("Search index missing generatedAt timestamp");
   }
+
+  // 项目数组校验
+  if (!Array.isArray(data.items)) throw new Error("Invalid search index: items missing or not an array");
+
+  // 每个项目的基本字段校验
+  for (const item of data.items) {
+    if (!item.id || typeof item.id !== "string") {
+      throw new Error(`Invalid item: id missing or not a string for item ${JSON.stringify(item)}`);
+    }
+    if (!item.title || typeof item.title !== "string") {
+      throw new Error(`Invalid item: title missing or not a string for item ${item.id}`);
+    }
+  }
+
   return data;
 }
 
@@ -32,14 +52,19 @@ export async function loadSearchIndex() {
     if (searchData) return searchData;
 
     try {
-        const url = new URL("data/search.json", BASE_URL).toString();
-        const data = await fetchJson(url);
+        const data = await fetchJson("data/search.json");
         searchData = assertSearchIndex(data);
         console.log('搜索索引加载完成:', searchData.items?.length || 0, '个项目');
         return searchData;
     } catch (error) {
         console.error('加载搜索索引失败:', error);
-        return { items: [], version: 1, generatedAt: new Date().toISOString() };
+        // 降级到空索引，避免完全崩溃
+        return {
+            items: [],
+            version: 1,
+            generatedAt: new Date().toISOString(),
+            error: error.message
+        };
     }
 }
 

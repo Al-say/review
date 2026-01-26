@@ -3,6 +3,7 @@ export class Router {
     constructor() {
         this.routes = {};
         this.currentRoute = null;
+        this.renderToken = 0; // 路由渲染并发保护令牌
         this.init();
     }
 
@@ -29,14 +30,35 @@ export class Router {
         return hash;
     }
 
-    // 处理路由
-    handleRoute() {
+    // 处理路由 - 带并发保护
+    async handleRoute() {
         const route = this.getCurrentRoute();
         const handler = this.routes[route] || this.routes['/'];
 
         if (handler) {
-            this.currentRoute = route;
-            handler(route);
+            // 增加渲染令牌，防止竞态条件
+            const token = ++this.renderToken;
+
+            try {
+                // 如果handler是异步函数，等待其完成
+                const result = handler(route);
+
+                // 如果返回Promise，等待其完成
+                if (result && typeof result.then === 'function') {
+                    await result;
+                }
+
+                // 检查令牌是否仍然有效（防止旧请求覆盖新请求）
+                if (token !== this.renderToken) {
+                    console.log('路由渲染被新请求取消:', route);
+                    return;
+                }
+
+                this.currentRoute = route;
+            } catch (error) {
+                console.error('路由处理失败:', route, error);
+                // 可以在这里添加错误恢复逻辑，比如显示错误页面
+            }
         }
     }
 

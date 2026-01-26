@@ -1,4 +1,58 @@
 // utils.js - 工具函数模块
+
+/**
+ * 基于document.baseURI生成完整URL，确保在不同域名环境下路径正确
+ * @param {string} path - 相对路径
+ * @returns {string} 完整URL
+ */
+export function urlOf(path) {
+  return new URL(path, document.baseURI).toString();
+}
+
+/**
+ * DOM节点断言函数 - 确保关键节点存在
+ * @param {string} id - 元素ID
+ * @returns {HTMLElement} DOM元素
+ * @throws {Error} 如果元素不存在
+ */
+export function mustGet(id) {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Missing DOM element: #${id}`);
+  return el;
+}
+
+/**
+ * 可选DOM节点获取 - 不抛出错误
+ * @param {string} id - 元素ID
+ * @returns {HTMLElement|null} DOM元素或null
+ */
+export function optionalGet(id) {
+  return document.getElementById(id);
+}
+
+/**
+ * 可选DOM查询 - 不抛出错误
+ * @param {string} selector - CSS选择器
+ * @returns {Element|null} 匹配的元素或null
+ */
+export function optionalQuery(selector) {
+  return document.querySelector(selector);
+}
+
+/**
+ * 安全的JSON解析
+ * @param {string} text - JSON字符串
+ * @returns {any} 解析后的对象
+ * @throws {Error} 如果解析失败
+ */
+export function safeJsonParse(text) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`JSON parse failed: ${error.message}`);
+  }
+}
+
 export function initSmoothScroll() {
     // 平滑滚动
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
