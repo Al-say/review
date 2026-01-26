@@ -81,7 +81,7 @@ class Store {
 
     // 搜索笔记
     searchNotes(query, options = {}) {
-        const { topic, tags, limit = 20 } = options;
+        const { topic, tags, sortBy = 'relevance', limit = 20 } = options;
         let results = this.getNotes();
 
         // 按主题过滤
@@ -106,8 +106,31 @@ class Store {
             );
         }
 
-        // 按更新时间排序
-        results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        // 排序
+        if (sortBy === 'updatedAt') {
+            results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        } else if (sortBy === 'relevance') {
+            // 如果有查询，按相关度排序（标题匹配优先，然后是内容匹配）
+            if (query) {
+                const lowerQuery = query.toLowerCase();
+                results.sort((a, b) => {
+                    const aTitleMatch = a.title.toLowerCase().includes(lowerQuery);
+                    const bTitleMatch = b.title.toLowerCase().includes(lowerQuery);
+                    const aContentMatch = a.text.toLowerCase().includes(lowerQuery);
+                    const bContentMatch = b.text.toLowerCase().includes(lowerQuery);
+
+                    // 标题匹配优先
+                    if (aTitleMatch && !bTitleMatch) return -1;
+                    if (!aTitleMatch && bTitleMatch) return 1;
+
+                    // 然后按更新时间
+                    return new Date(b.updatedAt) - new Date(a.updatedAt);
+                });
+            } else {
+                // 无查询时按更新时间排序
+                results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            }
+        }
 
         return results.slice(0, limit);
     }

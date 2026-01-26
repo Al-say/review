@@ -6,15 +6,21 @@ export class NoteDetailRenderer {
     constructor(container) {
         this.container = container;
         this.currentNoteId = null;
+        this.currentRenderToken = 0;
     }
 
     // 渲染笔记详情页
-    async render(noteId) {
+    async render(noteId, renderToken = null) {
+        const token = renderToken || ++this.currentRenderToken;
         this.currentNoteId = noteId;
 
         try {
             // 加载笔记内容
             const note = await loadNoteContent(noteId);
+
+            // 检查是否还是当前渲染请求
+            if (token !== this.currentRenderToken) return;
+
             if (!note) {
                 this.renderNotFound(noteId);
                 return;
@@ -22,6 +28,9 @@ export class NoteDetailRenderer {
 
             // 获取反向链接
             const backlinks = getBacklinks(noteId);
+
+            // 再次检查token
+            if (token !== this.currentRenderToken) return;
 
             // 渲染页面
             this.container.innerHTML = this.generateHTML(note, backlinks);
@@ -31,7 +40,10 @@ export class NoteDetailRenderer {
 
         } catch (error) {
             console.error('渲染笔记详情失败:', error);
-            this.renderError(error);
+            // 只有当前token的错误才显示
+            if (token === this.currentRenderToken) {
+                this.renderError(error);
+            }
         }
     }
 
@@ -71,8 +83,11 @@ export class NoteDetailRenderer {
 
     // 渲染 Markdown（简化版）
     renderMarkdown(content) {
+        // 先处理 wikilinks
+        const withWikiLinks = this.safeReplaceWikiLinks(content, (id) => `#/note/${id}`);
+
         // 简单的 Markdown 渲染
-        return content
+        return withWikiLinks
             .replace(/^### (.*$)/gim, '<h3>$1</h3>')
             .replace(/^## (.*$)/gim, '<h2>$1</h2>')
             .replace(/^# (.*$)/gim, '<h1>$1</h1>')
@@ -83,6 +98,28 @@ export class NoteDetailRenderer {
             .replace(/\n/gim, '<br>')
             .replace(/^\s*<p>/, '<p>')
             .replace(/<\/p>\s*$/, '</p>');
+    }
+
+    // 安全的 wikilink 替换函数
+    safeReplaceWikiLinks(text, toHref) {
+        try {
+            return text.replace(/\[\[([^\]|#]+)(?:\|([^\]]+))?\]\]/g, (_, id, label) => {
+                const safeId = String(id || "").trim();
+                if (!safeId) return _;
+                const name = (label || safeId).trim();
+                return `<a href="${toHref(safeId)}" class="wikilink">${escapeHtml(name)}</a>`;
+            });
+        } catch (e) {
+            console.error("[wikilink]", e);
+            return text;
+        }
+    }
+
+    // HTML 转义函数
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // 渲染反向链接

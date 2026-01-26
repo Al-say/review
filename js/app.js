@@ -1,12 +1,44 @@
 // app.js - 主入口文件
+
+// 全局错误捕获 - 让崩溃变成可定位的错误
+window.addEventListener("error", (e) => {
+  console.error("[window.error]", e.message, e.filename, e.lineno, e.colno, e.error);
+});
+
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("[unhandledrejection]", e.reason);
+});
+
+// 统一BASE_URL - 解决GitHub Pages路径问题
+export const BASE_URL = (() => {
+  const p = location.pathname;
+  return p.endsWith("/") ? p : p.slice(0, p.lastIndexOf("/") + 1);
+})();
+
+// DOM 选择断言函数 - 防止DOM选择为空的硬崩溃
+function mustGet(id) {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Missing DOM element: #${id}`);
+  return el;
+}
+
+function mustQuery(selector) {
+  const el = document.querySelector(selector);
+  if (!el) throw new Error(`Missing DOM element: ${selector}`);
+  return el;
+}
+
 import { initTypingEffect } from './typing.js';
 import { initSmoothScroll } from './utils.js';
 import { router } from './router.js';
 import { store } from './store.js';
 import { NoteDetailRenderer } from './render/note-detail.js';
+import { SearchPanel } from './ui/search-panel.js';
 
 // 全局变量
 let noteDetailRenderer = null;
+let searchPanel = null;
+let renderToken = 0; // 路由渲染token，防止旧请求覆盖新页面
 
 // 页面初始化
 async function initApp() {
@@ -28,6 +60,9 @@ async function initApp() {
         // 初始化笔记详情渲染器
         const container = document.querySelector('.container') || document.body;
         noteDetailRenderer = new NoteDetailRenderer(container);
+
+        // 初始化搜索面板
+        searchPanel = new SearchPanel(store, router);
 
         console.log('Alsay Portfolio - 加载完成');
 
@@ -146,9 +181,22 @@ function showHome() {
 
 // 显示笔记详情
 async function showNoteDetail(noteId) {
-    if (noteDetailRenderer) {
+    if (!noteDetailRenderer) return;
+
+    const token = ++renderToken;
+
+    try {
         await noteDetailRenderer.render(noteId);
-        document.title = `笔记: ${noteId} - Alsay`;
+        // 只有当前token匹配时才更新标题，防止旧请求覆盖新页面
+        if (token === renderToken) {
+            document.title = `笔记: ${noteId} - Alsay`;
+        }
+    } catch (error) {
+        console.error(`渲染笔记详情失败 ${noteId}:`, error);
+        // 如果是当前token的请求失败了，重置标题
+        if (token === renderToken) {
+            document.title = 'Alsay - 全栈开发工程师 | 个人主页';
+        }
     }
 }
 

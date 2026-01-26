@@ -1,17 +1,40 @@
 // data.js - 数据处理模块
+import { BASE_URL } from './app.js';
+
 let searchData = null;
 let graphData = null;
+
+// 安全的JSON获取函数
+async function fetchJson(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${url}`);
+  return res.json();
+}
+
+// 安全的文本获取函数
+async function fetchText(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${url}`);
+  return res.text();
+}
+
+// 搜索索引结构断言
+function assertSearchIndex(data) {
+  if (!data || !Array.isArray(data.items)) throw new Error("Invalid search index: items missing");
+  for (const it of data.items) {
+    if (!it.id || !it.title) throw new Error(`Invalid item: id/title missing for ${it.id || 'unknown'}`);
+  }
+  return data;
+}
 
 // 加载搜索索引（重命名以保持一致性）
 export async function loadSearchIndex() {
     if (searchData) return searchData;
 
     try {
-        const response = await fetch('./data/search.json');
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        searchData = await response.json();
+        const url = new URL("data/search.json", BASE_URL).toString();
+        const data = await fetchJson(url);
+        searchData = assertSearchIndex(data);
         console.log('搜索索引加载完成:', searchData.items?.length || 0, '个项目');
         return searchData;
     } catch (error) {
@@ -28,11 +51,8 @@ export async function loadNoteContent(noteId) {
     if (!note) return null;
 
     try {
-        const response = await fetch(note.path);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        const content = await response.text();
+        const url = new URL(note.path, BASE_URL).toString();
+        const content = await fetchText(url);
 
         // 解析 Front Matter
         const { metadata, content: bodyContent } = parseFrontMatter(content);
@@ -82,11 +102,8 @@ export async function loadGraphData() {
     if (graphData) return graphData;
 
     try {
-        const response = await fetch('./data/graph.json');
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        graphData = await response.json();
+        const url = new URL("data/graph.json", BASE_URL).toString();
+        graphData = await fetchJson(url);
         console.log('图谱数据加载完成:', graphData.nodes?.length || 0, '个节点');
         return graphData;
     } catch (error) {
