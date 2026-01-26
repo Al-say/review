@@ -103,6 +103,13 @@ function showHome() {
                         </svg>
                         <span>搜索</span>
                     </button>
+                    <a class="toolbar-btn" href="notes.html" title="笔记管理" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 5c0-1.1.9-2 2-2h9l5 5v12c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5zm11 0v4h4"/>
+                            <path d="M7 11h10v2H7zm0 4h6v2H7z"/>
+                        </svg>
+                        <span>管理</span>
+                    </a>
                     <button class="toolbar-btn" onclick="window.location.hash='#/notes'" title="笔记库">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>

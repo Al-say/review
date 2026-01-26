@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notes Manager</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    :root {
+      --nm-bg: #0f1115;
+      --nm-panel: rgba(255, 255, 255, 0.06);
+      --nm-border: rgba(255, 255, 255, 0.12);
+      --nm-accent: #5ad3b7;
+      --nm-warn: #f6c453;
+      --nm-danger: #ff6b6b;
+      --nm-text: #e8eef2;
+      --nm-muted: rgba(232, 238, 242, 0.65);
+      --nm-code: rgba(0, 0, 0, 0.35);
+    }
+
+    body {
+      background: radial-gradient(1200px 600px at 20% -10%, #1c2330 0%, #0f1115 60%, #0b0c10 100%);
+      color: var(--nm-text);
+      min-height: 100vh;
+    }
+
+    .nm-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .nm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .nm-title h1 {
+      font-size: 28px;
+      margin: 0 0 6px;
+    }
+
+    .nm-title p {
+      margin: 0;
+      color: var(--nm-muted);
+      font-size: 14px;
+    }
+
+    .nm-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nm-actions button,
+    .nm-actions a {
+      border: 1px solid var(--nm-border);
+      background: var(--nm-panel);
+      color: var(--nm-text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .nm-actions button:hover,
+    .nm-actions a:hover {
+      border-color: var(--nm-accent);
+      box-shadow: 0 6px 20px rgba(90, 211, 183, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .nm-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr);
+      gap: 20px;
+    }
+
+    .nm-panel {
+      background: var(--nm-panel);
+      border: 1px solid var(--nm-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .nm-panel h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+    }
+
+    .nm-filter {
+      display: grid;
+      gap: 12px;
+    }
+
+    .nm-filter input,
+    .nm-filter select {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--nm-border);
+      color: var(--nm-text);
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    .nm-list {
+      display: grid;
+      gap: 12px;
+      max-height: 65vh;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .nm-note-card {
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nm-note-card:hover {
+      border-color: var(--nm-accent);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .nm-note-card.active {
+      border-color: var(--nm-accent);
+      background: rgba(90, 211, 183, 0.08);
+    }
+
+    .nm-note-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .nm-note-meta {
+      font-size: 12px;
+      color: var(--nm-muted);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nm-editor {
+      display: grid;
+      gap: 16px;
+    }
+
+    .nm-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .nm-editor input,
+    .nm-editor textarea {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--nm-border);
+      color: var(--nm-text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .nm-editor textarea {
+      min-height: 260px;
+      resize: vertical;
+      font-family: "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .nm-tag-list {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .nm-tag {
+      border: 1px solid var(--nm-border);
+      color: var(--nm-muted);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    .nm-editor-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nm-primary {
+      background: var(--nm-accent);
+      color: #06211b;
+      border-color: transparent;
+    }
+
+    .nm-warn {
+      border-color: var(--nm-warn);
+      color: var(--nm-warn);
+    }
+
+    .nm-danger {
+      border-color: var(--nm-danger);
+      color: var(--nm-danger);
+    }
+
+    .nm-preview {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--nm-border);
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 180px;
+      color: var(--nm-text);
+      line-height: 1.6;
+    }
+
+    .nm-preview h1,
+    .nm-preview h2,
+    .nm-preview h3 {
+      margin-top: 16px;
+    }
+
+    .nm-preview code {
+      background: var(--nm-code);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .nm-footer {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--nm-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .nm-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .nm-list {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="nm-shell">
+    <header class="nm-header">
+      <div class="nm-title">
+        <h1>Notes Manager</h1>
+        <p>管理 content/notes 下的 markdown 笔记，并生成 data/search.json</p>
+      </div>
+      <div class="nm-actions">
+        <button id="newNoteBtn">新建笔记</button>
+        <button id="saveNoteBtn" class="nm-primary">保存变更</button>
+        <button id="deleteNoteBtn" class="nm-danger">删除笔记</button>
+        <button id="exportIndexBtn">导出索引 JSON</button>
+        <a href="index.html" title="返回主页">返回主页</a>
+      </div>
+    </header>
+
+    <div class="nm-layout">
+      <section class="nm-panel">
+        <h2>笔记列表</h2>
+        <div class="nm-filter">
+          <input id="searchInput" type="search" placeholder="搜索标题 / 标签 / 内容" />
+          <select id="topicFilter">
+            <option value="">全部主题</option>
+          </select>
+          <select id="sortSelect">
+            <option value="updated">按更新时间</option>
+            <option value="title">按标题</option>
+          </select>
+        </div>
+        <div id="noteList" class="nm-list"></div>
+      </section>
+
+      <section class="nm-panel">
+        <h2>编辑器</h2>
+        <div class="nm-editor">
+          <div class="nm-editor-actions">
+            <label class="nm-actions">
+              <span class="nm-primary" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;cursor:pointer;">导入 Markdown</span>
+              <input id="importMdInput" type="file" accept=".md" multiple style="display:none;">
+            </label>
+          </div>
+          <div class="nm-form-grid">
+            <input id="noteIdInput" placeholder="id (例如: frontend-react-hooks)" />
+            <input id="noteTitleInput" placeholder="标题" />
+            <input id="noteTopicInput" placeholder="主题" />
+            <input id="noteTagsInput" placeholder="标签 (逗号分隔)" />
+          </div>
+          <textarea id="noteContentInput" placeholder="正文 (Markdown)"></textarea>
+          <div>
+            <strong>标签预览</strong>
+            <div id="tagPreview" class="nm-tag-list"></div>
+          </div>
+          <div>
+            <strong>Markdown 预览</strong>
+            <div id="preview" class="nm-preview">选择或创建笔记后预览。</div>
+          </div>
+          <div class="nm-editor-actions">
+            <button id="generateIdBtn" class="nm-warn">自动生成 ID</button>
+            <button id="loadIndexBtn">重新加载索引</button>
+          </div>
+          <div class="nm-footer">
+            <span id="statusText">未加载</span>
+            <span>提示：保存后需手动将 markdown 写入 content/notes/</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      notes: [],
+      activeId: null,
+      searchIndex: null,
+    };
+
+    const els = {
+      noteList: document.getElementById('noteList'),
+      searchInput: document.getElementById('searchInput'),
+      topicFilter: document.getElementById('topicFilter'),
+      sortSelect: document.getElementById('sortSelect'),
+      noteIdInput: document.getElementById('noteIdInput'),
+      noteTitleInput: document.getElementById('noteTitleInput'),
+      noteTopicInput: document.getElementById('noteTopicInput'),
+      noteTagsInput: document.getElementById('noteTagsInput'),
+      noteContentInput: document.getElementById('noteContentInput'),
+      tagPreview: document.getElementById('tagPreview'),
+      preview: document.getElementById('preview'),
+      statusText: document.getElementById('statusText'),
+      importMdInput: document.getElementById('importMdInput'),
+      newNoteBtn: document.getElementById('newNoteBtn'),
+      saveNoteBtn: document.getElementById('saveNoteBtn'),
+      deleteNoteBtn: document.getElementById('deleteNoteBtn'),
+      exportIndexBtn: document.getElementById('exportIndexBtn'),
+      loadIndexBtn: document.getElementById('loadIndexBtn'),
+      generateIdBtn: document.getElementById('generateIdBtn'),
+    };
+
+    function setStatus(text) {
+      els.statusText.textContent = text;
+    }
+
+    function slugify(text) {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9\-\u4e00-\u9fa5]/g, '')
+        .replace(/\-+/g, '-');
+    }
+
+    async function loadIndex() {
+      try {
+        setStatus('正在加载索引...');
+        const res = await fetch('data/search.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('无法读取 data/search.json');
+        const json = await res.json();
+        state.searchIndex = json;
+        state.notes = json.items || [];
+        setStatus(`已加载 ${state.notes.length} 条记录`);
+        renderTopics();
+        renderList();
+      } catch (err) {
+        console.error(err);
+        setStatus('加载失败，请检查 data/search.json');
+      }
+    }
+
+    function renderTopics() {
+      const topics = Array.from(new Set(state.notes.map(n => n.topic).filter(Boolean))).sort();
+      els.topicFilter.innerHTML = '<option value="">全部主题</option>' + topics.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
+    function getFilteredNotes() {
+      const query = els.searchInput.value.trim().toLowerCase();
+      const topic = els.topicFilter.value;
+      const sortBy = els.sortSelect.value;
+
+      let list = [...state.notes];
+      if (topic) list = list.filter(note => note.topic === topic);
+      if (query) {
+        list = list.filter(note => {
+          const haystack = `${note.title} ${note.text} ${(note.tags || []).join(' ')}`.toLowerCase();
+          return haystack.includes(query);
+        });
+      }
+
+      if (sortBy === 'title') {
+        list.sort((a, b) => a.title.localeCompare(b.title, 'zh-Hans-CN'));
+      } else {
+        list.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      }
+
+      return list;
+    }
+
+    function renderList() {
+      const list = getFilteredNotes();
+      if (!list.length) {
+        els.noteList.innerHTML = '<div class="nm-note-card">没有匹配的笔记</div>';
+        return;
+      }
+      els.noteList.innerHTML = list.map(note => {
+        const isActive = note.id === state.activeId;
+        return `
+          <div class="nm-note-card ${isActive ? 'active' : ''}" data-id="${note.id}">
+            <h3>${note.title}</h3>
+            <div class="nm-note-meta">
+              <span>ID: ${note.id}</span>
+              <span>主题: ${note.topic || '未分类'}</span>
+              <span>更新: ${note.updatedAt}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateTagPreview() {
+      const tags = parseTags(els.noteTagsInput.value);
+      els.tagPreview.innerHTML = tags.map(tag => `<span class="nm-tag">${tag}</span>`).join('');
+    }
+
+    function parseTags(raw) {
+      if (!raw) return [];
+      return raw
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean);
+    }
+
+    function renderPreview() {
+      const content = els.noteContentInput.value || '';
+      let html = content
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+        .replace(/\*(.*)\*/gim, '<em>$1</em>')
+        .replace(/`([^`]+)`/gim, '<code>$1</code>')
+        .replace(/\n\n/gim, '</p><p>')
+        .replace(/\n/gim, '<br>');
+      html = `<p>${html}</p>`;
+      els.preview.innerHTML = html;
+    }
+
+    function parseFrontMatter(md) {
+      if (!md.startsWith('---')) {
+        return { metadata: {}, body: md.trim() };
+      }
+      const lines = md.split('\n');
+      const metadata = {};
+      let endIndex = -1;
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i].trim() === '---') {
+          endIndex = i;
+          break;
+        }
+        const line = lines[i];
+        if (line.includes(':')) {
+          const [key, ...valueParts] = line.split(':');
+          metadata[key.trim()] = valueParts.join(':').trim();
+        }
+      }
+      if (endIndex === -1) return { metadata: {}, body: md.trim() };
+      const body = lines.slice(endIndex + 1).join('\n').trim();
+      return { metadata, body };
+    }
+
+    async function importMarkdownFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length) return;
+      let imported = 0;
+      for (const file of files) {
+        const raw = await file.text();
+        const { metadata, body } = parseFrontMatter(raw);
+        const title = metadata.title || file.name.replace(/\.md$/i, '');
+        const id = metadata.id || slugify(title);
+        const topic = metadata.topic || '未分类';
+        const tags = metadata.tags
+          ? String(metadata.tags).split(',').map(t => t.trim()).filter(Boolean)
+          : [];
+        const updatedAt = metadata.updatedAt || new Date().toISOString().slice(0, 10);
+        const text = body.replace(/\s+/g, ' ').trim();
+        const existing = state.notes.find(n => n.id === id);
+        const payload = {
+          id,
+          title,
+          topic,
+          tags,
+          updatedAt,
+          text,
+          content: body,
+          path: `content/notes/${id}.md`,
+          linksOut: existing?.linksOut || [],
+          backlinks: existing?.backlinks || [],
+        };
+        if (existing) {
+          Object.assign(existing, payload);
+        } else {
+          state.notes.push(payload);
+        }
+        imported++;
+      }
+      renderTopics();
+      renderList();
+      setStatus(`已导入 ${imported} 个 Markdown 文件`);
+    }
+
+    function setActiveNote(id) {
+      const note = state.notes.find(n => n.id === id);
+      if (!note) return;
+      state.activeId = id;
+      els.noteIdInput.value = note.id;
+      els.noteTitleInput.value = note.title;
+      els.noteTopicInput.value = note.topic || '';
+      els.noteTagsInput.value = (note.tags || []).join(', ');
+      els.noteContentInput.value = note.content || '';
+      updateTagPreview();
+      renderPreview();
+      renderList();
+    }
+
+    function resetEditor() {
+      state.activeId = null;
+      els.noteIdInput.value = '';
+      els.noteTitleInput.value = '';
+      els.noteTopicInput.value = '';
+      els.noteTagsInput.value = '';
+      els.noteContentInput.value = '';
+      updateTagPreview();
+      renderPreview();
+      renderList();
+    }
+
+    function buildIndexPayload() {
+      const now = new Date().toISOString();
+      const items = state.notes.map(note => ({
+        id: note.id,
+        title: note.title,
+        path: note.path || `content/notes/${note.id}.md`,
+        tags: note.tags || [],
+        topic: note.topic || '未分类',
+        updatedAt: note.updatedAt || now.slice(0, 10),
+        text: note.text || '',
+        linksOut: note.linksOut || [],
+        backlinks: note.backlinks || [],
+      }));
+
+      return {
+        version: state.searchIndex?.version || 1,
+        generatedAt: now,
+        totalItems: items.length,
+        items,
+      };
+    }
+
+    function exportIndex() {
+      const payload = buildIndexPayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'search.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('已导出 search.json');
+    }
+
+    function upsertNote() {
+      const id = els.noteIdInput.value.trim();
+      const title = els.noteTitleInput.value.trim();
+      const topic = els.noteTopicInput.value.trim();
+      const tags = parseTags(els.noteTagsInput.value);
+      const content = els.noteContentInput.value;
+      if (!id || !title) {
+        alert('请填写 id 与标题');
+        return;
+      }
+
+      const now = new Date().toISOString().slice(0, 10);
+      const existing = state.notes.find(n => n.id === id);
+      const text = content.replace(/\s+/g, ' ').trim();
+
+      const payload = {
+        id,
+        title,
+        topic: topic || '未分类',
+        tags,
+        updatedAt: now,
+        text,
+        content,
+        path: `content/notes/${id}.md`,
+        linksOut: existing?.linksOut || [],
+        backlinks: existing?.backlinks || [],
+      };
+
+      if (existing) {
+        Object.assign(existing, payload);
+      } else {
+        state.notes.push(payload);
+      }
+
+      setStatus(`已保存: ${id}`);
+      renderTopics();
+      renderList();
+      setActiveNote(id);
+    }
+
+    function deleteNote() {
+      if (!state.activeId) return;
+      const ok = confirm(`确定删除 ${state.activeId} 吗？`);
+      if (!ok) return;
+      state.notes = state.notes.filter(n => n.id !== state.activeId);
+      resetEditor();
+      renderTopics();
+      setStatus('已删除');
+    }
+
+    function autoGenerateId() {
+      const title = els.noteTitleInput.value.trim();
+      if (!title) {
+        alert('先填写标题');
+        return;
+      }
+      els.noteIdInput.value = slugify(title);
+    }
+
+    els.noteList.addEventListener('click', (e) => {
+      const card = e.target.closest('.nm-note-card');
+      if (!card || !card.dataset.id) return;
+      setActiveNote(card.dataset.id);
+    });
+
+    ['input', 'change'].forEach(evt => {
+      els.searchInput.addEventListener(evt, renderList);
+      els.topicFilter.addEventListener(evt, renderList);
+      els.sortSelect.addEventListener(evt, renderList);
+      els.noteTagsInput.addEventListener(evt, updateTagPreview);
+      els.noteContentInput.addEventListener(evt, renderPreview);
+    });
+
+    els.newNoteBtn.addEventListener('click', resetEditor);
+    els.saveNoteBtn.addEventListener('click', upsertNote);
+    els.deleteNoteBtn.addEventListener('click', deleteNote);
+    els.exportIndexBtn.addEventListener('click', exportIndex);
+    els.loadIndexBtn.addEventListener('click', loadIndex);
+    els.generateIdBtn.addEventListener('click', autoGenerateId);
+    els.importMdInput.addEventListener('change', (e) => {
+      importMarkdownFiles(e.target.files);
+      e.target.value = '';
+    });
+
+    loadIndex();
+  </script>
+</body>
+</html>

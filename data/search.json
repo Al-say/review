@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generatedAt": "2026-01-26T18:21:56.192Z",
-  "totalItems": 4,
+  "generatedAt": "2026-01-26T18:41:06.000Z",
+  "totalItems": 5,
   "items": [
     {
       "id": "devops-docker-best-practices",
@@ -62,6 +62,22 @@
       "updatedAt": "2026-01-26",
       "text": "技能清单 | Skills  📋 概述 本文档记录个人技术栈和专业技能。 ---  💻 编程语言 | 语言 | 熟练程度 | 描述 | |------|---------|------| | JavaScript | ⭐⭐⭐⭐⭐ | 主力语言，精通 ES6+ 特性 | | Python | ⭐⭐⭐⭐ | 数据处理、自动化脚本 | | HTML/CSS | ⭐⭐⭐⭐⭐ | 语义化 HTML、响应式布局 | | TypeScript | ⭐⭐⭐ | 类型安全的 JavaScript 开发 | ---  🛠️ 前端技术  框架 & 库 - React - 组件化开发，Hooks，状态管理 - Vue - Vue3 Composition API - Next.js - SSR/SSG 应用开发  样式工具 - CSS3 / Sass / Less - Tailwind CSS - Styled Components ---  ⚙️ 后端技术 - Node.js - Express、Koa 框架 - 数据库 - MySQL、MongoDB、Redis - API 设计 - RESTful、GraphQL ---  🔧 开发工具 | 工具 | 用途 | |------|------| | Git | 版本控制 | | Docker | 容器化部署 | | VS Code | 主力编辑器 | | GitHub Actions | CI/CD 自动化 | ---  📚 正在学习 - [ ] Rust - [ ] Kubernetes - [ ] 机器学习基础 ---  🎯 技能等级说明 - ⭐⭐⭐⭐⭐ 精通 - 深入理解，能解决复杂问题 - ⭐⭐⭐⭐ 熟练 - 熟练使用，有项目经验 - ⭐⭐⭐ 掌握 - 能独立完成基本任务 - ⭐⭐ 了解 - 有基础知识，需查阅文档 - ⭐ 入门 - 初步接触 --- 最后更新: 2025年",
       "linksOut": [],
+      "backlinks": []
+    },
+    {
+      "id": "skills-documentation",
+      "title": "技能文档 | Skill Documentation",
+      "path": "content/notes/skills-documentation.md",
+      "tags": [
+        "skills",
+        "documentation"
+      ],
+      "topic": "技能",
+      "updatedAt": "2026-01-26",
+      "text": "技能文档 | Skill Documentation  📌 概述 本页用于说明个人技能文档的结构与使用方式，帮助读者快速理解技能分层、能力范围与应用场景。 ---  🧩 技能分层 - 核心能力：长期沉淀的主力技能，覆盖项目关键路径。 - 辅助能力：提升效率或扩展边界的技能。 - 学习中：正在持续投入的方向，适合在新项目中逐步落地。 ---  🗂️ 文档结构 - 技能名称：标准化命名，便于检索。 - 熟练程度：用等级或说明描述掌握深度。 - 典型应用：说明该技能在项目中的真实应用。 - 相关项目：对应案例或作品链接。 ---  ✅ 使用建议 1. 先看技能清单：快速了解整体技术栈。见 skills-overview 2. 按方向查阅：从前端/后端/DevOps 等领域定位。 3. 结合案例：优先阅读与目标需求最相关的实践内容。 ---  📍 示例（简化） 技能：React - 熟练程度：熟练 - 典型应用：组件化开发、Hooks 状态管理 - 相关项目：个人作品集、任务管理系统 ---  🧭 后续维护 - 每季度更新一次技能状态 - 新增项目时补充技能应用案例 - 过时内容标记并归档 --- 最后更新: 2026年01月26日 skills documentation",
+      "linksOut": [
+        "skills-overview"
+      ],
       "backlinks": []
     }
   ]
