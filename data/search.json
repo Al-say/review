@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "generatedAt": "2026-01-26T17:53:33.321Z",
+  "totalItems": 3,
+  "items": [
+    {
+      "id": "docker-best-practices",
+      "title": "Docker 容器化最佳实践",
+      "path": "content/notes/docker-best-practices.md",
+      "tags": [
+        "docker",
+        "container",
+        "devops",
+        "best"
+      ],
+      "topic": "DevOps",
+      "updatedAt": "2026-01-26",
+      "text": "Docker 容器化最佳实践 Docker 已成为现代软件开发和部署的标准工具。本文总结了使用 Docker 时的最佳实践，帮助你构建更安全、高效的容器化应用。  1. Dockerfile 优化  使用多阶段构建 dockerfile  构建阶段 FROM node:16-alpine AS builder WORKDIR /app COPY package.json ./ RUN npm ci --only=production  生产阶段 FROM node:16-alpine RUN apk add --no-cache dumb-init WORKDIR /app COPY --from=builder /app/nodemodules ./nodemodules COPY . . USER node EXPOSE 3000 ENTRYPOINT [\"dumb-init\", \"--\"] CMD [\"node\", \"server.js\"]  层缓存优化 dockerfile FROM ubuntu:20.04  先复制依赖文件，利用缓存 COPY requirements.txt . RUN pip install -r requirements.txt  再复制源代码 COPY . .  2. 安全最佳实践  非 root 用户运行 dockerfile FROM node:16-alpine RUN addgroup -g 1001 -S nodejs RUN adduser -S nextjs -u 1001 USER nextjs  最小化攻击面 dockerfile FROM alpine:latest RUN apk add --no-cache ca-certificates COPY myapp /myapp USER nobody ENTRYPOINT [\"/myapp\"]  扫描镜像漏洞 bash  使用 Trivy 扫描 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\   aquasecurity/trivy:latest image myimage:latest  使用 Clair docker run --rm -p 6060:6060 quay.io/coreos/clair:latest  3. 镜像大小优化  使用 .dockerignore nodemodules npm-debug.log .git .gitignore README.md .env .nycoutput coverage  链式 RUN 命令 dockerfile RUN apt-get update && apt-get install -y \\     package1 \\     package2 \\     package3 \\  && rm -rf /var/lib/apt/lists/  使用 distroless 镜像 dockerfile FROM golang:1.17 AS build WORKDIR /go/src/app COPY . . RUN go build -o myapp . FROM gcr.io/distroless/base COPY --from=build /go/src/app/myapp / CMD [\"/myapp\"]  4. 容器编排  Docker Compose 配置 yaml version: '3.8' services:   web:     build: .     ports:       - \"3000:3000\"     environment:       - NODEENV=production     dependson:       - db     networks:       - webnet   db:     image: postgres:13     environment:       - POSTGRESPASSWORD=mysecretpassword     volumes:       - db-data:/var/lib/postgresql/data     networks:       - webnet volumes:   db-data: networks:   webnet:  健康检查 dockerfile HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\   CMD curl -f http://localhost:3000/health || exit 1  5. 开发环境优化  开发用 Dockerfile dockerfile FROM node:16-alpine  安装开发依赖 RUN apk add --no-cache git  设置工作目录 WORKDIR /app  复制 package.json 并安装依赖 COPY package.json ./ RUN npm install  复制源代码 COPY . .  暴露端口 EXPOSE 3000  启动命令 CMD [\"npm\", \"run\", \"dev\"]  使用 bind mounts 进行热重载 bash docker run -v $(pwd):/app -p 3000:3000 myapp  6. 性能优化  资源限制 yaml services:   web:     deploy:       resources:         limits:           cpus: '0.50'           memory: 512M         reservations:           cpus: '0.25'           memory: 256M  使用合适的基础镜像 dockerfile  选择合适的基础镜像 FROM python:3.9-slim   而不是 python:3.9  或者使用 Alpine FROM python:3.9-alpine  7. 日志管理  结构化日志 javascript // 使用 JSON 格式日志 console.log(JSON.stringify({   level: 'info',   message: 'User logged in',   userId: user.id,   timestamp: new Date().toISOString() }));  日志轮转 dockerfile  使用 logrotate RUN apt-get update && apt-get install -y logrotate COPY logrotate.conf /etc/logrotate.d/app  8. 数据持久化  命名卷 yaml services:   db:     image: postgres:13     volumes:       - postgresdata:/var/lib/postgresql/data volumes:   postgresdata:  备份策略 bash  备份卷 docker run --rm -v postgresdata:/data -v $(pwd):/backup \\   alpine tar czf /backup/backup.tar.gz -C /data .  9. 网络配置  使用用户定义网络 yaml networks:   mynetwork:     driver: bridge     ipam:       config:         - subnet: 172.20.0.0/16  端口映射策略 yaml  开发环境 ports:   - \"3000:3000\"  生产环境（使用反向代理）  不暴露端口，直接通过网络连接  10. CI/CD 集成  多阶段构建在 CI/CD 中的应用 yaml stages:   - build   - test   - deploy build:   stage: build   script:     - docker build --target builder -t myapp:build .     - docker build --target production -t myapp:latest . test:   stage: test   script:     - docker run myapp:latest npm test deploy:   stage: deploy   script:     - docker push myapp:latest  总结 Docker 容器化带来了诸多好处，但要充分发挥其潜力需要遵循最佳实践： 1. 安全第一：使用非 root 用户、最小化镜像 2. 性能优化：多阶段构建、层缓存、资源限制 3. 可维护性：结构化日志、健康检查、文档化 4. 开发体验：热重载、开发环境优化 5. 生产就绪：编排、监控、备份策略 通过这些实践，你可以构建出更安全、更高效、更易维护的容器化应用。 docker container devops best-practices",
+      "linksOut": [],
+      "backlinks": [
+        {
+          "id": "tcp-handshake",
+          "title": "TCP 三次握手详解"
+        }
+      ]
+    },
+    {
+      "id": "react-hooks-best-practices",
+      "title": "React Hooks 最佳实践",
+      "path": "content/notes/react-hooks-best-practices.md",
+      "tags": [
+        "react",
+        "hooks",
+        "javascript",
+        "frontend"
+      ],
+      "topic": "前端开发",
+      "updatedAt": "2026-01-26",
+      "text": "React Hooks 最佳实践 React Hooks 是 React 16.8 引入的新特性，让函数组件也能拥有状态和生命周期。本文总结了使用 Hooks 时的最佳实践。  1. 使用 ESLint 插件 bash npm install eslint-plugin-react-hooks --save-dev 在 .eslintrc.js 中配置： javascript {   \"plugins\": [\"react-hooks\"],   \"rules\": {     \"react-hooks/rules-of-hooks\": \"error\",     \"react-hooks/exhaustive-deps\": \"warn\"   } }  2. 自定义 Hooks 将可复用的逻辑提取到自定义 Hooks 中： javascript // useLocalStorage.js function useLocalStorage(key, initialValue) {   const [storedValue, setStoredValue] = useState(() => {     try {       const item = window.localStorage.getItem(key);       return item ? JSON.parse(item) : initialValue;     } catch (error) {       console.log(error);       return initialValue;     }   });   const setValue = (value) => {     try {       const valueToStore = value instanceof Function ? value(storedValue) : value;       setStoredValue(valueToStore);       window.localStorage.setItem(key, JSON.stringify(valueToStore));     } catch (error) {       console.log(error);     }   };   return [storedValue, setValue]; }  3. useEffect 依赖管理  ✅ 正确做法 javascript useEffect(() => {   const subscription = props.source.subscribe();   return () => {     subscription.unsubscribe();   }; }, [props.source]); // 包含所有依赖  ❌ 错误做法 javascript useEffect(() => {   const subscription = props.source.subscribe();   return () => {     subscription.unsubscribe();   }; }, []); // 缺少依赖，可能导致 bug  4. useCallback 和 useMemo  性能优化 javascript const memoizedCallback = useCallback(   () => {     doSomething(a, b);   },   [a, b], ); const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);  避免过度使用 只有在必要时才使用 useCallback 和 useMemo，过度的优化可能适得其反。  5. Hooks 规则  ✅ 只能在 React 函数中调用 javascript function MyComponent() {   const [count, setCount] = useState(0); // ✅   return <div>{count}</div>; }  ❌ 不要在循环、条件或嵌套函数中调用 javascript if (condition) {   const [count, setCount] = useState(0); // ❌ }  6. useReducer vs useState  使用 useReducer 的场景 - 复杂的状态逻辑 - 多个子组件共享状态 - 下一个状态依赖于前一个状态 javascript const [state, dispatch] = useReducer(reducer, initialState);  7. 自定义 Hooks 命名约定 以 use 开头： javascript function useWindowSize() {   // ... } function useDebounce(value, delay) {   // ... }  8. 错误处理 javascript function useAsync(asyncFunction, immediate = true) {   const [status, setStatus] = useState('idle');   const [value, setValue] = useState(null);   const [error, setError] = useState(null);   const execute = useCallback(() => {     setStatus('pending');     setValue(null);     setError(null);     return asyncFunction()       .then((response) => {         setValue(response);         setStatus('success');       })       .catch((error) => {         setError(error);         setStatus('error');       });   }, [asyncFunction]);   useEffect(() => {     if (immediate) {       execute();     }   }, [execute, immediate]);   return { execute, status, value, error }; }  9. 测试 Hooks 使用 @testing-library/react-hooks： javascript import { renderHook, act } from '@testing-library/react-hooks'; test('should increment counter', () => {   const { result } = renderHook(() => useCounter());   act(() => {     result.current.increment();   });   expect(result.current.count).toBe(1); });  10. 常见陷阱  陷阱 1: 依赖数组不完整 javascript useEffect(() => {   fetchUser(userId); // userId 没有在依赖中 }, []); // ❌  陷阱 2: 直接修改状态 javascript const [todos, setTodos] = useState([]); const addTodo = (todo) => {   todos.push(todo); // ❌ 直接修改   setTodos(todos); };  陷阱 3: 条件调用 Hooks javascript if (user) {   const [name, setName] = useState(''); // ❌ }  总结 React Hooks 让函数组件更加强大，但需要遵循规则和最佳实践。记住： 1. 只在顶层调用 Hooks 2. 只在 React 函数中调用 Hooks 3. 正确管理依赖 4. 使用自定义 Hooks 提高复用性 5. 编写测试确保可靠性 通过遵循这些实践，你可以写出更健壮、更易维护的 React 应用。 react hooks javascript frontend",
+      "linksOut": [],
+      "backlinks": [
+        {
+          "id": "tcp-handshake",
+          "title": "TCP 三次握手详解"
+        }
+      ]
+    },
+    {
+      "id": "tcp-handshake",
+      "title": "TCP 三次握手详解",
+      "path": "content/notes/tcp-handshake.md",
+      "tags": [
+        "tcp",
+        "network",
+        "protocol"
+      ],
+      "topic": "计算机网络",
+      "updatedAt": "2026-01-26",
+      "text": "TCP 三次握手详解 TCP（Transmission Control Protocol）是互联网的核心协议之一，其连接建立过程通过\"三次握手\"来确保可靠的通信。  握手过程  1. 第一次握手 (SYN) 客户端发送 SYN 包到服务器，进入 SYNSENT 状态。 客户端 → 服务器: SYN=1, seq=x  2. 第二次握手 (SYN+ACK) 服务器收到 SYN 包后，回复 SYN+ACK 包，进入 SYNRCVD 状态。 服务器 → 客户端: SYN=1, ACK=1, seq=y, ack=x+1  3. 第三次握手 (ACK) 客户端收到 SYN+ACK 包后，发送 ACK 包，进入 ESTABLISHED 状态。 客户端 → 服务器: ACK=1, seq=x+1, ack=y+1 服务器收到 ACK 包后也进入 ESTABLISHED 状态。  为什么需要三次握手？ 三次握手的主要目的是防止已失效的连接请求报文突然又传送到了服务器，从而产生错误。  场景分析 假设客户端发送了一个 SYN 包，但由于网络延迟，这个包在网络中滞留了很久。客户端超时后重新发送了 SYN 包并建立了连接。 如果只使用两次握手，当那个延迟的 SYN 包最终到达服务器时，服务器会认为客户端又发起了一次新的连接请求，从而建立一个\"幽灵连接\"。  状态变迁 | 阶段 | 客户端状态 | 服务器状态 | |------|-----------|-----------| | 初始 | CLOSED | LISTEN | | 1次握手后 | SYNSENT | LISTEN | | 2次握手后 | SYNSENT | SYNRCVD | | 3次握手后 | ESTABLISHED | ESTABLISHED |  常见问题  1. 为什么不是两次握手？ 防止历史连接的 SYN 包干扰当前连接。  2. 为什么不是四次握手？ 三次握手已经能够满足可靠连接建立的需求。  3. SYN 洪泛攻击 攻击者发送大量 SYN 包但不回应 ACK，导致服务器维护大量半连接，消耗资源。  防御措施 1. SYN Cookie: 服务器不维护半连接队列，而是通过加密算法验证客户端的合法性。 2. 防火墙过滤: 限制 SYN 包的速率。 3. 增加队列长度: 提高服务器处理能力。  总结 TCP 三次握手是网络通信的基础，通过这种机制确保了连接的可靠建立。理解握手过程有助于我们更好地调试网络问题和优化系统性能。  相关阅读  [[react-hooks-best-practices]] - 前端开发最佳实践  [[docker-best-practices]] - 容器化部署实践 tcp network protocol",
+      "linksOut": [
+        "react-hooks-best-practices",
+        "docker-best-practices"
+      ],
+      "backlinks": []
+    }
+  ]
+}

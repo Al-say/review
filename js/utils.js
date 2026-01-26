@@ -1,0 +1,78 @@
+// utils.js - 工具函数模块
+export function initSmoothScroll() {
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+// 防抖函数
+export function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// 节流函数
+export function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
+// 格式化日期
+export function formatDate(date, options = {}) {
+    const defaultOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    };
+    return new Intl.DateTimeFormat('zh-CN', { ...defaultOptions, ...options }).format(date);
+}
+
+// 获取相对时间
+export function getRelativeTime(date) {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    const intervals = [
+        { label: '年', seconds: 31536000 },
+        { label: '月', seconds: 2592000 },
+        { label: '周', seconds: 604800 },
+        { label: '天', seconds: 86400 },
+        { label: '小时', seconds: 3600 },
+        { label: '分钟', seconds: 60 },
+        { label: '秒', seconds: 1 }
+    ];
+
+    for (const interval of intervals) {
+        const count = Math.floor(diffInSeconds / interval.seconds);
+        if (count >= 1) {
+            return `${count}${interval.label}前`;
+        }
+    }
+
+    return '刚刚';
+}
