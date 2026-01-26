@@ -24,6 +24,10 @@
       min-height: 100vh;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     .nm-shell {
       max-width: 1200px;
       margin: 0 auto;
@@ -223,16 +227,123 @@
       line-height: 1.6;
     }
 
+    .nm-toc {
+      margin: 10px 0 14px;
+      padding: 10px 12px;
+      border: 1px dashed var(--nm-border);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--nm-muted);
+      display: none;
+      position: sticky;
+      top: 12px;
+      background: rgba(15, 17, 21, 0.6);
+      backdrop-filter: blur(6px);
+      z-index: 1;
+    }
+
+    .nm-toc a {
+      color: var(--nm-text);
+      text-decoration: none;
+    }
+
+    .nm-toc a:hover {
+      text-decoration: underline;
+    }
+
+    .nm-toc a.active {
+      color: var(--nm-accent);
+      font-weight: 700;
+    }
+
+    .nm-toc ul {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .nm-toc .toc-h2 {
+      margin-left: 12px;
+      font-size: 12px;
+    }
+
+    .nm-toc .toc-h3 {
+      margin-left: 24px;
+      font-size: 11px;
+    }
+
     .nm-preview h1,
     .nm-preview h2,
     .nm-preview h3 {
       margin-top: 16px;
     }
 
+    .nm-preview p {
+      margin: 10px 0;
+    }
+
+    .nm-preview a {
+      color: var(--nm-accent);
+      text-decoration: none;
+    }
+
+    .nm-preview a:hover {
+      text-decoration: underline;
+    }
+
     .nm-preview code {
       background: var(--nm-code);
       padding: 2px 6px;
       border-radius: 6px;
+    }
+
+    .nm-preview pre {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--nm-border);
+      padding: 12px;
+      border-radius: 12px;
+      overflow: auto;
+      margin: 12px 0;
+    }
+
+    .nm-preview pre code {
+      background: transparent;
+      padding: 0;
+      display: block;
+      color: #e9f2ff;
+      font-size: 12px;
+      line-height: 1.6;
+      font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .nm-preview pre code .kw { color: #82aaff; }
+    .nm-preview pre code .fn { color: #c792ea; }
+    .nm-preview pre code .str { color: #c3e88d; }
+    .nm-preview pre code .num { color: #f78c6c; }
+    .nm-preview pre code .com { color: #7f8ea3; font-style: italic; }
+
+    .nm-preview blockquote {
+      border-left: 3px solid var(--nm-accent);
+      padding: 8px 12px;
+      margin: 12px 0;
+      color: var(--nm-muted);
+      background: rgba(90, 211, 183, 0.08);
+      border-radius: 8px;
+    }
+
+    .nm-preview ul,
+    .nm-preview ol {
+      margin: 10px 0 10px 20px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .nm-preview img {
+      max-width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--nm-border);
+      margin: 8px 0;
     }
 
     .nm-footer {
@@ -260,14 +371,11 @@
   <div class="nm-shell">
     <header class="nm-header">
       <div class="nm-title">
-        <h1>Notes Manager</h1>
-        <p>管理 content/notes 下的 markdown 笔记，并生成 data/search.json</p>
+        <h1>Notes Library</h1>
+        <p>浏览与阅读 content/notes 下的 Markdown 笔记</p>
       </div>
       <div class="nm-actions">
-        <button id="newNoteBtn">新建笔记</button>
-        <button id="saveNoteBtn" class="nm-primary">保存变更</button>
-        <button id="deleteNoteBtn" class="nm-danger">删除笔记</button>
-        <button id="exportIndexBtn">导出索引 JSON</button>
+        <button id="loadIndexBtn">重新加载索引</button>
         <a href="index.html" title="返回主页">返回主页</a>
       </div>
     </header>
@@ -289,36 +397,21 @@
       </section>
 
       <section class="nm-panel">
-        <h2>编辑器</h2>
+        <h2>阅读</h2>
         <div class="nm-editor">
-          <div class="nm-editor-actions">
-            <label class="nm-actions">
-              <span class="nm-primary" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;cursor:pointer;">导入 Markdown</span>
-              <input id="importMdInput" type="file" accept=".md" multiple style="display:none;">
-            </label>
-          </div>
-          <div class="nm-form-grid">
-            <input id="noteIdInput" placeholder="id (例如: frontend-react-hooks)" />
-            <input id="noteTitleInput" placeholder="标题" />
-            <input id="noteTopicInput" placeholder="主题" />
-            <input id="noteTagsInput" placeholder="标签 (逗号分隔)" />
-          </div>
-          <textarea id="noteContentInput" placeholder="正文 (Markdown)"></textarea>
           <div>
-            <strong>标签预览</strong>
-            <div id="tagPreview" class="nm-tag-list"></div>
+            <strong id="detailTitle">选择一篇笔记</strong>
+            <div id="detailMeta" class="nm-note-meta" style="margin-top:6px;"></div>
+            <div id="detailTags" class="nm-tag-list" style="margin-top:10px;"></div>
           </div>
           <div>
-            <strong>Markdown 预览</strong>
-            <div id="preview" class="nm-preview">选择或创建笔记后预览。</div>
-          </div>
-          <div class="nm-editor-actions">
-            <button id="generateIdBtn" class="nm-warn">自动生成 ID</button>
-            <button id="loadIndexBtn">重新加载索引</button>
+            <strong>内容</strong>
+            <div id="toc" class="nm-toc"></div>
+            <div id="preview" class="nm-preview">从左侧选择一篇笔记进行阅读。</div>
           </div>
           <div class="nm-footer">
             <span id="statusText">未加载</span>
-            <span>提示：保存后需手动将 markdown 写入 content/notes/</span>
+            <span>提示：从 data/search.json 读取索引</span>
           </div>
         </div>
       </section>
@@ -337,34 +430,17 @@
       searchInput: document.getElementById('searchInput'),
       topicFilter: document.getElementById('topicFilter'),
       sortSelect: document.getElementById('sortSelect'),
-      noteIdInput: document.getElementById('noteIdInput'),
-      noteTitleInput: document.getElementById('noteTitleInput'),
-      noteTopicInput: document.getElementById('noteTopicInput'),
-      noteTagsInput: document.getElementById('noteTagsInput'),
-      noteContentInput: document.getElementById('noteContentInput'),
-      tagPreview: document.getElementById('tagPreview'),
+      detailTitle: document.getElementById('detailTitle'),
+      detailMeta: document.getElementById('detailMeta'),
+      detailTags: document.getElementById('detailTags'),
+      toc: document.getElementById('toc'),
       preview: document.getElementById('preview'),
       statusText: document.getElementById('statusText'),
-      importMdInput: document.getElementById('importMdInput'),
-      newNoteBtn: document.getElementById('newNoteBtn'),
-      saveNoteBtn: document.getElementById('saveNoteBtn'),
-      deleteNoteBtn: document.getElementById('deleteNoteBtn'),
-      exportIndexBtn: document.getElementById('exportIndexBtn'),
       loadIndexBtn: document.getElementById('loadIndexBtn'),
-      generateIdBtn: document.getElementById('generateIdBtn'),
     };
 
     function setStatus(text) {
       els.statusText.textContent = text;
-    }
-
-    function slugify(text) {
-      return text
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9\-\u4e00-\u9fa5]/g, '')
-        .replace(/\-+/g, '-');
     }
 
     async function loadIndex() {
@@ -433,214 +509,164 @@
       }).join('');
     }
 
-    function updateTagPreview() {
-      const tags = parseTags(els.noteTagsInput.value);
-      els.tagPreview.innerHTML = tags.map(tag => `<span class="nm-tag">${tag}</span>`).join('');
+    function slugifyHeading(text) {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9\-\u4e00-\u9fa5]/g, '')
+        .replace(/\-+/g, '-');
     }
 
-    function parseTags(raw) {
-      if (!raw) return [];
-      return raw
-        .split(',')
-        .map(t => t.trim())
-        .filter(Boolean);
+    function buildToc(content) {
+      const lines = content.split('\n');
+      const items = [];
+      lines.forEach(line => {
+        const match = /^(#{1,3})\s+(.*)$/.exec(line.trim());
+        if (!match) return;
+        const level = match[1].length;
+        const title = match[2].trim();
+        const id = slugifyHeading(title);
+        items.push({ level, title, id });
+      });
+      if (!items.length) {
+        els.toc.style.display = 'none';
+        els.toc.innerHTML = '';
+        return;
+      }
+      const list = items.map(item => {
+        const cls = item.level === 1 ? '' : item.level === 2 ? 'toc-h2' : 'toc-h3';
+        return `<li class="${cls}"><a href="#${item.id}">${item.title}</a></li>`;
+      }).join('');
+      els.toc.innerHTML = `<strong>目录</strong><ul>${list}</ul>`;
+      els.toc.style.display = 'block';
     }
 
-    function renderPreview() {
-      const content = els.noteContentInput.value || '';
-      let html = content
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    function initScrollSpy() {
+      if (!els.toc || els.toc.style.display === 'none') return;
+      const headings = Array.from(els.preview.querySelectorAll('h1, h2, h3'));
+      if (!headings.length) return;
+      const tocLinks = Array.from(els.toc.querySelectorAll('a'));
+      const map = new Map(tocLinks.map(link => [decodeURIComponent(link.getAttribute('href').slice(1)), link]));
+
+      const onScroll = () => {
+        let current = headings[0];
+        const offset = 120;
+        headings.forEach(h => {
+          if (h.getBoundingClientRect().top - offset <= 0) current = h;
+        });
+        tocLinks.forEach(link => link.classList.remove('active'));
+        const activeLink = map.get(current.id);
+        if (activeLink) activeLink.classList.add('active');
+      };
+
+      window.removeEventListener('scroll', window.__tocScrollHandler);
+      window.__tocScrollHandler = onScroll;
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
+    function highlightCode(code, lang) {
+      const escaped = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      const patterns = [
+        { re: /(\/\/.*$)/gm, cls: 'com' },
+        { re: /(\/\*[\s\S]*?\*\/)/gm, cls: 'com' },
+        { re: /(["'`])(?:\\.|(?!\1).)*\1/gm, cls: 'str' },
+        { re: /\b(\d+(\.\d+)?)\b/gm, cls: 'num' },
+      ];
+      let output = escaped;
+      const kwList = /(const|let|var|function|return|if|else|for|while|switch|case|break|continue|class|new|try|catch|finally|throw|async|await|import|export|from|default|extends|super|this|true|false|null|undefined)\b/g;
+      output = output.replace(kwList, '<span class="kw">$1</span>');
+      patterns.forEach(({ re, cls }) => {
+        output = output.replace(re, `<span class="${cls}">$1</span>`);
+      });
+      output = output.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()/g, '<span class="fn">$1</span>');
+      return output;
+    }
+
+    function renderPreview(content) {
+      buildToc(content || '');
+      const codeBlocks = [];
+      let html = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
+        const klass = lang ? ` class="lang-${lang}"` : '';
+        const highlighted = highlightCode(code, lang);
+        const rendered = `<pre><code${klass}>${highlighted}</code></pre>`;
+        const token = `@@CODE${codeBlocks.length}@@`;
+        codeBlocks.push(rendered);
+        return token;
+      });
+
+      const lines = html.split('\n');
+      const out = [];
+      let inUl = false;
+      let inOl = false;
+      const closeLists = () => {
+        if (inUl) { out.push('</ul>'); inUl = false; }
+        if (inOl) { out.push('</ol>'); inOl = false; }
+      };
+      for (const line of lines) {
+        if (/^\s*[-*+]\s+/.test(line)) {
+          if (!inUl) { closeLists(); out.push('<ul>'); inUl = true; }
+          out.push(`<li>${line.replace(/^\s*[-*+]\s+/, '')}</li>`);
+          continue;
+        }
+        if (/^\s*\d+\.\s+/.test(line)) {
+          if (!inOl) { closeLists(); out.push('<ol>'); inOl = true; }
+          out.push(`<li>${line.replace(/^\s*\d+\.\s+/, '')}</li>`);
+          continue;
+        }
+        closeLists();
+        out.push(line);
+      }
+      closeLists();
+      html = out.join('\n')
+        .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+        .replace(/^### (.*$)/gim, (_, title) => `<h3 id="${slugifyHeading(title)}">${title}</h3>`)
+        .replace(/^## (.*$)/gim, (_, title) => `<h2 id="${slugifyHeading(title)}">${title}</h2>`)
+        .replace(/^# (.*$)/gim, (_, title) => `<h1 id="${slugifyHeading(title)}">${title}</h1>`)
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, '<img alt="$1" src="$2" />')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener">$1</a>')
         .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
         .replace(/\*(.*)\*/gim, '<em>$1</em>')
         .replace(/`([^`]+)`/gim, '<code>$1</code>')
         .replace(/\n\n/gim, '</p><p>')
         .replace(/\n/gim, '<br>');
+      codeBlocks.forEach((block, idx) => {
+        html = html.replace(`@@CODE${idx}@@`, block);
+      });
       html = `<p>${html}</p>`;
       els.preview.innerHTML = html;
+      initScrollSpy();
     }
 
-    function parseFrontMatter(md) {
-      if (!md.startsWith('---')) {
-        return { metadata: {}, body: md.trim() };
-      }
-      const lines = md.split('\n');
-      const metadata = {};
-      let endIndex = -1;
-      for (let i = 1; i < lines.length; i++) {
-        if (lines[i].trim() === '---') {
-          endIndex = i;
-          break;
-        }
-        const line = lines[i];
-        if (line.includes(':')) {
-          const [key, ...valueParts] = line.split(':');
-          metadata[key.trim()] = valueParts.join(':').trim();
-        }
-      }
-      if (endIndex === -1) return { metadata: {}, body: md.trim() };
-      const body = lines.slice(endIndex + 1).join('\n').trim();
-      return { metadata, body };
-    }
-
-    async function importMarkdownFiles(fileList) {
-      const files = Array.from(fileList || []);
-      if (!files.length) return;
-      let imported = 0;
-      for (const file of files) {
-        const raw = await file.text();
-        const { metadata, body } = parseFrontMatter(raw);
-        const title = metadata.title || file.name.replace(/\.md$/i, '');
-        const id = metadata.id || slugify(title);
-        const topic = metadata.topic || '未分类';
-        const tags = metadata.tags
-          ? String(metadata.tags).split(',').map(t => t.trim()).filter(Boolean)
-          : [];
-        const updatedAt = metadata.updatedAt || new Date().toISOString().slice(0, 10);
-        const text = body.replace(/\s+/g, ' ').trim();
-        const existing = state.notes.find(n => n.id === id);
-        const payload = {
-          id,
-          title,
-          topic,
-          tags,
-          updatedAt,
-          text,
-          content: body,
-          path: `content/notes/${id}.md`,
-          linksOut: existing?.linksOut || [],
-          backlinks: existing?.backlinks || [],
-        };
-        if (existing) {
-          Object.assign(existing, payload);
-        } else {
-          state.notes.push(payload);
-        }
-        imported++;
-      }
-      renderTopics();
-      renderList();
-      setStatus(`已导入 ${imported} 个 Markdown 文件`);
-    }
-
-    function setActiveNote(id) {
+    async function setActiveNote(id) {
       const note = state.notes.find(n => n.id === id);
       if (!note) return;
       state.activeId = id;
-      els.noteIdInput.value = note.id;
-      els.noteTitleInput.value = note.title;
-      els.noteTopicInput.value = note.topic || '';
-      els.noteTagsInput.value = (note.tags || []).join(', ');
-      els.noteContentInput.value = note.content || '';
-      updateTagPreview();
-      renderPreview();
-      renderList();
-    }
-
-    function resetEditor() {
-      state.activeId = null;
-      els.noteIdInput.value = '';
-      els.noteTitleInput.value = '';
-      els.noteTopicInput.value = '';
-      els.noteTagsInput.value = '';
-      els.noteContentInput.value = '';
-      updateTagPreview();
-      renderPreview();
-      renderList();
-    }
-
-    function buildIndexPayload() {
-      const now = new Date().toISOString();
-      const items = state.notes.map(note => ({
-        id: note.id,
-        title: note.title,
-        path: note.path || `content/notes/${note.id}.md`,
-        tags: note.tags || [],
-        topic: note.topic || '未分类',
-        updatedAt: note.updatedAt || now.slice(0, 10),
-        text: note.text || '',
-        linksOut: note.linksOut || [],
-        backlinks: note.backlinks || [],
-      }));
-
-      return {
-        version: state.searchIndex?.version || 1,
-        generatedAt: now,
-        totalItems: items.length,
-        items,
-      };
-    }
-
-    function exportIndex() {
-      const payload = buildIndexPayload();
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'search.json';
-      a.click();
-      URL.revokeObjectURL(url);
-      setStatus('已导出 search.json');
-    }
-
-    function upsertNote() {
-      const id = els.noteIdInput.value.trim();
-      const title = els.noteTitleInput.value.trim();
-      const topic = els.noteTopicInput.value.trim();
-      const tags = parseTags(els.noteTagsInput.value);
-      const content = els.noteContentInput.value;
-      if (!id || !title) {
-        alert('请填写 id 与标题');
-        return;
+      els.detailTitle.textContent = note.title;
+      els.detailMeta.innerHTML = `
+        <span>ID: ${note.id}</span>
+        <span>主题: ${note.topic || '未分类'}</span>
+        <span>更新: ${note.updatedAt || '-'}</span>
+      `;
+      els.detailTags.innerHTML = (note.tags || []).map(tag => `<span class="nm-tag">${tag}</span>`).join('');
+      if (!note.content && note.path) {
+        try {
+          const res = await fetch(note.path, { cache: 'no-store' });
+          if (!res.ok) throw new Error('无法读取 Markdown 文件');
+          note.content = await res.text();
+        } catch (err) {
+          console.error(err);
+          els.preview.textContent = '读取 Markdown 失败，请检查路径。';
+          renderList();
+          return;
+        }
       }
-
-      const now = new Date().toISOString().slice(0, 10);
-      const existing = state.notes.find(n => n.id === id);
-      const text = content.replace(/\s+/g, ' ').trim();
-
-      const payload = {
-        id,
-        title,
-        topic: topic || '未分类',
-        tags,
-        updatedAt: now,
-        text,
-        content,
-        path: `content/notes/${id}.md`,
-        linksOut: existing?.linksOut || [],
-        backlinks: existing?.backlinks || [],
-      };
-
-      if (existing) {
-        Object.assign(existing, payload);
-      } else {
-        state.notes.push(payload);
-      }
-
-      setStatus(`已保存: ${id}`);
-      renderTopics();
+      renderPreview(note.content || '');
       renderList();
-      setActiveNote(id);
-    }
-
-    function deleteNote() {
-      if (!state.activeId) return;
-      const ok = confirm(`确定删除 ${state.activeId} 吗？`);
-      if (!ok) return;
-      state.notes = state.notes.filter(n => n.id !== state.activeId);
-      resetEditor();
-      renderTopics();
-      setStatus('已删除');
-    }
-
-    function autoGenerateId() {
-      const title = els.noteTitleInput.value.trim();
-      if (!title) {
-        alert('先填写标题');
-        return;
-      }
-      els.noteIdInput.value = slugify(title);
     }
 
     els.noteList.addEventListener('click', (e) => {
@@ -653,20 +679,9 @@
       els.searchInput.addEventListener(evt, renderList);
       els.topicFilter.addEventListener(evt, renderList);
       els.sortSelect.addEventListener(evt, renderList);
-      els.noteTagsInput.addEventListener(evt, updateTagPreview);
-      els.noteContentInput.addEventListener(evt, renderPreview);
     });
 
-    els.newNoteBtn.addEventListener('click', resetEditor);
-    els.saveNoteBtn.addEventListener('click', upsertNote);
-    els.deleteNoteBtn.addEventListener('click', deleteNote);
-    els.exportIndexBtn.addEventListener('click', exportIndex);
     els.loadIndexBtn.addEventListener('click', loadIndex);
-    els.generateIdBtn.addEventListener('click', autoGenerateId);
-    els.importMdInput.addEventListener('change', (e) => {
-      importMarkdownFiles(e.target.files);
-      e.target.value = '';
-    });
 
     loadIndex();
   </script>
