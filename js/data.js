@@ -76,8 +76,7 @@ export async function loadNoteContent(noteId) {
     if (!note) return null;
 
     try {
-        const url = new URL(note.path, BASE_URL).toString();
-        const content = await fetchText(url);
+        const content = await fetchText(note.path);
 
         // 解析 Front Matter
         const { metadata, content: bodyContent } = parseFrontMatter(content);
@@ -127,8 +126,7 @@ export async function loadGraphData() {
     if (graphData) return graphData;
 
     try {
-        const url = new URL("data/graph.json", BASE_URL).toString();
-        graphData = await fetchJson(url);
+        graphData = await fetchJson("data/graph.json");
         console.log('图谱数据加载完成:', graphData.nodes?.length || 0, '个节点');
         return graphData;
     } catch (error) {
