@@ -1,39 +1,306 @@
-<!DOCTYPE html> <!-- 声明文档类型为 HTML5 -->
-<html lang="zh-CN"> <!-- 设置页面语言为中文（中国） -->
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8"> <!-- 设置字符编码为 UTF-8，支持中文显示 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 响应式设计，适配不同设备宽度 -->
-    <title>My Web Page</title> <!-- 网页标题，显示在浏览器标签上 -->
-    <link rel="stylesheet" href="css/style.css"> <!-- 引入外部 CSS 样式文件 -->
-    <link rel="icon" href="photo/aisay_logo.png" type="image/png"> <!-- 浏览器标签页图标（favicon） -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Alsay - 个人展示页面">
+    <meta name="author" content="Alsay">
+    <title>Alsay - 欢迎访问</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --text-color: #333;
+            --text-light: #666;
+            --bg-color: #f8f9fa;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            margin: 0 auto 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: var(--white);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .description {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        footer a {
+            color: var(--white);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        footer a:hover {
+            opacity: 0.8;
+        }
+
+        .footer-content p {
+            margin: 0.3rem 0;
+            font-size: 0.85rem;
+        }
+
+        .icp-info {
+            opacity: 0.8;
+        }
+
+        /* Skills Section */
+        .skills {
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .skills-title {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .skill-tag {
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .skill-tag:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            transform: scale(1.05);
+        }
+
+        .skill-tag.highlight {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .skill-tag {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container"> <!-- 页面主要内容容器 -->
-        <header>
-            
-            <h1>欢迎来到我的网站</h1> <!-- 网站主标题 -->
-        </header>
-        
-        <main> <!-- 主要内容区域 -->
-            <section>
-                <h2>网站内容</h2> <!-- 区块标题 -->
-                <p>这里是网站的主要内容区域。</p> <!-- 主要内容描述 -->
-            </section>
-        </main>
+    <div class="container">
+        <div class="card">
+            <div class="avatar">👋</div>
+            <h1>欢迎来到 Alsay</h1>
+            <p class="tagline">探索 · 创造 · 分享</p>
+            <p class="description">
+                这是一个简洁的个人展示页面。<br>
+                在这里，我分享我的想法、项目和故事。
+            </p>
+
+            <!-- Skills Section -->
+            <div class="skills">
+                <h3 class="skills-title">技能 · Skills</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag highlight">JavaScript</span>
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">React</span>
+                    <span class="skill-tag">Node.js</span>
+                    <span class="skill-tag">Vue</span>
+                    <span class="skill-tag">HTML/CSS</span>
+                    <span class="skill-tag">Git</span>
+                    <span class="skill-tag">Docker</span>
+                </div>
+            </div>
+
+            <div class="social-links">
+                <a href="https://github.com/Al-say" class="social-link" title="GitHub" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="mailto:contact@alsay.net" class="social-link" title="Email">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                </a>
+                <a href="https://alsay.net" class="social-link" title="Website" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                网站正常运行中
+            </div>
+        </div>
     </div>
-    
-    <footer id="footer" class="footer"> <!-- 页脚区域，包含版权和备案信息 -->
+
+    <footer>
         <div class="footer-content">
             <p>
                 安全检测能力由 
-                <a class="footer-waflink" href="https://waf-ce.chaitin.cn/">雷池 WAF</a> 
-                驱动 <!-- 安全检测服务说明及链接 -->
+                <a href="https://waf-ce.chaitin.cn/" target="_blank">雷池 WAF</a> 
+                驱动
             </p>
-            <p class="icp-info">备案号：皖ICP备2025082417号-1</p> <!-- 网站备案号信息 -->
-            <p class="copyright">© 2025 Alsay.net, Inc.</p> <!-- 版权信息 -->
+            <p class="icp-info">备案号：皖ICP备2025082417号-1</p>
+            <p class="copyright">© 2025 Alsay.net, Inc.</p>
         </div>
     </footer>
-    
-    <script src="js/main.js"></script> <!-- 引入外部 JavaScript 文件 -->
 </body>
 </html>
