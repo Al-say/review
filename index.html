@@ -70,6 +70,19 @@
             --text-light: #666;
             --bg-color: #f8f9fa;
             --white: #ffffff;
+            --card-bg: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.25);
+        }
+
+        /* 深色模式 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-color: #f0f0f0;
+                --text-light: #b0b0b0;
+                --bg-color: #2d2d2d;
+                --card-bg: #1e1e1e;
+                --shadow-color: rgba(0, 0, 0, 0.5);
+            }
         }
 
         body {
@@ -90,14 +103,16 @@
         }
 
         .card {
-            background: var(--white);
+            background: var(--card-bg);
             border-radius: 20px;
             padding: 3rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 25px 50px -12px var(--shadow-color);
             text-align: center;
-            max-width: 500px;
+            max-width: 520px;
             width: 100%;
             animation: fadeInUp 0.8s ease-out;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         @keyframes fadeInUp {
@@ -123,6 +138,13 @@
             font-size: 3rem;
             color: var(--white);
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
         }
 
         h1 {
@@ -196,6 +218,98 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+        }
+
+        /* 打字机光标效果 */
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: var(--primary-color);
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* 项目展示区 */
+        .projects {
+            margin: 1.5rem 0;
+        }
+
+        .projects-title {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .project-cards {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .project-card {
+            padding: 0.8rem 1.2rem;
+            background: var(--bg-color);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .project-card:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .project-card svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 访问统计 */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+            padding: 1rem 0;
+            border-top: 1px solid var(--bg-color);
+            border-bottom: 1px solid var(--bg-color);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         footer {
@@ -297,8 +411,7 @@
             <h1>欢迎来到 Alsay</h1>
             <p class="tagline">探索 · 创造 · 分享</p>
             <p class="description">
-                这是一个简洁的个人展示页面。<br>
-                在这里，我分享我的想法、项目和故事。
+                <span id="typed-text"></span><span class="typing-cursor"></span>
             </p>
 
             <!-- Skills Section -->
@@ -313,6 +426,37 @@
                     <span class="skill-tag">HTML/CSS</span>
                     <span class="skill-tag">Git</span>
                     <span class="skill-tag">Docker</span>
+                </div>
+            </div>
+
+            <!-- Projects Section -->
+            <div class="projects">
+                <h3 class="projects-title">项目 · Projects</h3>
+                <div class="project-cards">
+                    <a href="https://github.com/Al-say" class="project-card" target="_blank">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        开源项目
+                    </a>
+                    <a href="SKILL/Skills.md" class="project-card">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        技能文档
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="repos">10+</div>
+                    <div class="stat-label">开源项目</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">3+</div>
+                    <div class="stat-label">年经验</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">学习热情</div>
                 </div>
             </div>
 
@@ -344,12 +488,64 @@
         <div class="footer-content">
             <p>
                 安全检测能力由 
-                <a href="https://waf-ce.chaitin.cn/" target="_blank">雷池 WAF</a> 
+                <a href="https://waf-ce.chaitin.cn/" target="_blank" rel="noopener noreferrer">雷池 WAF</a> 
                 驱动
             </p>
-            <p class="icp-info">备案号：皖ICP备2025082417号-1</p>
+            <p class="icp-info">备案号：<a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">皖ICP备2025082417号-1</a></p>
             <p class="copyright">© 2026 Alsay.net, Inc.</p>
         </div>
     </footer>
+
+    <script>
+        // 打字机效果
+        const texts = [
+            '全栈开发工程师，热爱技术与创新。',
+            '专注于构建优雅的 Web 应用。',
+            '开源爱好者，分享即是学习。',
+            '探索 AI 时代的无限可能。'
+        ];
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typedElement = document.getElementById('typed-text');
+
+        function typeEffect() {
+            const currentText = texts[textIndex];
+            
+            if (isDeleting) {
+                typedElement.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typedElement.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = isDeleting ? 30 : 80;
+
+            if (!isDeleting && charIndex === currentText.length) {
+                typeSpeed = 2000; // 停顿时间
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                textIndex = (textIndex + 1) % texts.length;
+                typeSpeed = 500;
+            }
+
+            setTimeout(typeEffect, typeSpeed);
+        }
+
+        // 页面加载完成后启动打字机效果
+        document.addEventListener('DOMContentLoaded', typeEffect);
+
+        // 添加平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 </body>
 </html>
