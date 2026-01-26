@@ -16,6 +16,33 @@
       --nm-text: #e8eef2;
       --nm-muted: rgba(232, 238, 242, 0.65);
       --nm-code: rgba(0, 0, 0, 0.35);
+      --nm-font-size: 15px;
+      --nm-line-height: 1.7;
+    }
+
+    body.theme-warm {
+      background: radial-gradient(1200px 600px at 20% -10%, #2c241a 0%, #1a1510 60%, #0f0c0a 100%);
+    }
+
+    body.theme-warm .nm-panel,
+    body.theme-warm .nm-actions button,
+    body.theme-warm .nm-actions a,
+    body.theme-warm .nm-note-card,
+    body.theme-warm .nm-preview {
+      background: rgba(255, 248, 236, 0.08);
+      border-color: rgba(255, 217, 170, 0.2);
+    }
+
+    body.theme-warm .nm-preview {
+      color: #f4eadc;
+    }
+
+    body.theme-warm .nm-preview a {
+      color: #ffd18a;
+    }
+
+    body.theme-warm .nm-toc {
+      background: rgba(32, 25, 18, 0.8);
     }
 
     body {
@@ -26,6 +53,17 @@
 
     html {
       scroll-behavior: smooth;
+    }
+
+    .nm-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--nm-accent), #8ad7ff);
+      z-index: 999;
+      box-shadow: 0 2px 8px rgba(90, 211, 183, 0.4);
     }
 
     .nm-shell {
@@ -81,7 +119,7 @@
 
     .nm-layout {
       display: grid;
-      grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr);
+      grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr) minmax(200px, 0.9fr);
       gap: 20px;
     }
 
@@ -158,6 +196,24 @@
       gap: 16px;
     }
 
+    .nm-reader-tools {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .nm-reader-tools button {
+      border: 1px solid var(--nm-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--nm-text);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
     .nm-form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -224,11 +280,12 @@
       padding: 16px;
       min-height: 180px;
       color: var(--nm-text);
-      line-height: 1.6;
+      line-height: var(--nm-line-height);
+      font-size: var(--nm-font-size);
     }
 
     .nm-toc {
-      margin: 10px 0 14px;
+      margin: 10px 0 0;
       padding: 10px 12px;
       border: 1px dashed var(--nm-border);
       border-radius: 10px;
@@ -240,6 +297,10 @@
       background: rgba(15, 17, 21, 0.6);
       backdrop-filter: blur(6px);
       z-index: 1;
+    }
+
+    .nm-toc-panel h2 {
+      margin-bottom: 8px;
     }
 
     .nm-toc a {
@@ -364,10 +425,23 @@
       .nm-list {
         max-height: none;
       }
+
+      .nm-toc {
+        position: static;
+      }
+
+      .nm-toc-panel {
+        display: none;
+      }
+
+      .nm-toc-panel.open {
+        display: block;
+      }
     }
   </style>
 </head>
 <body>
+  <div id="progressBar" class="nm-progress"></div>
   <div class="nm-shell">
     <header class="nm-header">
       <div class="nm-title">
@@ -406,7 +480,15 @@
           </div>
           <div>
             <strong>内容</strong>
-            <div id="toc" class="nm-toc"></div>
+            <div class="nm-reader-tools">
+              <button id="fontDecBtn">A-</button>
+              <button id="fontIncBtn">A+</button>
+              <button id="lineDecBtn">行距-</button>
+              <button id="lineIncBtn">行距+</button>
+              <button id="themeToggleBtn" title="切换主题">🌙</button>
+              <button id="tocToggleBtn" title="目录">目录</button>
+              <button id="resetReaderBtn">重置</button>
+            </div>
             <div id="preview" class="nm-preview">从左侧选择一篇笔记进行阅读。</div>
           </div>
           <div class="nm-footer">
@@ -415,10 +497,25 @@
           </div>
         </div>
       </section>
+
+      <section class="nm-panel nm-toc-panel">
+        <h2>目录</h2>
+        <div id="toc" class="nm-toc"></div>
+      </section>
     </div>
   </div>
 
   <script>
+    const BASE_URL = (() => {
+      const p = location.pathname;
+      return p.endsWith('/') ? p : p.slice(0, p.lastIndexOf('/') + 1);
+    })();
+
+    function urlOf(path) {
+      if (/^https?:\/\//i.test(path)) return path;
+      return `${BASE_URL}${path}`.replace(/\/{2,}/g, '/');
+    }
+
     const state = {
       notes: [],
       activeId: null,
@@ -437,16 +534,47 @@
       preview: document.getElementById('preview'),
       statusText: document.getElementById('statusText'),
       loadIndexBtn: document.getElementById('loadIndexBtn'),
+      fontDecBtn: document.getElementById('fontDecBtn'),
+      fontIncBtn: document.getElementById('fontIncBtn'),
+      lineDecBtn: document.getElementById('lineDecBtn'),
+      lineIncBtn: document.getElementById('lineIncBtn'),
+      themeToggleBtn: document.getElementById('themeToggleBtn'),
+      tocToggleBtn: document.getElementById('tocToggleBtn'),
+      resetReaderBtn: document.getElementById('resetReaderBtn'),
+      progressBar: document.getElementById('progressBar'),
     };
 
     function setStatus(text) {
       els.statusText.textContent = text;
     }
 
+    const readerPrefs = {
+      fontSize: Number(localStorage.getItem('nm-font-size')) || 15,
+      lineHeight: Number(localStorage.getItem('nm-line-height')) || 1.7,
+      theme: localStorage.getItem('nm-theme') || 'dark',
+    };
+
+    function applyReaderPrefs() {
+      document.documentElement.style.setProperty('--nm-font-size', `${readerPrefs.fontSize}px`);
+      document.documentElement.style.setProperty('--nm-line-height', readerPrefs.lineHeight);
+      document.body.classList.toggle('theme-warm', readerPrefs.theme === 'warm');
+      if (els.themeToggleBtn) {
+        els.themeToggleBtn.textContent = readerPrefs.theme === 'warm' ? '☀️' : '🌙';
+      }
+    }
+
+    function updateReaderPrefs(deltaSize, deltaLine) {
+      readerPrefs.fontSize = Math.min(20, Math.max(12, readerPrefs.fontSize + deltaSize));
+      readerPrefs.lineHeight = Math.min(2.2, Math.max(1.4, +(readerPrefs.lineHeight + deltaLine).toFixed(2)));
+      localStorage.setItem('nm-font-size', readerPrefs.fontSize);
+      localStorage.setItem('nm-line-height', readerPrefs.lineHeight);
+      applyReaderPrefs();
+    }
+
     async function loadIndex() {
       try {
         setStatus('正在加载索引...');
-        const res = await fetch('data/search.json', { cache: 'no-store' });
+        const res = await fetch(urlOf('data/search.json'), { cache: 'no-store' });
         if (!res.ok) throw new Error('无法读取 data/search.json');
         const json = await res.json();
         state.searchIndex = json;
@@ -566,6 +694,14 @@
       onScroll();
     }
 
+    function updateProgress() {
+      if (!els.progressBar) return;
+      const doc = document.documentElement;
+      const total = doc.scrollHeight - doc.clientHeight;
+      const scrolled = total > 0 ? (doc.scrollTop / total) * 100 : 0;
+      els.progressBar.style.width = `${Math.min(100, Math.max(0, scrolled))}%`;
+    }
+
     function highlightCode(code, lang) {
       const escaped = code
         .replace(/&/g, '&amp;')
@@ -655,7 +791,7 @@
       els.detailTags.innerHTML = (note.tags || []).map(tag => `<span class="nm-tag">${tag}</span>`).join('');
       if (!note.content && note.path) {
         try {
-          const res = await fetch(note.path, { cache: 'no-store' });
+          const res = await fetch(urlOf(note.path), { cache: 'no-store' });
           if (!res.ok) throw new Error('无法读取 Markdown 文件');
           note.content = await res.text();
         } catch (err) {
@@ -682,8 +818,33 @@
     });
 
     els.loadIndexBtn.addEventListener('click', loadIndex);
+    els.fontDecBtn.addEventListener('click', () => updateReaderPrefs(-1, 0));
+    els.fontIncBtn.addEventListener('click', () => updateReaderPrefs(1, 0));
+    els.lineDecBtn.addEventListener('click', () => updateReaderPrefs(0, -0.1));
+    els.lineIncBtn.addEventListener('click', () => updateReaderPrefs(0, 0.1));
+    els.themeToggleBtn.addEventListener('click', () => {
+      readerPrefs.theme = readerPrefs.theme === 'warm' ? 'dark' : 'warm';
+      localStorage.setItem('nm-theme', readerPrefs.theme);
+      applyReaderPrefs();
+    });
+    els.tocToggleBtn.addEventListener('click', () => {
+      const panel = document.querySelector('.nm-toc-panel');
+      if (panel) panel.classList.toggle('open');
+    });
+    els.resetReaderBtn.addEventListener('click', () => {
+      readerPrefs.fontSize = 15;
+      readerPrefs.lineHeight = 1.7;
+      readerPrefs.theme = 'dark';
+      localStorage.removeItem('nm-font-size');
+      localStorage.removeItem('nm-line-height');
+      localStorage.removeItem('nm-theme');
+      applyReaderPrefs();
+    });
 
+    applyReaderPrefs();
     loadIndex();
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
   </script>
 </body>
 </html>
