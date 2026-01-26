@@ -3,7 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Notes Manager</title>
+  <title>Alsay Notes Manager</title>
+  <meta name="description" content="Alsay 的笔记管理与知识库，支持双向链接、全文检索与主题切换。">
+  <meta name="keywords" content="Alsay, 笔记管理, 知识库, 双向链接, 全文检索">
+  <meta name="author" content="Alsay">
+  <meta name="robots" content="index, follow">
+  <meta name="baiduspider" content="index, follow">
+  <meta name="applicable-device" content="pc,mobile">
+  <link rel="canonical" href="https://mzjh.top/notes.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mzjh.top/notes.html">
+  <meta property="og:title" content="Alsay Notes Manager">
+  <meta property="og:description" content="笔记管理与知识库，支持双向链接、全文检索与主题切换。">
+  <meta property="og:image" content="https://mzjh.top/images/logo.png">
+  <meta property="og:site_name" content="Alsay">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://mzjh.top/notes.html">
+  <meta name="twitter:title" content="Alsay Notes Manager">
+  <meta name="twitter:description" content="笔记管理与知识库，支持双向链接、全文检索与主题切换。">
+  <meta name="twitter:image" content="https://mzjh.top/images/logo.png">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://mzjh.top/sitemap.xml">
   <link rel="stylesheet" href="css/styles.css" />
   <style>
     :root {
@@ -378,6 +398,9 @@
       display: grid;
       gap: 6px;
       margin-top: 8px;
+      max-height: 65vh;
+      overflow: auto;
+      padding-right: 6px;
     }
 
     .nm-toc .toc-h2 {
@@ -388,6 +411,37 @@
     .nm-toc .toc-h3 {
       margin-left: 24px;
       font-size: 11px;
+    }
+
+    .nm-toc .toc-group {
+      border-left: 2px solid rgba(90, 211, 183, 0.2);
+      padding-left: 8px;
+      margin: 6px 0;
+    }
+
+    .nm-toc .toc-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--nm-text);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .nm-toc .toc-toggle::before {
+      content: "▾";
+      font-size: 12px;
+      opacity: 0.7;
+      transition: transform 0.2s ease;
+    }
+
+    .nm-toc .toc-group.collapsed .toc-toggle::before {
+      transform: rotate(-90deg);
+    }
+
+    .nm-toc .toc-group.collapsed ul {
+      display: none;
     }
 
     .nm-preview h1,
@@ -546,6 +600,7 @@
               <button id="lineIncBtn">行距+</button>
               <button id="themeToggleBtn" title="切换主题">🌙</button>
               <button id="tocToggleBtn" title="目录">目录</button>
+              <button id="tocAutoBtn" title="目录自动折叠">折叠</button>
               <button id="resetReaderBtn">重置</button>
             </div>
             <div id="preview" class="nm-preview">从左侧选择一篇笔记进行阅读。</div>
@@ -599,6 +654,7 @@
       lineIncBtn: document.getElementById('lineIncBtn'),
       themeToggleBtn: document.getElementById('themeToggleBtn'),
       tocToggleBtn: document.getElementById('tocToggleBtn'),
+      tocAutoBtn: document.getElementById('tocAutoBtn'),
       resetReaderBtn: document.getElementById('resetReaderBtn'),
       progressBar: document.getElementById('progressBar'),
     };
@@ -611,6 +667,7 @@
       fontSize: Number(localStorage.getItem('nm-font-size')) || 15,
       lineHeight: Number(localStorage.getItem('nm-line-height')) || 1.7,
       theme: localStorage.getItem('nm-theme') || 'dark',
+      tocAuto: localStorage.getItem('nm-toc-auto') !== 'false',
     };
 
     function applyReaderPrefs() {
@@ -619,6 +676,9 @@
       document.body.classList.toggle('theme-warm', readerPrefs.theme === 'warm');
       if (els.themeToggleBtn) {
         els.themeToggleBtn.textContent = readerPrefs.theme === 'warm' ? '☀️' : '🌙';
+      }
+      if (els.tocAutoBtn) {
+        els.tocAutoBtn.textContent = readerPrefs.tocAuto ? '折叠' : '展开';
       }
     }
 
@@ -721,10 +781,33 @@
         els.toc.innerHTML = '';
         return;
       }
-      const list = items.map(item => {
-        const cls = item.level === 1 ? '' : item.level === 2 ? 'toc-h2' : 'toc-h3';
-        return `<li class="${cls}"><a href="#${item.id}">${item.title}</a></li>`;
+      const groups = [];
+      let current = null;
+      items.forEach(item => {
+        if (item.level === 1 || item.level === 2) {
+          current = { head: item, children: [] };
+          groups.push(current);
+        } else if (current) {
+          current.children.push(item);
+        }
+      });
+
+      const list = groups.map(group => {
+        const head = group.head;
+        const headClass = head.level === 1 ? '' : 'toc-h2';
+        const children = group.children.map(child => (
+          `<li class="toc-h3"><a href="#${child.id}">${child.title}</a></li>`
+        )).join('');
+        return `
+          <li class="toc-group">
+            <div class="toc-toggle" data-target="${head.id}">
+              <a class="${headClass}" href="#${head.id}">${head.title}</a>
+            </div>
+            ${children ? `<ul>${children}</ul>` : ''}
+          </li>
+        `;
       }).join('');
+
       els.toc.innerHTML = `<strong>目录</strong><ul>${list}</ul>`;
       els.toc.style.display = 'block';
     }
@@ -744,13 +827,36 @@
         });
         tocLinks.forEach(link => link.classList.remove('active'));
         const activeLink = map.get(current.id);
-        if (activeLink) activeLink.classList.add('active');
+        if (activeLink) {
+          activeLink.classList.add('active');
+          const activeGroup = activeLink.closest('.toc-group');
+          if (readerPrefs.tocAuto) {
+            document.querySelectorAll('.toc-group').forEach(group => {
+              if (group === activeGroup) {
+                group.classList.remove('collapsed');
+              } else {
+                group.classList.add('collapsed');
+              }
+            });
+          }
+        }
       };
 
       window.removeEventListener('scroll', window.__tocScrollHandler);
       window.__tocScrollHandler = onScroll;
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
+    }
+
+    function bindTocToggles() {
+      if (!els.toc) return;
+      els.toc.querySelectorAll('.toc-toggle').forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+          if (e.target.tagName.toLowerCase() === 'a') return;
+          const parent = toggle.closest('.toc-group');
+          if (parent) parent.classList.toggle('collapsed');
+        });
+      });
     }
 
     // 防抖函数
@@ -966,6 +1072,7 @@
       html = `<p>${html}</p>`;
       els.preview.innerHTML = html;
       initScrollSpy();
+      bindTocToggles();
     }
 
     async function setActiveNote(id) {
@@ -1037,6 +1144,11 @@
         panel.hidden = !panel.classList.contains('open');
       }
     });
+    els.tocAutoBtn.addEventListener('click', () => {
+      readerPrefs.tocAuto = !readerPrefs.tocAuto;
+      localStorage.setItem('nm-toc-auto', String(readerPrefs.tocAuto));
+      applyReaderPrefs();
+    });
     els.resetReaderBtn.addEventListener('click', () => {
       readerPrefs.fontSize = 15;
       readerPrefs.lineHeight = 1.7;
@@ -1044,6 +1156,8 @@
       localStorage.removeItem('nm-font-size');
       localStorage.removeItem('nm-line-height');
       localStorage.removeItem('nm-theme');
+      localStorage.removeItem('nm-toc-auto');
+      readerPrefs.tocAuto = true;
       applyReaderPrefs();
     });
 

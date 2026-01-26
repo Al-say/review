@@ -35,11 +35,15 @@ import { store } from './store.js';
 import { NoteDetailRenderer } from './render/note-detail.js';
 import { SearchPanel } from './ui/search-panel.js';
 import { ShortcutsPanel } from './ui/shortcuts-panel.js';
+import { GraphRenderer } from './render/graph-view.js';
+import { TimelineRenderer } from './render/timeline-view.js';
 
 // 全局变量
 let noteDetailRenderer = null;
 let searchPanel = null;
 let shortcutsPanel = null;
+let graphRenderer = null;
+let timelineRenderer = null;
 let renderToken = 0; // 路由渲染token，防止旧请求覆盖新页面
 
 // 页面初始化
@@ -224,6 +228,152 @@ async function showNoteDetail(noteId) {
             document.title = 'Alsay - 全栈开发工程师 | 个人主页';
         }
     }
+}
+
+// 显示笔记列表
+function showNotesList() {
+    document.title = '笔记库 - Alsay';
+
+    const container = document.querySelector('.container');
+    if (!container) return;
+
+    const notes = store.getNotes();
+    const topics = store.getAllTopics();
+    const tags = store.getAllTags();
+
+    container.innerHTML = `
+        <div class="notes-page">
+            <div class="notes-header">
+                <h1>笔记库</h1>
+                <div class="notes-stats">
+                    <span>${notes.length} 篇笔记</span>
+                    <span>${topics.length} 个主题</span>
+                    <span>${tags.length} 个标签</span>
+                </div>
+            </div>
+
+            <div class="notes-toolbar">
+                <input type="search" id="notes-search" placeholder="搜索笔记..." />
+                <select id="notes-topic-filter">
+                    <option value="">全部主题</option>
+                    ${topics.map(t => `<option value="${t}">${t}</option>`).join('')}
+                </select>
+                <select id="notes-sort">
+                    <option value="updated">按更新时间</option>
+                    <option value="title">按标题</option>
+                    <option value="created">按创建时间</option>
+                </select>
+            </div>
+
+            <div class="tags-cloud">
+                <span class="tag-cloud-item active">全部</span>
+                ${tags.map(tag => `<span class="tag-cloud-item" data-tag="${tag}">${tag}</span>`).join('')}
+            </div>
+
+            <div id="notes-grid" class="notes-grid">
+                ${renderNoteCards(notes)}
+            </div>
+        </div>
+    `;
+
+    bindNotesEvents();
+}
+
+// 渲染笔记卡片
+function renderNoteCards(notes) {
+    if (notes.length === 0) {
+        return '<div class="notes-empty">暂无笔记</div>';
+    }
+
+    return notes.map(note => `
+        <div class="note-card" data-id="${note.id}">
+            <div class="note-card-header">
+                <h3>${note.title}</h3>
+                <span class="note-card-topic">${note.topic || '未分类'}</span>
+            </div>
+            <p class="note-card-excerpt">${note.text.slice(0, 150)}${note.text.length > 150 ? '...' : ''}</p>
+            <div class="note-card-footer">
+                <span class="note-card-date">${note.updatedAt || note.createdAt}</span>
+                <div class="note-card-tags">
+                    ${(note.tags || []).slice(0, 3).map(tag => `<span class="mini-tag">${tag}</span>`).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 绑定笔记列表事件
+function bindNotesEvents() {
+    const searchInput = document.getElementById('notes-search');
+    const topicFilter = document.getElementById('notes-topic-filter');
+    const sortSelect = document.getElementById('notes-sort');
+    const tagItems = document.querySelectorAll('.tag-cloud-item');
+
+    let currentTag = '';
+
+    function filterNotes() {
+        const query = searchInput?.value.toLowerCase() || '';
+        const topic = topicFilter?.value || '';
+        const notes = store.searchNotes(query, { topic, tags: currentTag ? [currentTag] : [], sortBy: sortSelect?.value || 'updatedAt' });
+        document.getElementById('notes-grid').innerHTML = renderNoteCards(notes);
+    }
+
+    searchInput?.addEventListener('input', filterNotes);
+    topicFilter?.addEventListener('change', filterNotes);
+    sortSelect?.addEventListener('change', filterNotes);
+
+    tagItems.forEach(item => {
+        item.addEventListener('click', () => {
+            tagItems.forEach(t => t.classList.remove('active'));
+            if (item.classList.contains('active')) {
+                currentTag = '';
+            } else {
+                item.classList.add('active');
+                currentTag = item.dataset.tag;
+            }
+            filterNotes();
+        });
+    });
+
+    // 笔记卡片点击事件
+    document.querySelectorAll('.note-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const noteId = card.dataset.id;
+            window.location.hash = `/note/${noteId}`;
+        });
+    });
+}
+
+// 显示知识图谱
+async function showGraph() {
+    document.title = '知识图谱 - Alsay';
+
+    const container = document.querySelector('.container') || document.body;
+
+    // 清理之前的渲染器
+    if (graphRenderer) {
+        graphRenderer.destroy();
+    }
+
+    // 创建新的渲染器
+    graphRenderer = new GraphRenderer(container);
+    await graphRenderer.render();
+}
+
+// 显示时间线
+async function showTimeline() {
+    document.title = '时间线 - Alsay';
+
+    const container = document.querySelector('.container') || document.body;
+
+    // 清理之前的渲染器
+    if (timelineRenderer) {
+        timelineRenderer = null;
+    }
+
+    // 创建新的渲染器
+    timelineRenderer = new TimelineRenderer(container);
+    await timelineRenderer.render();
 }
 
 // 启动应用

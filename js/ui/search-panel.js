@@ -14,6 +14,8 @@ export class SearchPanel {
         };
         this.searchTimer = null;
         this.debounceDelay = 300; // 300ms 防抖延迟
+        this.searchHistory = JSON.parse(localStorage.getItem('search-history') || '[]');
+        this.maxHistoryItems = 10;
 
         this.init();
     }
@@ -46,6 +48,26 @@ export class SearchPanel {
                         </div>
                         <button id="search-close" class="search-close-btn">×</button>
                     </div>
+
+                    <!-- 搜索历史 -->
+                    ${this.searchHistory.length > 0 ? `
+                        <div class="search-history">
+                            <div class="history-header">
+                                <span>最近搜索</span>
+                                <button id="clear-history" class="clear-history-btn">清除</button>
+                            </div>
+                            <div class="history-items">
+                                ${this.searchHistory.slice(0, 5).map(item => `
+                                    <button class="history-item" data-query="${item}">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 10 10 10-4.48 10-10S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 1h2v2h-2V7zm4 0h2v2h-2V7zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
+                                        </svg>
+                                        ${item}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
 
                     <div class="search-filters">
                         <div class="filter-group">
@@ -95,6 +117,13 @@ export class SearchPanel {
             this.searchTimer = setTimeout(() => {
                 this.performSearch();
             }, this.debounceDelay);
+        });
+
+        // 搜索时保存历史
+        this.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && this.currentQuery && this.currentQuery.length >= 2) {
+                this.saveToHistory(this.currentQuery);
+            }
         });
 
         // 键盘导航
@@ -157,6 +186,7 @@ export class SearchPanel {
         this.input.focus();
         this.input.select();
         this.updateFilters();
+        this.renderSearchHistory();
         document.body.style.overflow = 'hidden';
     }
 
@@ -208,6 +238,24 @@ export class SearchPanel {
                 this.toggleTag(tag);
             });
             tagsContainer.appendChild(tagElement);
+        });
+
+        // 绑定搜索历史事件
+        const historyItems = document.querySelectorAll('.history-item');
+        historyItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const query = item.dataset.query;
+                this.input.value = query;
+                this.currentQuery = query;
+                this.performSearch();
+                this.input.focus();
+            });
+        });
+
+        // 清除历史按钮
+        const clearBtn = document.getElementById('clear-history');
+        clearBtn?.addEventListener('click', () => {
+            this.clearHistory();
         });
     }
 
@@ -336,5 +384,50 @@ export class SearchPanel {
 
     showStatus(message) {
         this.resultsContainer.innerHTML = `<div class="search-status">${message}</div>`;
+    }
+
+    // 保存搜索到历史记录
+    saveToHistory(query) {
+        if (!query || query.length < 2) return;
+
+        // 移除重复项
+        this.searchHistory = this.searchHistory.filter(item => item !== query);
+
+        // 添加到开头
+        this.searchHistory.unshift(query);
+
+        // 限制历史记录数量
+        if (this.searchHistory.length > this.maxHistoryItems) {
+            this.searchHistory = this.searchHistory.slice(0, this.maxHistoryItems);
+        }
+
+        // 保存到 localStorage
+        localStorage.setItem('search-history', JSON.stringify(this.searchHistory));
+
+        this.renderSearchHistory();
+    }
+
+    // 渲染搜索历史
+    renderSearchHistory() {
+        const historyContainer = document.getElementById('search-history');
+        if (!historyContainer) return;
+
+        if (this.searchHistory.length === 0) {
+            historyContainer.style.display = 'none';
+            return;
+        }
+
+        historyContainer.style.display = 'block';
+    }
+
+    // 清除搜索历史
+    clearHistory() {
+        this.searchHistory = [];
+        localStorage.removeItem('search-history');
+
+        const historyContainer = document.getElementById('search-history');
+        if (historyContainer) {
+            historyContainer.style.display = 'none';
+        }
     }
 }
