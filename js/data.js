@@ -127,11 +127,14 @@ export async function loadGraphData() {
 
     try {
         graphData = await fetchJson("data/graph.json");
+        if (!graphData.links && graphData.edges) {
+            graphData.links = graphData.edges;
+        }
         console.log('图谱数据加载完成:', graphData.nodes?.length || 0, '个节点');
         return graphData;
     } catch (error) {
         console.error('加载图谱数据失败:', error);
-        return { nodes: [], edges: [] };
+        return { nodes: [], links: [] };
     }
 }
 
@@ -161,13 +164,13 @@ export async function search(query, options = {}) {
 
 // 获取笔记详情
 export async function getNote(id) {
-    const data = await loadSearchData();
+    const data = await loadSearchIndex();
     return data.items.find(item => item.id === id);
 }
 
 // 获取所有标签
 export async function getAllTags() {
-    const data = await loadSearchData();
+    const data = await loadSearchIndex();
     const tagSet = new Set();
 
     data.items.forEach(item => {
@@ -181,7 +184,7 @@ export async function getAllTags() {
 
 // 获取按主题分组的笔记
 export async function getNotesByTopic() {
-    const data = await loadSearchData();
+    const data = await loadSearchIndex();
     const topics = {};
 
     data.items.forEach(item => {
@@ -193,4 +196,15 @@ export async function getNotesByTopic() {
     });
 
     return topics;
+}
+
+// 按时间获取笔记（用于时间线）
+export async function getNotesByTime() {
+    const data = await loadSearchIndex();
+    return data.items
+        .map(item => ({
+            ...item,
+            date: new Date(item.updatedAt || item.createdAt)
+        }))
+        .sort((a, b) => b.date - a.date);
 }

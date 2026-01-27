@@ -358,6 +358,8 @@
       color: var(--nm-text);
       line-height: var(--nm-line-height);
       font-size: var(--nm-font-size);
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .nm-toc {
@@ -454,6 +456,27 @@
       margin: 10px 0;
     }
 
+    .nm-preview p.anchor {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .nm-preview p.anchor::before {
+      content: "¶";
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0.3;
+      font-size: 12px;
+    }
+
+    .nm-preview p.anchor.active {
+      background: rgba(90, 211, 183, 0.12);
+      border-left: 3px solid var(--nm-accent);
+      padding-left: 12px;
+      border-radius: 8px;
+    }
+
     .nm-preview a {
       color: var(--nm-accent);
       text-decoration: none;
@@ -476,6 +499,8 @@
       border-radius: 12px;
       overflow: auto;
       margin: 12px 0;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .nm-preview pre code {
@@ -486,6 +511,7 @@
       font-size: 12px;
       line-height: 1.6;
       font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      white-space: pre;
     }
 
     .nm-preview pre code .kw { color: #89ddff; }
@@ -518,6 +544,41 @@
       border-radius: 10px;
       border: 1px solid var(--nm-border);
       margin: 8px 0;
+      cursor: zoom-in;
+    }
+
+    .nm-lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .nm-lightbox.open {
+      display: flex;
+    }
+
+    .nm-lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    .nm-lightbox-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
     }
 
     .nm-footer {
@@ -555,6 +616,10 @@
 </head>
 <body>
   <div id="progressBar" class="nm-progress"></div>
+  <div id="lightbox" class="nm-lightbox" aria-hidden="true">
+    <button id="lightboxClose" class="nm-lightbox-close">×</button>
+    <img id="lightboxImg" alt="preview">
+  </div>
   <div class="nm-shell">
     <header class="nm-header">
       <div class="nm-title">
@@ -657,6 +722,9 @@
       tocAutoBtn: document.getElementById('tocAutoBtn'),
       resetReaderBtn: document.getElementById('resetReaderBtn'),
       progressBar: document.getElementById('progressBar'),
+      lightbox: document.getElementById('lightbox'),
+      lightboxImg: document.getElementById('lightboxImg'),
+      lightboxClose: document.getElementById('lightboxClose'),
     };
 
     function setStatus(text) {
@@ -1070,14 +1138,65 @@
         html = html.replace(`@@CODE${idx}@@`, block);
       });
       html = `<p>${html}</p>`;
+      let pIndex = 0;
+      html = html.replace(/<p>(.*?)<\/p>/g, (_, text) => {
+        const pid = `p-${pIndex++}`;
+        return `<p id="${pid}" class="anchor">${text}</p>`;
+      });
       els.preview.innerHTML = html;
       initScrollSpy();
       bindTocToggles();
+      bindLightbox();
+      bindParagraphAnchors();
+    }
+
+    function bindLightbox() {
+      if (!els.lightbox || !els.lightboxImg) return;
+      els.preview.querySelectorAll('img').forEach(img => {
+        img.addEventListener('click', () => {
+          els.lightboxImg.src = img.src;
+          els.lightbox.classList.add('open');
+          els.lightbox.setAttribute('aria-hidden', 'false');
+        });
+      });
+    }
+
+    function closeLightbox() {
+      els.lightbox.classList.remove('open');
+      els.lightbox.setAttribute('aria-hidden', 'true');
+      els.lightboxImg.src = '';
+    }
+
+    function bindParagraphAnchors() {
+      els.preview.querySelectorAll('p.anchor').forEach(p => {
+        p.addEventListener('click', () => {
+          els.preview.querySelectorAll('p.anchor').forEach(node => node.classList.remove('active'));
+          p.classList.add('active');
+          history.replaceState(null, '', `#${p.id}`);
+        });
+      });
+    }
+
+    function saveScrollPosition(id) {
+      if (!id) return;
+      const pos = document.documentElement.scrollTop || document.body.scrollTop || 0;
+      localStorage.setItem(`nm-scroll-${id}`, String(pos));
+    }
+
+    function restoreScrollPosition(id) {
+      if (!id) return;
+      const saved = Number(localStorage.getItem(`nm-scroll-${id}`));
+      if (Number.isFinite(saved) && saved > 0) {
+        requestAnimationFrame(() => window.scrollTo({ top: saved, behavior: 'instant' }));
+      }
     }
 
     async function setActiveNote(id) {
       const note = state.notes.find(n => n.id === id);
       if (!note) return;
+      if (state.activeId && state.activeId !== id) {
+        saveScrollPosition(state.activeId);
+      }
       state.activeId = id;
       els.detailTitle.textContent = note.title;
       els.detailMeta.innerHTML = `
@@ -1099,6 +1218,7 @@
         }
       }
       renderPreview(note.content || '');
+      restoreScrollPosition(id);
       renderListDebounced();
     }
 
@@ -1161,6 +1281,11 @@
       applyReaderPrefs();
     });
 
+    els.lightbox.addEventListener('click', (e) => {
+      if (e.target === els.lightbox) closeLightbox();
+    });
+    els.lightboxClose.addEventListener('click', closeLightbox);
+
     // 全局键盘快捷键
     document.addEventListener('keydown', handleKeyboardShortcuts);
 
@@ -1169,6 +1294,7 @@
     loadIndex();
     window.addEventListener('scroll', updateProgressThrottled, { passive: true });
     updateProgressThrottled();
+    window.addEventListener('beforeunload', () => saveScrollPosition(state.activeId));
   </script>
 </body>
 </html>

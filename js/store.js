@@ -76,7 +76,7 @@ class Store {
 
     // 按标签过滤笔记
     getNotesByTag(tag) {
-        return this.getNotes().filter(note => note.tags.includes(tag));
+        return this.getNotes().filter(note => (note.tags || []).includes(tag));
     }
 
     // 搜索笔记
@@ -92,7 +92,7 @@ class Store {
         // 按标签过滤
         if (tags && tags.length > 0) {
             results = results.filter(note =>
-                tags.some(tag => note.tags.includes(tag))
+                tags.some(tag => (note.tags || []).includes(tag))
             );
         }
 
@@ -100,15 +100,19 @@ class Store {
         if (query) {
             const lowerQuery = query.toLowerCase();
             results = results.filter(note =>
-                note.title.toLowerCase().includes(lowerQuery) ||
-                note.text.toLowerCase().includes(lowerQuery) ||
-                note.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+                (note.title || '').toLowerCase().includes(lowerQuery) ||
+                (note.text || '').toLowerCase().includes(lowerQuery) ||
+                (note.tags || []).some(tag => tag.toLowerCase().includes(lowerQuery))
             );
         }
 
         // 排序
         if (sortBy === 'updatedAt') {
             results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        } else if (sortBy === 'created') {
+            results.sort((a, b) => new Date(b.createdAt || b.updatedAt) - new Date(a.createdAt || a.updatedAt));
+        } else if (sortBy === 'title') {
+            results.sort((a, b) => a.title.localeCompare(b.title, 'zh-Hans-CN'));
         } else if (sortBy === 'relevance') {
             // 如果有查询，按相关度排序（标题匹配优先，然后是内容匹配）
             if (query) {
@@ -148,7 +152,7 @@ class Store {
     getAllTags() {
         const tags = new Set();
         this.getNotes().forEach(note => {
-            note.tags.forEach(tag => tags.add(tag));
+            (note.tags || []).forEach(tag => tags.add(tag));
         });
         return Array.from(tags).sort();
     }

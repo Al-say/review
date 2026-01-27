@@ -30,11 +30,23 @@ export class ShortcutsPanel {
                                     <span>打开搜索</span>
                                 </div>
                                 <div class="shortcut-item">
+                                    <kbd>N</kbd>
+                                    <span>打开笔记库</span>
+                                </div>
+                                <div class="shortcut-item">
+                                    <kbd>G</kbd>
+                                    <span>打开知识图谱</span>
+                                </div>
+                                <div class="shortcut-item">
+                                    <kbd>T</kbd>
+                                    <span>打开时间线</span>
+                                </div>
+                                <div class="shortcut-item">
                                     <kbd>Esc</kbd>
                                     <span>关闭面板/弹窗</span>
                                 </div>
                                 <div class="shortcut-item">
-                                    <kbd>?</kbd>
+                                    <kbd>H</kbd><kbd>?</kbd>
                                     <span>显示快捷键帮助</span>
                                 </div>
                             </div>
@@ -57,23 +69,10 @@ export class ShortcutsPanel {
                             </div>
                         </div>
                         <div class="shortcuts-section">
-                            <h3>笔记阅读</h3>
+                            <h3>说明</h3>
                             <div class="shortcuts-list">
                                 <div class="shortcut-item">
-                                    <kbd>←</kbd><kbd>→</kbd>
-                                    <span>切换笔记</span>
-                                </div>
-                                <div class="shortcut-item">
-                                    <kbd>A+</kbd><kbd>A-</kbd>
-                                    <span>调整字体大小</span>
-                                </div>
-                                <div class="shortcut-item">
-                                    <kbd>g</kbd>
-                                    <span>查看知识图谱</span>
-                                </div>
-                                <div class="shortcut-item">
-                                    <kbd>t</kbd>
-                                    <span>查看时间线</span>
+                                    <span>更多操作可通过顶部工具栏访问</span>
                                 </div>
                             </div>
                         </div>
@@ -103,14 +102,17 @@ export class ShortcutsPanel {
 
         // 全局快捷键绑定
         document.addEventListener('keydown', (e) => {
-            // ? 键打开帮助（除了在输入框中）
-            if (e.key === '?' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            const target = e.target;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+            if (e.repeat) return;
+
+            const key = e.key.toLowerCase();
+            if (key === '?' || key === 'h') {
                 e.preventDefault();
                 this.toggle();
             }
 
-            // Esc 键关闭
-            if (e.key === 'Escape' && this.isOpen) {
+            if (key === 'escape' && this.isOpen) {
                 this.close();
             }
         });

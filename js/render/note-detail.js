@@ -2,13 +2,7 @@
 import { loadNoteContent } from '../data.js';
 import { getBacklinks } from '../store.js';
 import { store } from '../store.js';
-
-// HTML 转义函数
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+import { escapeHtml } from '../utils.js';
 
 // 触摸滑动导航控制器
 class TouchNavigation {
@@ -20,20 +14,40 @@ class TouchNavigation {
         this.minSwipeDistance = 80;
         this.maxVerticalDistance = 50;
         this.isTracking = false;
+        // 保存绑定函数引用，用于清理
+        this._handleTouchStart = null;
+        this._handleTouchMove = null;
+        this._handleTouchEnd = null;
 
         this.bind();
     }
 
     bind() {
-        document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
-        document.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: true });
-        document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
+        // 保存原始绑定函数的引用
+        this._handleTouchStart = this.handleTouchStart.bind(this);
+        this._handleTouchMove = this.handleTouchMove.bind(this);
+        this._handleTouchEnd = this.handleTouchEnd.bind(this);
+
+        // touchmove 需要 passive: false 才能调用 preventDefault()
+        document.addEventListener('touchstart', this._handleTouchStart, { passive: false });
+        document.addEventListener('touchmove', this._handleTouchMove, { passive: false });
+        document.addEventListener('touchend', this._handleTouchEnd);
     }
 
     unbind() {
-        document.removeEventListener('touchstart', this.handleTouchStart.bind(this));
-        document.removeEventListener('touchmove', this.handleTouchMove.bind(this));
-        document.removeEventListener('touchend', this.handleTouchEnd.bind(this));
+        // 使用保存的引用来移除监听器
+        if (this._handleTouchStart) {
+            document.removeEventListener('touchstart', this._handleTouchStart);
+            this._handleTouchStart = null;
+        }
+        if (this._handleTouchMove) {
+            document.removeEventListener('touchmove', this._handleTouchMove);
+            this._handleTouchMove = null;
+        }
+        if (this._handleTouchEnd) {
+            document.removeEventListener('touchend', this._handleTouchEnd);
+            this._handleTouchEnd = null;
+        }
     }
 
     handleTouchStart(e) {
@@ -126,18 +140,21 @@ export class NoteDetailRenderer {
         const currentIndex = notes.findIndex(n => n.id === note.id);
         const prevNote = currentIndex > 0 ? notes[currentIndex - 1] : null;
         const nextNote = currentIndex < notes.length - 1 ? notes[currentIndex + 1] : null;
+        const safeTitle = escapeHtml(note.title || '');
+        const safeTopic = escapeHtml(note.topic || '未分类');
+        const safeDate = escapeHtml(note.updatedAt || note.createdAt || '');
 
         return `
             <div class="note-detail">
                 <header class="note-header">
                     <button class="back-btn" onclick="window.location.hash='/'">← 返回</button>
-                    <h1 class="note-title">${note.title}</h1>
+                    <h1 class="note-title">${safeTitle}</h1>
                     <div class="note-meta">
-                        <span class="note-topic">${note.topic}</span>
-                        <span class="note-date">${note.updatedAt}</span>
+                        <span class="note-topic">${safeTopic}</span>
+                        <span class="note-date">${safeDate}</span>
                     </div>
                     <div class="note-tags">
-                        ${note.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        ${(note.tags || []).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
                     </div>
                 </header>
 
@@ -151,19 +168,22 @@ export class NoteDetailRenderer {
                     ${note.linksOut && note.linksOut.length > 0 ?
                         `<h3>相关笔记</h3>
                         <ul>
-                            ${note.linksOut.map(linkId => `<li><a href="#/note/${linkId}">${linkId}</a></li>`).join('')}
+                            ${note.linksOut.map(linkId => {
+                                const safeId = encodeURIComponent(String(linkId));
+                                return `<li><a href="#/note/${safeId}">${escapeHtml(linkId)}</a></li>`;
+                            }).join('')}
                         </ul>` : ''
                     }
                 </div>
 
                 <!-- 导航按钮 -->
                 <div class="note-navigation">
-                    ${prevNote ? `<a href="#/note/${prevNote.id}" class="nav-btn prev-btn" title="上一篇: ${prevNote.title}">
+                    ${prevNote ? `<a href="#/note/${encodeURIComponent(String(prevNote.id))}" class="nav-btn prev-btn" title="上一篇: ${escapeHtml(prevNote.title)}">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-                        <span>${prevNote.title}</span>
+                        <span>${escapeHtml(prevNote.title)}</span>
                     </a>` : ''}
-                    ${nextNote ? `<a href="#/note/${nextNote.id}" class="nav-btn next-btn" title="下一篇: ${nextNote.title}">
-                        <span>${nextNote.title}</span>
+                    ${nextNote ? `<a href="#/note/${encodeURIComponent(String(nextNote.id))}" class="nav-btn next-btn" title="下一篇: ${escapeHtml(nextNote.title)}">
+                        <span>${escapeHtml(nextNote.title)}</span>
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
                     </a>` : ''}
                 </div>
@@ -173,8 +193,9 @@ export class NoteDetailRenderer {
 
     // 渲染 Markdown（增强版）
     renderMarkdown(content) {
+        const safeContent = escapeHtml(String(content || ''));
         // 先处理 wikilinks
-        const withWikiLinks = this.safeReplaceWikiLinks(content, (id) => `#/note/${id}`);
+        const withWikiLinks = this.safeReplaceWikiLinks(safeContent, (id) => `#/note/${encodeURIComponent(id)}`);
 
         // 提取代码块，避免被其他正则处理
         const codeBlocks = [];
@@ -198,13 +219,55 @@ export class NoteDetailRenderer {
         // 处理引用
         html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
 
-        // 处理无序列表
-        html = html.replace(/^\s*[-*+]\s+(.*$)/gim, '<li>$1</li>');
-        html = html.replace(/(<li>.*<\/li>)\n(?!<li>)/g, '$1</ul>\n');
+        // 处理列表 - 逐行处理，确保生成有效的 HTML 结构
+        const lines = html.split('\n');
+        const processedLines = [];
+        let inUl = false;
+        let inOl = false;
 
-        // 处理有序列表
-        html = html.replace(/^\s*\d+\.\s+(.*$)/gim, '<oli>$1</oli>');
-        html = html.replace(/(<oli>.*<\/oli>)\n(?!<oli>)/g, '$1</ol>\n');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const isUlItem = /^\s*[-*+]\s+/.test(line);
+            const isOlItem = /^\s*\d+\.\s+/.test(line);
+
+            if (isUlItem) {
+                if (!inUl) {
+                    if (inOl) {
+                        processedLines.push('</ol>');
+                        inOl = false;
+                    }
+                    processedLines.push('<ul>');
+                    inUl = true;
+                }
+                processedLines.push(line.replace(/^\s*[-*+]\s+/, '<li>').replace(/$/, '</li>'));
+            } else if (isOlItem) {
+                if (!inOl) {
+                    if (inUl) {
+                        processedLines.push('</ul>');
+                        inUl = false;
+                    }
+                    processedLines.push('<ol>');
+                    inOl = true;
+                }
+                processedLines.push(line.replace(/^\s*\d+\.\s+/, '<li>').replace(/$/, '</li>'));
+            } else {
+                if (inUl) {
+                    processedLines.push('</ul>');
+                    inUl = false;
+                }
+                if (inOl) {
+                    processedLines.push('</ol>');
+                    inOl = false;
+                }
+                processedLines.push(line);
+            }
+        }
+
+        // 关闭未闭合的标签
+        if (inUl) processedLines.push('</ul>');
+        if (inOl) processedLines.push('</ol>');
+
+        html = processedLines.join('\n');
 
         // 处理粗体和斜体
         html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
@@ -218,8 +281,14 @@ export class NoteDetailRenderer {
         html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
 
         // 处理链接和图片
-        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+            const safeUrl = sanitizeUrl(url);
+            return `<img src="${safeUrl}" alt="${alt}">`;
+        });
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+            const safeUrl = sanitizeUrl(url);
+            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        });
 
         // 处理水平线
         html = html.replace(/^(-{3,}|_{3,}|\*{3,})$/gim, '<hr>');
@@ -227,12 +296,6 @@ export class NoteDetailRenderer {
         // 处理段落和换行
         html = html.replace(/\n\n+/g, '</p><p>');
         html = html.replace(/\n/g, '<br>');
-
-        // 修复列表标签
-        html = html.replace(/<oli>/g, '<li>');
-        html = html.replace(/<\/oli>/g, '</li>');
-        html = html.replace(/(<\/li><br>)+<\/ul>/g, '</ul>');
-        html = html.replace(/(<\/li><br>)+<\/ol>/g, '</ol>');
 
         // 修复段落标签
         html = html.replace(/^\s*<p>/, '<p>');
@@ -260,19 +323,12 @@ export class NoteDetailRenderer {
                 const safeId = String(id || "").trim();
                 if (!safeId) return _;
                 const name = (label || safeId).trim();
-                return `<a href="${toHref(safeId)}" class="wikilink">${escapeHtml(name)}</a>`;
+                return `<a href="${toHref(safeId)}" class="wikilink">${name}</a>`;
             });
         } catch (e) {
             console.error("[wikilink]", e);
             return text;
         }
-    }
-
-    // HTML 转义函数
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     // 渲染反向链接
@@ -283,8 +339,8 @@ export class NoteDetailRenderer {
                 <ul class="backlinks-list">
                     ${backlinks.map(link => `
                         <li>
-                            <a href="#/note/${link.id}" class="backlink-item">
-                                <span class="backlink-title">${link.title}</span>
+                            <a href="#/note/${encodeURIComponent(String(link.id))}" class="backlink-item">
+                                <span class="backlink-title">${escapeHtml(link.title)}</span>
                                 <span class="backlink-arrow">→</span>
                             </a>
                         </li>
@@ -368,4 +424,12 @@ export class NoteDetailRenderer {
             </div>
         `;
     }
+}
+
+function sanitizeUrl(url) {
+    const raw = String(url || '').trim();
+    if (!raw) return '#';
+    if (raw.startsWith('#') || raw.startsWith('/')) return raw;
+    if (/^(https?:|mailto:)/i.test(raw)) return raw;
+    return '#';
 }

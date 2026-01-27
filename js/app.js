@@ -46,6 +46,11 @@ let graphRenderer = null;
 let timelineRenderer = null;
 let renderToken = 0; // 路由渲染token，防止旧请求覆盖新页面
 
+function openSearchFromShortcut() {
+    if (!searchPanel) return;
+    searchPanel.open();
+}
+
 // 页面初始化
 async function initApp() {
     console.log('Alsay Portfolio - 初始化中...');
@@ -73,6 +78,30 @@ async function initApp() {
         // 初始化快捷键面板
         shortcutsPanel = new ShortcutsPanel();
 
+        document.addEventListener('keydown', (e) => {
+            const target = e.target;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+            if (e.repeat) return;
+
+            const key = e.key.toLowerCase();
+            if (key === '/') {
+                e.preventDefault();
+                openSearchFromShortcut();
+            }
+            if (key === 'n') {
+                e.preventDefault();
+                window.location.hash = '#/notes';
+            }
+            if (key === 'g') {
+                e.preventDefault();
+                window.location.hash = '#/graph';
+            }
+            if (key === 't') {
+                e.preventDefault();
+                window.location.hash = '#/timeline';
+            }
+        });
+
         // 绑定快捷键按钮
         const shortcutsBtn = document.getElementById('shortcuts-btn');
         if (shortcutsBtn) {
@@ -97,9 +126,13 @@ function initRoutes() {
     router.addRoute('/notes', showNotesList);
 
     // 笔记详情路由
-    router.addRoute('/note/:id', (route) => {
-        const noteId = route.split('/')[2]; // 提取笔记 ID
-        showNoteDetail(noteId);
+    router.addRoute('/note/:id', (route, params) => {
+        const noteId = params?.id || route.split('/')[2];
+        if (noteId) {
+            showNoteDetail(noteId);
+        } else {
+            showHome();
+        }
     });
 
     // 知识图谱路由
@@ -128,7 +161,7 @@ function showHome() {
             <!-- 顶部工具栏 - 移动端固定 -->
             <div class="top-toolbar">
                 <div class="toolbar-buttons">
-                    <button class="toolbar-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: '/'}))" title="搜索 (/)">
+                    <button class="toolbar-btn" onclick="window.location.hash='#/search'" title="搜索 (/)">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                         </svg>
@@ -180,7 +213,7 @@ function showHome() {
                                 <p>浏览全部笔记</p>
                             </div>
                         </a>
-                        <a href="#/search" class="main-entry" onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: '/'}))">
+                        <a href="#/search" class="main-entry">
                             <div class="entry-icon">🔍</div>
                             <div class="entry-content">
                                 <h3>快速搜索</h3>
@@ -191,18 +224,9 @@ function showHome() {
                 </div>
 
                 <div class="learning-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">${store.getNotes().length}</div>
-                        <div class="stat-label">笔记</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">${store.getAllTags().length}</div>
-                        <div class="stat-label">标签</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">${Array.from(new Set(store.getNotes().flatMap(n => n.linksOut || []))).length}</div>
-                        <div class="stat-label">连接</div>
-                    </div>
+                    <span><strong>${store.getNotes().length}</strong> 笔记</span>
+                    <span><strong>${store.getAllTags().length}</strong> 标签</span>
+                    <span><strong>${Array.from(new Set(store.getNotes().flatMap(n => n.linksOut || []))).length}</strong> 连接</span>
                 </div>
             </div>
         `;
@@ -259,7 +283,7 @@ function showNotesList() {
                     ${topics.map(t => `<option value="${t}">${t}</option>`).join('')}
                 </select>
                 <select id="notes-sort">
-                    <option value="updated">按更新时间</option>
+                    <option value="updatedAt">按更新时间</option>
                     <option value="title">按标题</option>
                     <option value="created">按创建时间</option>
                 </select>
@@ -291,7 +315,7 @@ function renderNoteCards(notes) {
                 <h3>${note.title}</h3>
                 <span class="note-card-topic">${note.topic || '未分类'}</span>
             </div>
-            <p class="note-card-excerpt">${note.text.slice(0, 150)}${note.text.length > 150 ? '...' : ''}</p>
+            <p class="note-card-excerpt">${(note.text || '').slice(0, 150)}${(note.text || '').length > 150 ? '...' : ''}</p>
             <div class="note-card-footer">
                 <span class="note-card-date">${note.updatedAt || note.createdAt}</span>
                 <div class="note-card-tags">
@@ -308,6 +332,7 @@ function bindNotesEvents() {
     const topicFilter = document.getElementById('notes-topic-filter');
     const sortSelect = document.getElementById('notes-sort');
     const tagItems = document.querySelectorAll('.tag-cloud-item');
+    const notesGrid = document.getElementById('notes-grid');
 
     let currentTag = '';
 
@@ -315,7 +340,7 @@ function bindNotesEvents() {
         const query = searchInput?.value.toLowerCase() || '';
         const topic = topicFilter?.value || '';
         const notes = store.searchNotes(query, { topic, tags: currentTag ? [currentTag] : [], sortBy: sortSelect?.value || 'updatedAt' });
-        document.getElementById('notes-grid').innerHTML = renderNoteCards(notes);
+        notesGrid.innerHTML = renderNoteCards(notes);
     }
 
     searchInput?.addEventListener('input', filterNotes);
@@ -324,8 +349,9 @@ function bindNotesEvents() {
 
     tagItems.forEach(item => {
         item.addEventListener('click', () => {
+            const wasActive = item.classList.contains('active');
             tagItems.forEach(t => t.classList.remove('active'));
-            if (item.classList.contains('active')) {
+            if (wasActive || !item.dataset.tag) {
                 currentTag = '';
             } else {
                 item.classList.add('active');
@@ -335,12 +361,14 @@ function bindNotesEvents() {
         });
     });
 
-    // 笔记卡片点击事件
-    document.querySelectorAll('.note-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const noteId = card.dataset.id;
+    // 笔记卡片点击事件（使用事件委托，避免重绘后失效）
+    notesGrid?.addEventListener('click', (event) => {
+        const card = event.target.closest('.note-card');
+        if (!card || !notesGrid.contains(card)) return;
+        const noteId = card.dataset.id;
+        if (noteId) {
             window.location.hash = `/note/${noteId}`;
-        });
+        }
     });
 }
 
@@ -353,6 +381,7 @@ async function showGraph() {
     // 清理之前的渲染器
     if (graphRenderer) {
         graphRenderer.destroy();
+        graphRenderer = null;
     }
 
     // 创建新的渲染器

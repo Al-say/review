@@ -21,6 +21,19 @@ export class Router {
 
     // 注册路由
     addRoute(path, handler) {
+        if (!this.dynamicRoutes) {
+            this.dynamicRoutes = [];
+        }
+        if (path.includes(':')) {
+            const keys = [];
+            const pattern = '^' + path.replace(/\/:([^/]+)/g, (_, key) => {
+                keys.push(key);
+                return '/([^/]+)';
+            }) + '$';
+            const regex = new RegExp(pattern);
+            this.dynamicRoutes.push({ path, handler, regex, keys });
+            return;
+        }
         this.routes[path] = handler;
     }
 
@@ -33,7 +46,30 @@ export class Router {
     // 处理路由 - 带并发保护
     async handleRoute() {
         const route = this.getCurrentRoute();
-        const handler = this.routes[route] || this.routes['/'];
+        let handler = this.routes[route];
+        let params = null;
+
+        if (!handler && this.dynamicRoutes && this.dynamicRoutes.length > 0) {
+            for (const entry of this.dynamicRoutes) {
+                const match = route.match(entry.regex);
+                if (match) {
+                    params = {};
+                    entry.keys.forEach((key, index) => {
+                        try {
+                            params[key] = decodeURIComponent(match[index + 1]);
+                        } catch {
+                            params[key] = match[index + 1];
+                        }
+                    });
+                    handler = entry.handler;
+                    break;
+                }
+            }
+        }
+
+        if (!handler) {
+            handler = this.routes['*'] || this.routes['/'];
+        }
 
         if (handler) {
             // 增加渲染令牌，防止竞态条件
@@ -41,7 +77,7 @@ export class Router {
 
             try {
                 // 如果handler是异步函数，等待其完成
-                const result = handler(route);
+                const result = handler(route, params);
 
                 // 如果返回Promise，等待其完成
                 if (result && typeof result.then === 'function') {

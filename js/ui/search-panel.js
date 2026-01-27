@@ -51,7 +51,7 @@ export class SearchPanel {
 
                     <!-- 搜索历史 -->
                     ${this.searchHistory.length > 0 ? `
-                        <div class="search-history">
+                        <div id="search-history" class="search-history">
                             <div class="history-header">
                                 <span>最近搜索</span>
                                 <button id="clear-history" class="clear-history-btn">清除</button>
@@ -307,7 +307,7 @@ export class SearchPanel {
 
         const resultsHTML = this.results.map((result, index) => {
             const isSelected = index === this.selectedIndex;
-            const highlightedText = this.highlightMatches(result.text, this.currentQuery);
+            const highlightedText = this.highlightMatches(result.text || '', this.currentQuery);
 
             return `
                 <div class="search-result ${isSelected ? 'selected' : ''}" data-index="${index}">
@@ -320,7 +320,7 @@ export class SearchPanel {
                     </div>
                     <div class="result-content">${highlightedText}</div>
                     <div class="result-tags">
-                        ${result.tags.map(tag => `<span class="result-tag">${tag}</span>`).join('')}
+                        ${(result.tags || []).map(tag => `<span class="result-tag">${tag}</span>`).join('')}
                     </div>
                     ${result.linksOut && result.linksOut.length > 0 ?
                         `<div class="result-links">出链: ${result.linksOut.length} 个笔记</div>` : ''}

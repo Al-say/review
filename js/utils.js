@@ -54,11 +54,16 @@ export function safeJsonParse(text) {
 }
 
 export function initSmoothScroll() {
-    // 平滑滚动
+    // 平滑滚动 - 只对页面内锚点链接生效，不拦截路由链接
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            // 跳过路由链接（如 #/note/xxx）和空锚点
+            if (href.startsWith('#/') || href === '#' || href === '') {
+                return;
+            }
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const target = document.querySelector(href);
             if (target) {
                 target.scrollIntoView({
                     behavior: 'smooth',
@@ -129,4 +134,15 @@ export function getRelativeTime(date) {
     }
 
     return '刚刚';
+}
+
+/**
+ * HTML 转义函数 - 防止 XSS 攻击
+ * @param {string} text - 需要转义的文本
+ * @returns {string} 转义后的 HTML 安全字符串
+ */
+export function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
