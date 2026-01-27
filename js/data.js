@@ -1,8 +1,7 @@
 // data.js - 数据处理模块
 import { urlOf, safeJsonParse } from './utils.js';
 import { errorHandler } from './utils/error-handler.js';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+// Node-only modules are loaded lazily inside Node paths.
 
 let searchData = null;
 let graphData = null;
@@ -13,8 +12,10 @@ export async function fetchJson(filePath) {
     let text;
     if (typeof window === 'undefined') {
       // Node.js environment
+      const { readFile } = await import('fs/promises');
+      const path = await import('path');
       const resolvedPath = path.resolve(filePath);
-      text = await fs.readFile(resolvedPath, 'utf-8');
+      text = await readFile(resolvedPath, 'utf-8');
     } else {
       // Browser environment
       const res = await fetch(urlOf(filePath), { cache: "no-store" });
@@ -33,8 +34,10 @@ export async function fetchText(filePath) {
   try {
     if (typeof window === 'undefined') {
       // Node.js environment
+      const { readFile } = await import('fs/promises');
+      const path = await import('path');
       const resolvedPath = path.resolve(filePath);
-      return await fs.readFile(resolvedPath, 'utf-8');
+      return await readFile(resolvedPath, 'utf-8');
     } else {
       // Browser environment
       const res = await fetch(urlOf(filePath), { cache: "no-store" });

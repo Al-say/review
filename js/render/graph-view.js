@@ -25,6 +25,7 @@ export class GraphRenderer {
         this.transform = { x: 0, y: 0, scale: 1 };
         this.animationId = null;
         this.simulationStep = 0;
+        this._handleResize = null;
     }
 
     async render() {
@@ -253,7 +254,7 @@ export class GraphRenderer {
         this.canvas.addEventListener('mouseup', () => this.onMouseUp());
         this.canvas.addEventListener('mouseleave', () => this.onMouseUp());
         this.canvas.addEventListener('click', (e) => this.onClick(e));
-        this.canvas.addEventListener('wheel', (e) => this.onWheel(e));
+        this.canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
 
         // 触摸事件 - 使用 passive: false 以允许 preventDefault()
         this.canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
@@ -266,7 +267,8 @@ export class GraphRenderer {
         this.container.querySelector('#sidebar-close').addEventListener('click', () => this.closeSidebar());
 
         // 窗口调整
-        window.addEventListener('resize', () => this.setupCanvas());
+        this._handleResize = () => this.setupCanvas();
+        window.addEventListener('resize', this._handleResize);
     }
 
     getMousePos(e) {
@@ -414,6 +416,10 @@ export class GraphRenderer {
     destroy() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
+        }
+        if (this._handleResize) {
+            window.removeEventListener('resize', this._handleResize);
+            this._handleResize = null;
         }
     }
 }

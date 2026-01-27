@@ -1318,7 +1318,7 @@ footer a:hover {
     .note-navigation .prev-btn svg {
         order: -1;
     }
-}
+
     .note-content h3 { font-size: 1.4rem; }
 
     .note-meta {
@@ -2643,6 +2643,7 @@ footer a:hover {
         left: -15px;
         top: 4px;
     }
+}
 
 /* 深色模式适配 - 知识图谱和时间线 */
 @media (prefers-color-scheme: dark) {

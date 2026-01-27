@@ -193,17 +193,21 @@ export class NoteDetailRenderer {
 
     // 渲染 Markdown（增强版）
     renderMarkdown(content) {
-        const safeContent = escapeHtml(String(content || ''));
-        // 先处理 wikilinks
-        const withWikiLinks = this.safeReplaceWikiLinks(safeContent, (id) => `#/note/${encodeURIComponent(id)}`);
+        const rawContent = String(content || '');
 
-        // 提取代码块，避免被其他正则处理
+        // 先提取代码块，避免被其他正则处理
         const codeBlocks = [];
-        let html = withWikiLinks.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
+        let html = rawContent.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
             const index = codeBlocks.length;
             codeBlocks.push({ lang: lang || '', code: escapeHtml(code.trim()) });
             return `__CODE_BLOCK_${index}__`;
         });
+
+        // 转义非代码内容，防止注入
+        html = escapeHtml(html);
+
+        // 处理 wikilinks
+        html = this.safeReplaceWikiLinks(html, (id) => `#/note/${encodeURIComponent(id)}`);
 
         // 处理行内代码
         html = html.replace(/`([^`]+)`/g, '<code>$1</code>');

@@ -791,6 +791,25 @@
       return `${BASE_URL}${path}`.replace(/\/{2,}/g, '/');
     }
 
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = String(text ?? '');
+      return div.innerHTML;
+    }
+
+    function sanitizeUrl(url) {
+      const trimmed = String(url ?? '').trim();
+      if (!trimmed) return '#';
+      try {
+        const parsed = new URL(trimmed, window.location.href);
+        const protocol = parsed.protocol.toLowerCase();
+        if (protocol === 'javascript:' || protocol === 'data:') return '#';
+        return parsed.toString();
+      } catch {
+        return '#';
+      }
+    }
+
     const state = {
       notes: [],
       activeId: null,
@@ -918,7 +937,11 @@
       if (sortBy === 'title') {
         list.sort((a, b) => a.title.localeCompare(b.title, 'zh-Hans-CN'));
       } else {
-        list.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        list.sort((a, b) => {
+          const aTime = new Date(a.updatedAt || a.createdAt || 0).getTime();
+          const bTime = new Date(b.updatedAt || b.createdAt || 0).getTime();
+          return bTime - aTime;
+        });
       }
 
       return list;
@@ -932,13 +955,17 @@
       }
       els.noteList.innerHTML = list.map((note, index) => {
         const isActive = note.id === state.activeId;
+        const safeTitle = escapeHtml(note.title || '');
+        const safeId = escapeHtml(note.id || '');
+        const safeTopic = escapeHtml(note.topic || '未分类');
+        const safeUpdated = escapeHtml(note.updatedAt || '-');
         return `
-          <div class="nm-note-card ${isActive ? 'active' : ''}" data-id="${note.id}" tabindex="0" role="button" aria-label="阅读: ${note.title}" data-index="${index}">
-            <h3>${note.title}</h3>
+          <div class="nm-note-card ${isActive ? 'active' : ''}" data-id="${note.id}" tabindex="0" role="button" aria-label="阅读: ${safeTitle}" data-index="${index}">
+            <h3>${safeTitle}</h3>
             <div class="nm-note-meta">
-              <span>ID: ${note.id}</span>
-              <span>主题: ${note.topic || '未分类'}</span>
-              <span>更新: ${note.updatedAt}</span>
+              <span>ID: ${safeId}</span>
+              <span>主题: ${safeTopic}</span>
+              <span>更新: ${safeUpdated}</span>
             </div>
           </div>
         `;
@@ -954,17 +981,28 @@
         .replace(/\-+/g, '-');
     }
 
-    function buildToc(content) {
+    function extractHeadings(content) {
       const lines = content.split('\n');
       const items = [];
+      const slugCounts = new Map();
+      const uniqueSlug = (title) => {
+        const base = slugifyHeading(title);
+        const count = slugCounts.get(base) || 0;
+        slugCounts.set(base, count + 1);
+        return count === 0 ? base : `${base}-${count}`;
+      };
       lines.forEach(line => {
         const match = /^(#{1,3})\s+(.*)$/.exec(line.trim());
         if (!match) return;
         const level = match[1].length;
         const title = match[2].trim();
-        const id = slugifyHeading(title);
+        const id = uniqueSlug(title);
         items.push({ level, title, id });
       });
+      return items;
+    }
+
+    function buildToc(items) {
       if (!items.length) {
         els.toc.style.display = 'none';
         els.toc.innerHTML = '';
@@ -985,12 +1023,12 @@
         const head = group.head;
         const headClass = head.level === 1 ? '' : 'toc-h2';
         const children = group.children.map(child => (
-          `<li class="toc-h3"><a href="#${child.id}">${child.title}</a></li>`
+          `<li class="toc-h3"><a href="#${child.id}">${escapeHtml(child.title)}</a></li>`
         )).join('');
         return `
           <li class="toc-group">
             <div class="toc-toggle" data-target="${head.id}">
-              <a class="${headClass}" href="#${head.id}">${head.title}</a>
+              <a class="${headClass}" href="#${head.id}">${escapeHtml(head.title)}</a>
             </div>
             ${children ? `<ul>${children}</ul>` : ''}
           </li>

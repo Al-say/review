@@ -275,7 +275,7 @@ export class SearchPanel {
         });
     }
 
-    performSearch() {
+    async performSearch() {
         if (!this.currentQuery && !this.filters.topic && this.filters.tags.length === 0) {
             this.showStatus('输入关键词开始搜索...');
             return;

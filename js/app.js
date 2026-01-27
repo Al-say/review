@@ -168,7 +168,7 @@ async function initApp() {
             // 点击外部关闭面板
             if (e.target === container || container.contains(e.target)) {
                 const searchPanelEl = document.getElementById('search-panel');
-                const shortcutsPanelEl = document.querySelector('.shortcuts-modal');
+                const shortcutsPanelEl = document.getElementById('shortcuts-panel');
                 if (searchPanelEl && searchPanelEl.style.display !== 'none') {
                     if (searchPanel) searchPanel.close();
                 }

@@ -4,9 +4,12 @@
   "description": "Alsay's personal portfolio website with Apple-style design",
   "type": "module",
   "scripts": {
-    "start": "npx serve",
-    "test": "echo \"No tests specified\"",
-    "build": "echo \"No build required\""
+    "prebuild": "rm -rf build",
+    "build": "npm run build:css && npm run build:js && npm run build:static",
+    "build:css": "mkdir -p build/css && find css -name '*.css' -exec cssnano {} build/{} \\;",
+    "build:js": "mkdir -p build/js && find js -name '*.js' | while read -r file; do mkdir -p build/$(dirname $file) && terser $file -o build/$file; done",
+    "build:static": "cp index.html notes.html manifest.json sw.js robots.txt sitemap.xml CNAME LICENSE README.md CONTRIBUTING.md SECURITY.md SEARCH_PANEL_README.md STABILITY_FIXES_README.md DEPLOYMENT_STATUS.md build/ && cp -r images data build/",
+    "start": "npx serve build"
   },
   "repository": {
     "type": "git",
