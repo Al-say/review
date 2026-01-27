@@ -309,6 +309,17 @@ function showHome() {
                 </div>
             </div>
         `;
+
+        // Preload heavy components on hover
+        const graphBtn = container.querySelector("button[onclick=\"window.location.hash='#/graph'\"]");
+        if (graphBtn) {
+            graphBtn.addEventListener('mouseenter', () => lazyLoader.preload('graph-view'), { once: true });
+        }
+
+        const timelineBtn = container.querySelector("button[onclick=\"window.location.hash='#/timeline'\"]");
+        if (timelineBtn) {
+            timelineBtn.addEventListener('mouseenter', () => lazyLoader.preload('timeline-view'), { once: true });
+        }
     }
 }
 

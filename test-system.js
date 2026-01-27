@@ -25,7 +25,7 @@ async function testSystem() {
         }
         
         // 测试 5: 搜索功能
-        const searchResults = store.searchNotes('TCP');
+        const searchResults = await store.searchNotes('TCP');
         console.log(`✅ 搜索 "TCP" 找到 ${searchResults.length} 个结果`);
         
         console.log('🎉 所有测试通过！');

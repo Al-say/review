@@ -25,6 +25,8 @@
   },
   "homepage": "https://al-say.github.io/review/",
   "devDependencies": {
-    "serve": "^14.0.0"
+    "cssnano-cli": "^1.0.5",
+    "serve": "^14.0.0",
+    "terser": "^5.46.0"
   }
 }

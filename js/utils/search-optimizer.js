@@ -5,6 +5,7 @@ export class SearchOptimizer {
         this.cacheSize = 50; // 缓存最近50次搜索结果
         this.debounceDelay = 150; // 降低防抖延迟到150ms
         this.minQueryLength = 2; // 最小查询长度
+        this.tokenizeRegex = /[^\u4e00-\u9fa5a-zA-Z0-9\s]/g;
         this.stopWords = new Set([
             '的', '了', '在', '是', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这', '那', '它', '他', '她', '们', '我们', '你们', '他们', '它们', '这个', '那个', '这些', '那些', '什么', '怎么', '为什么', '哪里', '何时', '谁', '如何', '哪个'
         ]);
@@ -58,9 +59,7 @@ export class SearchOptimizer {
 
                 // 计算词频
                 contentWords.forEach(word => {
-                    if (!this.stopWords.has(word)) {
-                        wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
-                    }
+                    wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
                 });
 
                 // 更新索引
@@ -78,9 +77,9 @@ export class SearchOptimizer {
     tokenize(text) {
         return text
             .toLowerCase()
-            .replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s]/g, ' ')
+            .replace(this.tokenizeRegex, ' ')
             .split(/\s+/)
-            .filter(word => word.length > 1);
+            .filter(word => word.length > 1 && !this.stopWords.has(word));
     }
 
     // 计算相关度分数
@@ -165,12 +164,24 @@ export class SearchOptimizer {
 
         // 文本搜索
         if (query && query.length >= this.minQueryLength) {
-            results = results.filter(note => {
-                const lowerQuery = query.toLowerCase();
-                return (note.title || '').toLowerCase().includes(lowerQuery) ||
-                       (note.text || '').toLowerCase().includes(lowerQuery) ||
-                       (note.tags || []).some(tag => tag.toLowerCase().includes(lowerQuery));
+            const queryWords = this.tokenize(query);
+            const matchedNoteIds = new Set();
+
+            // 从索引中获取匹配的笔记ID
+            queryWords.forEach(word => {
+                if (this.titleIndex.has(word)) {
+                    this.titleIndex.get(word).forEach(id => matchedNoteIds.add(id));
+                }
+                if (this.tagIndex.has(word)) {
+                    this.tagIndex.get(word).forEach(id => matchedNoteIds.add(id));
+                }
+                if (this.wordIndex.has(word)) {
+                    this.wordIndex.get(word).forEach((freq, id) => matchedNoteIds.add(id));
+                }
             });
+
+            // 使用索引结果过滤笔记
+            results = results.filter(note => matchedNoteIds.has(note.id));
 
             // 计算相关度分数
             results = results.map(note => ({

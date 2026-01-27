@@ -56,24 +56,13 @@ export class SearchPanel {
                     </div>
 
                     <!-- 搜索历史 -->
-                    ${this.searchHistory.length > 0 ? `
-                        <div id="search-history" class="search-history">
-                            <div class="history-header">
-                                <span>最近搜索</span>
-                                <button id="clear-history" class="clear-history-btn">清除</button>
-                            </div>
-                            <div class="history-items">
-                                ${this.searchHistory.slice(0, 5).map(item => `
-                                    <button class="history-item" data-query="${item}">
-                                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-                                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 10 10 10-4.48 10-10S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 1h2v2h-2V7zm4 0h2v2h-2V7zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
-                                        </svg>
-                                        ${item}
-                                    </button>
-                                `).join('')}
-                            </div>
+                    <div id="search-history" class="search-history" style="display: none;">
+                        <div class="history-header">
+                            <span>最近搜索</span>
+                            <button id="clear-history" class="clear-history-btn">清除</button>
                         </div>
-                    ` : ''}
+                        <div class="history-items"></div>
+                    </div>
 
                     <div class="search-filters">
                         <div class="filter-group">
@@ -260,23 +249,7 @@ export class SearchPanel {
             tagsContainer.appendChild(tagElement);
         });
 
-        // 绑定搜索历史事件
-        const historyItems = document.querySelectorAll('.history-item');
-        historyItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const query = item.dataset.query;
-                this.input.value = query;
-                this.currentQuery = query;
-                this.performSearch();
-                this.input.focus();
-            });
-        });
-
-        // 清除历史按钮
-        const clearBtn = document.getElementById('clear-history');
-        clearBtn?.addEventListener('click', () => {
-            this.clearHistory();
-        });
+        // 搜索历史事件由 renderSearchHistory 统一绑定
     }
 
     toggleTag(tag) {
@@ -463,7 +436,34 @@ export class SearchPanel {
             return;
         }
 
+        const itemsContainer = historyContainer.querySelector('.history-items');
+        if (itemsContainer) {
+            itemsContainer.innerHTML = this.searchHistory.slice(0, 5).map(item => `
+                <button class="history-item" data-query="${item}">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 10 10 10-4.48 10-10S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 1h2v2h-2V7zm4 0h2v2h-2V7zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
+                    </svg>
+                    ${item}
+                </button>
+            `).join('');
+        }
+
         historyContainer.style.display = 'block';
+
+        historyContainer.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const query = item.dataset.query;
+                this.input.value = query;
+                this.currentQuery = query;
+                this.performSearch();
+                this.input.focus();
+            });
+        });
+
+        const clearBtn = historyContainer.querySelector('#clear-history');
+        clearBtn?.addEventListener('click', () => {
+            this.clearHistory();
+        });
     }
 
     // 清除搜索历史
