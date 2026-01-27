@@ -6,6 +6,10 @@
  * @returns {string} 完整URL
  */
 export function urlOf(path) {
+  if (typeof document === 'undefined') {
+    // Node.js environment, assume path is relative to the project root
+    return path;
+  }
   return new URL(path, document.baseURI).toString();
 }
 

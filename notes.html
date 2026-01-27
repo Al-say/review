@@ -182,6 +182,13 @@
       accent-color: var(--nm-accent);
     }
 
+    .nm-width-slider span {
+      min-width: 36px;
+      text-align: right;
+      color: var(--nm-text);
+      font-variant-numeric: tabular-nums;
+    }
+
     .nm-panel {
       background: var(--nm-panel);
       border: 1px solid var(--nm-border);
@@ -747,9 +754,10 @@
                 <button id="wrapToggleBtn" title="代码自动换行 (W)">换行</button>
                 <button id="themeToggleBtn" title="切换主题 (T)">🌙</button>
               </div>
-              <label class="nm-width-slider">
+              <label class="nm-width-slider" title="阅读宽度">
                 宽度
                 <input id="widthRange" type="range" min="640" max="1200" step="40" />
+                <span id="widthValue">900</span>
               </label>
               <div class="nm-tool-group" data-label="模式">
                 <button id="focusToggleBtn" title="专注阅读 (F)">🔍</button>
@@ -813,6 +821,7 @@
       resetReaderBtn: document.getElementById('resetReaderBtn'),
       progressBar: document.getElementById('progressBar'),
       widthRange: document.getElementById('widthRange'),
+      widthValue: document.getElementById('widthValue'),
       lightbox: document.getElementById('lightbox'),
       lightboxImg: document.getElementById('lightboxImg'),
       lightboxClose: document.getElementById('lightboxClose'),
@@ -852,6 +861,10 @@
       }
       if (els.widthRange) {
         els.widthRange.value = readerPrefs.width;
+      }
+      if (els.widthValue) {
+        const pct = Math.round((readerPrefs.width / 1200) * 100);
+        els.widthValue.textContent = `${pct}%`;
       }
       document.querySelectorAll('.nm-preview pre').forEach(pre => {
         pre.classList.toggle('code-wrap', readerPrefs.codeWrap);
@@ -1273,18 +1286,20 @@
         return cells;
       };
 
+      const normalizeAlign = (token) => {
+        const trimmed = token.trim();
+        const left = trimmed.startsWith(':');
+        const right = trimmed.endsWith(':');
+        if (left && right) return 'center';
+        if (right) return 'right';
+        if (left) return 'left';
+        return '';
+      };
+
       const parseTable = (startIndex) => {
         const headerCells = splitRow(lines[startIndex]);
         const alignTokens = splitRow(lines[startIndex + 1]);
-        const aligns = alignTokens.map(token => {
-          const trimmed = token.trim();
-          const isLeft = trimmed.startsWith(':');
-          const isRight = trimmed.endsWith(':');
-          if (isLeft && isRight) return 'center';
-          if (isRight) return 'right';
-          if (isLeft) return 'left';
-          return '';
-        });
+        const aligns = headerCells.map((_, idx) => normalizeAlign(alignTokens[idx] || ''));
 
         const thead = `<thead><tr>${headerCells.map((cell, idx) => {
           const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
@@ -1392,7 +1407,7 @@
           const indentMatch = line.match(/^(\s*)/);
           const indentRaw = indentMatch ? indentMatch[1] : '';
           const indentCount = indentRaw.replace(/\t/g, '  ').length;
-          const level = Math.floor(indentCount / 2);
+          const level = indentCount % 2 === 0 ? indentCount / 2 : 0;
           const type = isOrdered ? 'ol' : 'ul';
           let content = line.replace(/^\s*[-*+]\s+/, '').replace(/^\s*\d+\.\s+/, '');
 

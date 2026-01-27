@@ -1,11 +1,13 @@
 // js/store.js - 数据状态与缓存管理模块
 import { loadSearchIndex } from './data.js';
+import { SearchOptimizer } from './utils/search-optimizer.js';
 
 class Store {
     constructor() {
         this.searchIndex = null;
         this.noteCache = new Map();
         this.backlinksCache = new Map();
+        this.searchOptimizer = new SearchOptimizer();
     }
 
     // 初始化存储
@@ -13,6 +15,8 @@ class Store {
         try {
             this.searchIndex = await loadSearchIndex();
             this.buildBacklinksCache();
+            // 初始化搜索索引
+            this.searchOptimizer.updateIndex(this.getNotes());
             console.log('数据存储初始化完成');
         } catch (error) {
             console.error('数据存储初始化失败:', error);
@@ -79,64 +83,24 @@ class Store {
         return this.getNotes().filter(note => (note.tags || []).includes(tag));
     }
 
-    // 搜索笔记
-    searchNotes(query, options = {}) {
+    // 搜索笔记（使用优化器）
+    async searchNotes(query, options = {}) {
+        // 检查查询长度
+        if (query && query.length < 2) {
+            return [];
+        }
+
         const { topic, tags, sortBy = 'relevance', limit = 20 } = options;
-        let results = this.getNotes();
 
-        // 按主题过滤
-        if (topic) {
-            results = results.filter(note => note.topic === topic);
-        }
+        // 使用优化器进行搜索
+        const results = this.searchOptimizer.search(query, this.getNotes(), {
+            topic,
+            tags,
+            sortBy,
+            limit
+        });
 
-        // 按标签过滤
-        if (tags && tags.length > 0) {
-            results = results.filter(note =>
-                tags.some(tag => (note.tags || []).includes(tag))
-            );
-        }
-
-        // 文本搜索
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            results = results.filter(note =>
-                (note.title || '').toLowerCase().includes(lowerQuery) ||
-                (note.text || '').toLowerCase().includes(lowerQuery) ||
-                (note.tags || []).some(tag => tag.toLowerCase().includes(lowerQuery))
-            );
-        }
-
-        // 排序
-        if (sortBy === 'updatedAt') {
-            results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-        } else if (sortBy === 'created') {
-            results.sort((a, b) => new Date(b.createdAt || b.updatedAt) - new Date(a.createdAt || a.updatedAt));
-        } else if (sortBy === 'title') {
-            results.sort((a, b) => a.title.localeCompare(b.title, 'zh-Hans-CN'));
-        } else if (sortBy === 'relevance') {
-            // 如果有查询，按相关度排序（标题匹配优先，然后是内容匹配）
-            if (query) {
-                const lowerQuery = query.toLowerCase();
-                results.sort((a, b) => {
-                    const aTitleMatch = a.title.toLowerCase().includes(lowerQuery);
-                    const bTitleMatch = b.title.toLowerCase().includes(lowerQuery);
-                    const aContentMatch = a.text.toLowerCase().includes(lowerQuery);
-                    const bContentMatch = b.text.toLowerCase().includes(lowerQuery);
-
-                    // 标题匹配优先
-                    if (aTitleMatch && !bTitleMatch) return -1;
-                    if (!aTitleMatch && bTitleMatch) return 1;
-
-                    // 然后按更新时间
-                    return new Date(b.updatedAt) - new Date(a.updatedAt);
-                });
-            } else {
-                // 无查询时按更新时间排序
-                results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-            }
-        }
-
-        return results.slice(0, limit);
+        return results;
     }
 
     // 获取所有主题

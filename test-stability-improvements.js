@@ -11,13 +11,17 @@ async function testStabilityImprovements() {
         console.log('✅ urlOf 函数工作正常:', testUrl);
 
         // 测试 2: DOM 断言函数 (在DOM加载后测试)
-        if (document.readyState === 'loading') {
-            await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
-        }
+        if (typeof document !== 'undefined') {
+            if (document.readyState === 'loading') {
+                await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+            }
 
-        // 测试可选DOM函数
-        const optionalEl = optionalGet('non-existent-element');
-        console.log('✅ optionalGet 函数工作正常:', optionalEl === null ? '返回null' : '找到元素');
+            // 测试可选DOM函数
+            const optionalEl = optionalGet('non-existent-element');
+            console.log('✅ optionalGet 函数工作正常:', optionalEl === null ? '返回null' : '找到元素');
+        } else {
+            console.log('⚪️ 跳过DOM相关测试 (非浏览器环境)');
+        }
 
         // 测试 3: 安全的JSON解析
         const validJson = safeJsonParse('{"test": "value"}');

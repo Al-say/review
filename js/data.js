@@ -1,22 +1,50 @@
 // data.js - 数据处理模块
 import { urlOf, safeJsonParse } from './utils.js';
+import { errorHandler } from './utils/error-handler.js';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 let searchData = null;
 let graphData = null;
 
 // 安全的JSON获取函数
-export async function fetchJson(path) {
-  const res = await fetch(urlOf(path), { cache: "no-store" });
-  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${path}`);
-  const text = await res.text();
-  return safeJsonParse(text);
+export async function fetchJson(filePath) {
+  try {
+    let text;
+    if (typeof window === 'undefined') {
+      // Node.js environment
+      const resolvedPath = path.resolve(filePath);
+      text = await fs.readFile(resolvedPath, 'utf-8');
+    } else {
+      // Browser environment
+      const res = await fetch(urlOf(filePath), { cache: "no-store" });
+      if (!res.ok) throw new Error(`Fetch failed ${res.status} ${filePath}`);
+      text = await res.text();
+    }
+    return safeJsonParse(text);
+  } catch (error) {
+    errorHandler.handleError(error, `fetchJson: ${filePath}`);
+    throw error;
+  }
 }
 
 // 安全的文本获取函数
-export async function fetchText(path) {
-  const res = await fetch(urlOf(path), { cache: "no-store" });
-  if (!res.ok) throw new Error(`Fetch failed ${res.status} ${path}`);
-  return res.text();
+export async function fetchText(filePath) {
+  try {
+    if (typeof window === 'undefined') {
+      // Node.js environment
+      const resolvedPath = path.resolve(filePath);
+      return await fs.readFile(resolvedPath, 'utf-8');
+    } else {
+      // Browser environment
+      const res = await fetch(urlOf(filePath), { cache: "no-store" });
+      if (!res.ok) throw new Error(`Fetch failed ${res.status} ${filePath}`);
+      return res.text();
+    }
+  } catch (error) {
+    errorHandler.handleError(error, `fetchText: ${filePath}`);
+    throw error;
+  }
 }
 
 // 搜索索引结构断言 - 增强版本校验

@@ -1,0 +1,341 @@
+/* 高对比度模式样式 */
+.high-contrast {
+    /* 强制高对比度颜色 */
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --text-light: #cccccc;
+    --card-bg: #1a1a1a;
+    --border-color: #ffffff;
+    --primary-color: #ffffff;
+    --secondary-color: #ffff00;
+    --accent-color: #00ffff;
+
+    /* 禁用渐变和透明度 */
+    --bg-gradient: none;
+}
+
+/* 禁用所有动画和过渡效果 */
+.high-contrast *,
+.high-contrast *::before,
+.high-contrast *::after {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+}
+
+/* 增强文本对比度 */
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6 {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.high-contrast p,
+.high-contrast span,
+.high-contrast div {
+    color: #ffffff;
+}
+
+/* 按钮样式 */
+.high-contrast button,
+.high-contrast .toolbar-btn,
+.high-contrast .shortcuts-nav-btn {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    padding: 8px 16px;
+    font-weight: bold;
+}
+
+.high-contrast button:hover,
+.high-contrast button:focus,
+.high-contrast .toolbar-btn:hover,
+.high-contrast .toolbar-btn:focus {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* 链接样式 */
+.high-contrast a {
+    color: #00ffff;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.high-contrast a:hover,
+.high-contrast a:focus {
+    color: #ffff00;
+    text-decoration: underline;
+}
+
+/* 卡片样式 */
+.high-contrast .card,
+.high-contrast .project-card,
+.high-contrast .note-card {
+    background-color: #1a1a1a;
+    border: 2px solid #ffffff;
+}
+
+.high-contrast .card:hover,
+.high-contrast .project-card:hover,
+.high-contrast .note-card:hover {
+    border-color: #ffff00;
+    background-color: #000000;
+}
+
+/* 输入框样式 */
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    padding: 8px;
+}
+
+.high-contrast input:focus,
+.high-contrast textarea:focus,
+.high-contrast select:focus {
+    outline: 3px solid #00ffff;
+    border-color: #00ffff;
+}
+
+/* 表格样式 */
+.high-contrast table {
+    border-collapse: collapse;
+    border: 2px solid #ffffff;
+}
+
+.high-contrast th,
+.high-contrast td {
+    border: 1px solid #ffffff;
+    padding: 8px;
+    background-color: #000000;
+}
+
+.high-contrast th {
+    background-color: #1a1a1a;
+    font-weight: bold;
+}
+
+/* 搜索面板 */
+.high-contrast .search-panel {
+    background-color: #000000;
+    border: 3px solid #ffffff;
+}
+
+.high-contrast .search-input-wrapper input {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    padding: 12px;
+}
+
+.high-contrast .search-result {
+    background-color: #1a1a1a;
+    border: 2px solid #ffffff;
+    margin-bottom: 8px;
+}
+
+.high-contrast .search-result.selected {
+    background-color: #000000;
+    border-color: #00ffff;
+}
+
+/* 状态指示器 */
+.high-contrast .status-dot {
+    background-color: #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+/* 面包屑导航 */
+.high-contrast .breadcrumb-item a {
+    color: #00ffff;
+    text-decoration: underline;
+}
+
+.high-contrast .breadcrumb-separator {
+    color: #ffffff;
+}
+
+/* 分页 */
+.high-contrast .pagination {
+    color: #ffffff;
+}
+
+.high-contrast .pagination button {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+
+.high-contrast .pagination button:hover,
+.high-contrast .pagination button.active {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* 加载动画 */
+.high-contrast .loading-spinner {
+    border-color: #ffffff;
+    border-top-color: #00ffff;
+}
+
+/* 模态框 */
+.high-contrast .modal {
+    background-color: rgba(0, 0, 0, 0.95);
+    border: 3px solid #ffffff;
+}
+
+.high-contrast .modal-content {
+    background-color: #000000;
+    border: 2px solid #ffffff;
+}
+
+/* 工具提示 */
+.high-contrast .tooltip {
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    padding: 8px 12px;
+}
+
+/* 标签云 */
+.high-contrast .tag-cloud-item {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    padding: 6px 12px;
+}
+
+.high-contrast .tag-cloud-item:hover,
+.high-contrast .tag-cloud-item.active {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #ffff00;
+}
+
+/* 技能标签 */
+.high-contrast .skill-tag {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    padding: 6px 12px;
+}
+
+.high-contrast .skill-tag:hover {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #ffff00;
+}
+
+/* 进度条 */
+.high-contrast .progress-bar {
+    background-color: #00ffff;
+}
+
+/* 滚动条 */
+.high-contrast ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.high-contrast ::-webkit-scrollbar-track {
+    background: #000000;
+    border: 1px solid #ffffff;
+}
+
+.high-contrast ::-webkit-scrollbar-thumb {
+    background: #ffffff;
+    border: 1px solid #000000;
+}
+
+.high-contrast ::-webkit-scrollbar-thumb:hover {
+    background: #ffff00;
+}
+
+/* 防止文本被意外选中 */
+.high-contrast .no-select {
+    user-select: none;
+}
+
+/* 聚焦样式 */
+.high-contrast .focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 2px;
+}
+
+/* 焦点陷阱样式 */
+.high-contrast .focus-trap *:focus {
+    outline: 3px solid #ffff00;
+}
+
+/* 代码块 */
+.high-contrast pre,
+.high-contrast code {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+
+/* 图片 */
+.high-contrast img {
+    filter: contrast(1.2) brightness(1.1);
+}
+
+/* SVG 图标 */
+.high-contrast svg {
+    filter: invert(1) brightness(1.1);
+}
+
+/* 响应式高对比度 */
+@media (max-width: 768px) {
+    .high-contrast button,
+    .high-contrast .toolbar-btn {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .high-contrast input,
+    .high-contrast textarea,
+    .high-contrast select {
+        font-size: 16px;
+    }
+}
+
+/* 键盘导航提示 */
+.high-contrast .keyboard-hint {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* 错误状态 */
+.high-contrast .error {
+    color: #ff0000;
+    border-color: #ff0000;
+}
+
+/* 成功状态 */
+.high-contrast .success {
+    color: #00ff00;
+    border-color: #00ff00;
+}
+
+/* 警告状态 */
+.high-contrast .warning {
+    color: #ffff00;
+    border-color: #ffff00;
+}
+
+/* 信息状态 */
+.high-contrast .info {
+    color: #00ffff;
+    border-color: #00ffff;
+}

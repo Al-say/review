@@ -13,7 +13,7 @@ export class SearchPanel {
             sortBy: 'relevance' // 'relevance' | 'updatedAt'
         };
         this.searchTimer = null;
-        this.debounceDelay = 300; // 300ms 防抖延迟
+        this.debounceDelay = 150; // 150ms 防抖延迟（已优化）
         this.searchHistory = JSON.parse(localStorage.getItem('search-history') || '[]');
         this.maxHistoryItems = 10;
 
@@ -29,24 +29,30 @@ export class SearchPanel {
     createPanel() {
         // 创建搜索面板HTML
         const panelHTML = `
-            <div id="search-panel" class="search-panel" style="display: none;">
-                <div class="search-overlay" id="search-overlay"></div>
+            <div id="search-panel" class="search-panel" role="dialog" aria-modal="true" aria-labelledby="search-title" aria-hidden="true" style="display: none;">
+                <div class="search-overlay" id="search-overlay" aria-hidden="true"></div>
                 <div class="search-container">
                     <div class="search-header">
+                        <h2 id="search-title" class="sr-only">搜索面板</h2>
                         <div class="search-input-wrapper">
                             <input
                                 type="text"
                                 id="search-input"
                                 placeholder="搜索笔记... (输入 / 打开搜索)"
                                 autocomplete="off"
+                                aria-label="搜索笔记"
+                                aria-describedby="search-help"
                             >
+                            <div id="search-help" class="sr-only">
+                                使用方向键上下切换搜索结果，Enter键打开选中的笔记，Esc键关闭搜索
+                            </div>
                             <div class="search-shortcuts">
                                 <span class="shortcut">↑↓</span> 切换
                                 <span class="shortcut">Enter</span> 打开
                                 <span class="shortcut">Esc</span> 关闭
                             </div>
                         </div>
-                        <button id="search-close" class="search-close-btn">×</button>
+                        <button id="search-close" class="search-close-btn" aria-label="关闭搜索">×</button>
                     </div>
 
                     <!-- 搜索历史 -->
@@ -183,16 +189,25 @@ export class SearchPanel {
     open() {
         this.isOpen = true;
         this.panel.style.display = 'block';
+        this.panel.setAttribute('aria-hidden', 'false');
         this.input.focus();
         this.input.select();
         this.updateFilters();
         this.renderSearchHistory();
+        this.panel.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
+
+        // 为屏幕阅读器宣布
+        if (window.accessibilityManager) {
+            window.accessibilityManager.announceToScreenReader('搜索面板已打开');
+        }
     }
 
     close() {
         this.isOpen = false;
         this.panel.style.display = 'none';
+        this.panel.setAttribute('aria-hidden', 'true');
+        this.panel.setAttribute('aria-expanded', 'false');
         this.currentQuery = '';
         this.input.value = '';
         this.results = [];
@@ -205,6 +220,11 @@ export class SearchPanel {
         }
 
         document.body.style.overflow = '';
+
+        // 为屏幕阅读器宣布
+        if (window.accessibilityManager) {
+            window.accessibilityManager.announceToScreenReader('搜索面板已关闭');
+        }
     }
 
     updateFilters() {
@@ -289,14 +309,21 @@ export class SearchPanel {
         }
 
         // 执行搜索
-        this.results = this.store.searchNotes(this.currentQuery, {
-            topic: this.filters.topic,
-            tags: this.filters.tags,
-            sortBy: this.filters.sortBy
-        });
-
-        this.selectedIndex = 0;
-        this.renderResults();
+        try {
+            this.showLoading(true);
+            this.results = await this.store.searchNotes(this.currentQuery, {
+                topic: this.filters.topic,
+                tags: this.filters.tags,
+                sortBy: this.filters.sortBy
+            });
+            this.selectedIndex = 0;
+            this.renderResults();
+        } catch (error) {
+            console.error('搜索失败:', error);
+            this.showStatus('搜索出错，请稍后重试');
+        } finally {
+            this.showLoading(false);
+        }
     }
 
     renderResults() {
@@ -305,12 +332,21 @@ export class SearchPanel {
             return;
         }
 
+        // 添加结果计数
+        const countMessage = `找到 ${this.results.length} 个搜索结果`;
+        const countElement = document.createElement('div');
+        countElement.className = 'search-results-count';
+        countElement.setAttribute('aria-live', 'polite');
+        countElement.textContent = countMessage;
+        this.resultsContainer.innerHTML = '';
+        this.resultsContainer.appendChild(countElement);
+
         const resultsHTML = this.results.map((result, index) => {
             const isSelected = index === this.selectedIndex;
             const highlightedText = this.highlightMatches(result.text || '', this.currentQuery);
 
             return `
-                <div class="search-result ${isSelected ? 'selected' : ''}" data-index="${index}">
+                <div class="search-result ${isSelected ? 'selected' : ''}" data-index="${index}" role="option" aria-selected="${isSelected}" tabindex="0">
                     <div class="result-header">
                         <h3 class="result-title">${this.highlightMatches(result.title, this.currentQuery)}</h3>
                         <div class="result-meta">
@@ -324,11 +360,12 @@ export class SearchPanel {
                     </div>
                     ${result.linksOut && result.linksOut.length > 0 ?
                         `<div class="result-links">出链: ${result.linksOut.length} 个笔记</div>` : ''}
+                    <div class="sr-only">笔记ID: ${result.id}</div>
                 </div>
             `;
         }).join('');
 
-        this.resultsContainer.innerHTML = resultsHTML;
+        this.resultsContainer.insertAdjacentHTML('beforeend', resultsHTML);
 
         // 绑定结果点击事件
         document.querySelectorAll('.search-result').forEach((element, index) => {
@@ -336,14 +373,23 @@ export class SearchPanel {
                 this.selectedIndex = index;
                 this.openSelected();
             });
+
+            // 添加键盘支持
+            element.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.selectedIndex = index;
+                    this.openSelected();
+                }
+            });
         });
     }
 
     highlightMatches(text, query) {
-        if (!query) return text;
+        if (!query || query.length < 2) return text;
 
-        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return text.replace(regex, '<mark>$1</mark>');
+        // 使用搜索优化器的高亮功能
+        return store.searchOptimizer.highlightText(text, query);
     }
 
     selectNext() {
@@ -428,6 +474,52 @@ export class SearchPanel {
         const historyContainer = document.getElementById('search-history');
         if (historyContainer) {
             historyContainer.style.display = 'none';
+        }
+    }
+
+    // 显示加载状态
+    showLoading(show) {
+        if (show) {
+            this.resultsContainer.innerHTML = `
+                <div class="search-loading">
+                    <div class="loading-spinner"></div>
+                    <div>搜索中...</div>
+                </div>
+            `;
+            // 添加加载动画样式
+            if (!document.getElementById('loading-spinner-style')) {
+                const style = document.createElement('style');
+                style.id = 'loading-spinner-style';
+                style.textContent = `
+                    .search-loading {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 2rem;
+                        color: var(--text-light);
+                    }
+                    .loading-spinner {
+                        width: 24px;
+                        height: 24px;
+                        border: 2px solid var(--border-color);
+                        border-top-color: var(--primary-color);
+                        border-radius: 50%;
+                        animation: spin 0.8s linear infinite;
+                        margin-bottom: 0.5rem;
+                    }
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        } else {
+            // 清除加载状态
+            const loadingElement = this.resultsContainer.querySelector('.search-loading');
+            if (loadingElement) {
+                loadingElement.remove();
+            }
         }
     }
 }

@@ -1,0 +1,75 @@
+{
+  "name": "Alsay - 学习笔记可视化",
+  "short_name": "Alsay Notes",
+  "description": "一个现代化的个人笔记管理系统，支持搜索、知识图谱、时间线等功能",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1115",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "categories": ["education", "productivity", "utilities"],
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "images/screenshot-narrow.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "搜索笔记",
+      "short_name": "搜索",
+      "description": "快速搜索笔记内容",
+      "url": "/#/",
+      "icons": [{ "src": "icons/search.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "新建笔记",
+      "short_name": "新建",
+      "description": "创建新的笔记",
+      "url": "/notes.html",
+      "icons": [{ "src": "icons/new.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "知识图谱",
+      "short_name": "图谱",
+      "description": "查看知识图谱",
+      "url": "/#/graph",
+      "icons": [{ "src": "icons/graph.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

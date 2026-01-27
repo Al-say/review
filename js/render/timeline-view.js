@@ -24,7 +24,10 @@ export class TimelineRenderer {
                     </div>
                 </div>
                 <div id="timeline-content" class="timeline-content">
-                    <div class="timeline-loading">加载中...</div>
+                    <div class="timeline-loading">
+                        <div class="loading-spinner"></div>
+                        <div>正在加载时间线...</div>
+                    </div>
                 </div>
             </div>
         `;

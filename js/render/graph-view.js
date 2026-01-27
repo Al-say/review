@@ -37,6 +37,10 @@ export class GraphRenderer {
                         <button id="graph-fit" title="适应视图">⊡</button>
                     </div>
                 </div>
+                <div class="graph-loading">
+                    <div class="loading-spinner"></div>
+                    <div>正在加载知识图谱...</div>
+                </div>
                 <div class="graph-legend">
                     <span class="legend-item"><span class="legend-color" style="background: #2b59ff;"></span>主节点</span>
                     <span class="legend-item"><span class="legend-color" style="background: #7aa2ff;"></span>相关笔记</span>
@@ -61,6 +65,13 @@ export class GraphRenderer {
         this.sidebar = this.container.querySelector('#graph-sidebar');
 
         this.setupCanvas();
+
+        // 移除加载状态
+        const loadingElement = this.container.querySelector('.graph-loading');
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+
         await this.loadData();
         this.startSimulation();
         this.bindEvents();

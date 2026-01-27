@@ -32,11 +32,13 @@ import { initTypingEffect } from './typing.js';
 import { initSmoothScroll, mustGet, optionalGet, optionalQuery } from './utils.js';
 import { router } from './router.js';
 import { store } from './store.js';
-import { NoteDetailRenderer } from './render/note-detail.js';
 import { SearchPanel } from './ui/search-panel.js';
 import { ShortcutsPanel } from './ui/shortcuts-panel.js';
-import { GraphRenderer } from './render/graph-view.js';
-import { TimelineRenderer } from './render/timeline-view.js';
+import { errorHandler } from './utils/error-handler.js';
+import { lazyLoader } from './utils/lazy-loader.js';
+import { gestureManager } from './utils/touch-gestures.js';
+import { pwaHandler } from './utils/pwa-handler.js';
+import { accessibilityManager } from './utils/accessibility.js';
 
 // 全局变量
 let noteDetailRenderer = null;
@@ -70,13 +72,13 @@ async function initApp() {
 
         // 初始化笔记详情渲染器
         const container = document.querySelector('.container') || document.body;
-        noteDetailRenderer = new NoteDetailRenderer(container);
+        noteDetailRenderer = errorHandler.wrap(() => new NoteDetailRenderer(container), 'NoteDetailRenderer');
 
         // 初始化搜索面板
-        searchPanel = new SearchPanel(store, router);
+        searchPanel = errorHandler.wrap(() => new SearchPanel(store, router), 'SearchPanel');
 
         // 初始化快捷键面板
-        shortcutsPanel = new ShortcutsPanel();
+        shortcutsPanel = errorHandler.wrap(() => new ShortcutsPanel(), 'ShortcutsPanel');
 
         document.addEventListener('keydown', (e) => {
             const target = e.target;
@@ -110,10 +112,87 @@ async function initApp() {
             });
         }
 
+        // 绑定高对比度按钮
+        const highContrastBtn = document.getElementById('high-contrast-btn');
+        if (highContrastBtn) {
+            highContrastBtn.addEventListener('click', () => {
+                toggleHighContrast();
+            });
+
+            // Alt+C 快捷键
+            document.addEventListener('keydown', (e) => {
+                if (e.altKey && e.key.toLowerCase() === 'c') {
+                    e.preventDefault();
+                    toggleHighContrast();
+                }
+            });
+        }
+
+        // 检查系统是否启用了高对比度模式
+        if (window.matchMedia('(prefers-contrast: high)').matches) {
+            document.body.classList.add('high-contrast');
+        }
+
         console.log('Alsay Portfolio - 加载完成');
 
+        // 初始化触摸手势
+        const container = document.querySelector('.container') || document.body;
+        gestureManager.add(container, {
+            swipeThreshold: 50,
+            longPressDelay: 500
+        });
+
+        // 添加手势事件监听
+        container.addEventListener('gesture-swipe', (e) => {
+            // 左右滑动切换页面
+            if (e.detail.direction === 'left') {
+                // 向左滑动，下一个
+                const currentPath = window.location.hash.slice(1) || '/';
+                if (currentPath === '/notes') {
+                    window.location.hash = '/graph';
+                } else if (currentPath === '/graph') {
+                    window.location.hash = '/timeline';
+                }
+            } else if (e.detail.direction === 'right') {
+                // 向右滑动，上一个
+                const currentPath = window.location.hash.slice(1) || '/';
+                if (currentPath === '/graph') {
+                    window.location.hash = '/notes';
+                } else if (currentPath === '/timeline') {
+                    window.location.hash = '/graph';
+                }
+            }
+        });
+
+        container.addEventListener('gesture-tap', (e) => {
+            // 点击外部关闭面板
+            if (e.target === container || container.contains(e.target)) {
+                const searchPanelEl = document.getElementById('search-panel');
+                const shortcutsPanelEl = document.querySelector('.shortcuts-modal');
+                if (searchPanelEl && searchPanelEl.style.display !== 'none') {
+                    if (searchPanel) searchPanel.close();
+                }
+                if (shortcutsPanelEl && shortcutsPanelEl.style.display !== 'none') {
+                    if (shortcutsPanel) shortcutsPanel.toggle();
+                }
+            }
+        });
+
+        container.addEventListener('gesture-longpress', (e) => {
+            // 长按显示菜单
+            if (e.target.closest('.note-card')) {
+                const noteId = e.target.closest('.note-card').dataset.id;
+                if (noteId) {
+                    // 显示笔记操作菜单
+                    this.showNoteMenu(noteId, e);
+                }
+            }
+        });
+
     } catch (error) {
-        console.error('应用初始化失败:', error);
+        errorHandler.handleError(error, 'App Initialization');
+        // 显示用户友好的错误消息
+        errorHandler.showToast('应用加载失败，请刷新页面重试', 'error');
     }
 }
 
@@ -384,9 +463,22 @@ async function showGraph() {
         graphRenderer = null;
     }
 
-    // 创建新的渲染器
-    graphRenderer = new GraphRenderer(container);
-    await graphRenderer.render();
+    try {
+        // 懒加载 GraphRenderer
+        const GraphRenderer = await lazyLoader.loadComponent('graph-view');
+
+        // 创建新的渲染器
+        graphRenderer = new GraphRenderer(container);
+        await graphRenderer.render();
+    } catch (error) {
+        console.error('Failed to load graph view:', error);
+        container.innerHTML = `
+            <div class="error-message">
+                <h2>无法加载知识图谱</h2>
+                <p>请检查网络连接并刷新页面重试。</p>
+            </div>
+        `;
+    }
 }
 
 // 显示时间线
@@ -397,13 +489,203 @@ async function showTimeline() {
 
     // 清理之前的渲染器
     if (timelineRenderer) {
+        timelineRenderer.destroy();
         timelineRenderer = null;
     }
 
-    // 创建新的渲染器
-    timelineRenderer = new TimelineRenderer(container);
-    await timelineRenderer.render();
+    try {
+        // 懒加载 TimelineRenderer
+        const TimelineRenderer = await lazyLoader.loadComponent('timeline-view');
+
+        // 创建新的渲染器
+        timelineRenderer = new TimelineRenderer(container);
+        await timelineRenderer.render();
+    } catch (error) {
+        console.error('Failed to load timeline view:', error);
+        container.innerHTML = `
+            <div class="error-message">
+                <h2>无法加载时间线</h2>
+                <p>请检查网络连接并刷新页面重试。</p>
+            </div>
+        `;
+    }
+}
+
+// 显示笔记菜单
+function showNoteMenu(noteId, event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const note = store.getNoteById(noteId);
+    if (!note) return;
+
+    // 创建菜单
+    const menu = document.createElement('div');
+    menu.className = 'note-menu';
+    menu.style.position = 'fixed';
+    menu.style.top = event.touches ? event.touches[0].clientY + 'px' : event.clientY + 'px';
+    menu.style.left = event.touches ? event.touches[0].clientX + 'px' : event.clientX + 'px';
+    menu.style.zIndex = '1000';
+    menu.style.background = 'white';
+    menu.style.borderRadius = '8px';
+    menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    menu.style.padding = '0.5rem 0';
+
+    menu.innerHTML = `
+        <button class="menu-item" onclick="window.location.hash='/note/${noteId}'">
+            <span>查看笔记</span>
+        </button>
+        <button class="menu-item" onclick="window.open('notes.html#/${noteId}', '_blank')">
+            <span>编辑笔记</span>
+        </button>
+        <button class="menu-item" onclick="copyNoteLink('${noteId}')">
+            <span>复制链接</span>
+        </button>
+    `;
+
+    // 添加样式
+    const style = document.createElement('style');
+    style.textContent = `
+        .note-menu {
+            min-width: 150px;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            text-align: left;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .menu-item:hover {
+            background: var(--bg-color);
+        }
+        .menu-item span {
+            margin-left: 0.5rem;
+        }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(menu);
+
+    // 点击外部关闭菜单
+    setTimeout(() => {
+        const handleClick = (e) => {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                document.removeEventListener('click', handleClick);
+                document.removeEventListener('touchend', handleClick);
+            }
+        };
+        document.addEventListener('click', handleClick);
+        document.addEventListener('touchend', handleClick);
+    }, 100);
+}
+
+// 复制笔记链接
+function copyNoteLink(noteId) {
+    const url = window.location.origin + window.location.pathname + '#/note/' + noteId;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('链接已复制到剪贴板');
+    }).catch(() => {
+        showToast('复制失败', 'error');
+    });
+}
+
+// 显示提示消息
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${type === 'error' ? '#dc3545' : '#28a745'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-size: 14px;
+        z-index: 10000;
+        animation: slideUp 0.3s ease-out;
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'slideDown 0.3s ease-in';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// 添加动画样式
+const animationStyle = document.createElement('style');
+animationStyle.textContent = `
+    @keyframes slideUp {
+        from {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+    }
+    @keyframes slideDown {
+        from {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+        to {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(animationStyle);
+
+// 切换高对比度模式
+function toggleHighContrast() {
+    const body = document.body;
+    const isEnabled = body.classList.toggle('high-contrast');
+
+    // 保存用户偏好
+    localStorage.setItem('high-contrast-mode', isEnabled.toString());
+
+    // 更新按钮状态
+    const btn = document.getElementById('high-contrast-btn');
+    if (btn) {
+        btn.setAttribute('aria-pressed', isEnabled.toString());
+    }
+
+    // 为屏幕阅读器宣布
+    if (window.accessibilityManager) {
+        window.accessibilityManager.announceToScreenReader(
+            isEnabled ? '高对比度模式已开启' : '高对比度模式已关闭'
+        );
+    }
+}
+
+// 恢复用户保存的偏好
+function restoreUserPreferences() {
+    // 恢复高对比度模式
+    const savedHighContrast = localStorage.getItem('high-contrast-mode') === 'true';
+    if (savedHighContrast) {
+        document.body.classList.add('high-contrast');
+        const btn = document.getElementById('high-contrast-btn');
+        if (btn) {
+            btn.setAttribute('aria-pressed', 'true');
+        }
+    }
 }
 
 // 启动应用
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', () => {
+    restoreUserPreferences();
+    initApp();
+});

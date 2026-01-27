@@ -2,6 +2,7 @@
   "name": "alsay-portfolio",
   "version": "1.0.0",
   "description": "Alsay's personal portfolio website with Apple-style design",
+  "type": "module",
   "scripts": {
     "start": "npx serve",
     "test": "echo \"No tests specified\"",
