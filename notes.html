@@ -273,6 +273,16 @@
       background: rgba(255, 255, 255, 0.03);
     }
 
+    .nm-tool-group::before {
+      font-size: 10px;
+      color: var(--nm-muted);
+      margin-right: 4px;
+    }
+
+    .nm-tool-group[data-label="排版"]::before { content: "Aa"; }
+    .nm-tool-group[data-label="目录"]::before { content: "🧭"; }
+    .nm-tool-group[data-label="模式"]::before { content: "⚙️"; }
+
     .nm-reader-tools button {
       padding: 6px 8px;
       font-size: 11px;
@@ -723,27 +733,27 @@
           <div>
             <strong>内容</strong>
             <div class="nm-reader-tools">
-              <div class="nm-tool-group">
-                <button id="fontDecBtn">A-</button>
-                <button id="fontIncBtn">A+</button>
-                <button id="lineDecBtn" class="compact-hide">行距-</button>
-                <button id="lineIncBtn" class="compact-hide">行距+</button>
+              <div class="nm-tool-group" data-label="排版">
+                <button id="fontDecBtn" title="减小字号 (A-)">A-</button>
+                <button id="fontIncBtn" title="增大字号 (A+)">A+</button>
+                <button id="lineDecBtn" class="compact-hide" title="减小行距">行距-</button>
+                <button id="lineIncBtn" class="compact-hide" title="增大行距">行距+</button>
               </div>
-              <div class="nm-tool-group compact-hide">
-                <button id="tocToggleBtn" title="目录">目录</button>
+              <div class="nm-tool-group compact-hide" data-label="目录">
+                <button id="tocToggleBtn" title="显示/隐藏目录">目录</button>
                 <button id="tocAutoBtn" title="目录自动折叠">折叠</button>
               </div>
-              <div class="nm-tool-group compact-hide">
-                <button id="wrapToggleBtn" title="代码自动换行">换行</button>
-                <button id="themeToggleBtn" title="切换主题">🌙</button>
+              <div class="nm-tool-group compact-hide" data-label="模式">
+                <button id="wrapToggleBtn" title="代码自动换行 (W)">换行</button>
+                <button id="themeToggleBtn" title="切换主题 (T)">🌙</button>
               </div>
               <label class="nm-width-slider">
                 宽度
                 <input id="widthRange" type="range" min="640" max="1200" step="40" />
               </label>
-              <div class="nm-tool-group">
-                <button id="focusToggleBtn" title="专注阅读">🔍</button>
-                <button id="resetReaderBtn">重置</button>
+              <div class="nm-tool-group" data-label="模式">
+                <button id="focusToggleBtn" title="专注阅读 (F)">🔍</button>
+                <button id="resetReaderBtn" title="重置阅读设置">重置</button>
               </div>
             </div>
             <div id="preview" class="nm-preview">从左侧选择一篇笔记进行阅读。</div>
@@ -1238,12 +1248,29 @@
       };
 
       const splitRow = (value) => {
-        return value
-          .trim()
-          .replace(/^\|/, '')
-          .replace(/\|$/, '')
-          .split('|')
-          .map(cell => cell.trim());
+        const row = value.trim().replace(/^\|/, '').replace(/\|$/, '');
+        const cells = [];
+        let buffer = '';
+        let escaped = false;
+        for (const ch of row) {
+          if (escaped) {
+            buffer += ch;
+            escaped = false;
+            continue;
+          }
+          if (ch === '\\') {
+            escaped = true;
+            continue;
+          }
+          if (ch === '|') {
+            cells.push(buffer.trim());
+            buffer = '';
+            continue;
+          }
+          buffer += ch;
+        }
+        cells.push(buffer.trim());
+        return cells;
       };
 
       const parseTable = (startIndex) => {
@@ -1286,8 +1313,8 @@
         }
       };
 
-      const closeListsToIndent = (indent) => {
-        while (listStack.length && listStack[listStack.length - 1].indent >= indent) {
+      const closeListsToLevel = (level) => {
+        while (listStack.length && listStack[listStack.length - 1].level >= level) {
           const last = listStack.pop();
           out.push(`</${last.type}>`);
         }
@@ -1363,24 +1390,26 @@
           flushParagraph();
           const isOrdered = /^\s*\d+\.\s+/.test(line);
           const indentMatch = line.match(/^(\s*)/);
-          const indent = indentMatch ? indentMatch[1].length : 0;
+          const indentRaw = indentMatch ? indentMatch[1] : '';
+          const indentCount = indentRaw.replace(/\t/g, '  ').length;
+          const level = Math.floor(indentCount / 2);
           const type = isOrdered ? 'ol' : 'ul';
           let content = line.replace(/^\s*[-*+]\s+/, '').replace(/^\s*\d+\.\s+/, '');
 
-          if (!listStack.length || indent > listStack[listStack.length - 1].indent) {
+          if (!listStack.length || level > listStack[listStack.length - 1].level) {
             out.push(`<${type}>`);
-            listStack.push({ type, indent });
-          } else if (indent === listStack[listStack.length - 1].indent) {
+            listStack.push({ type, level });
+          } else if (level === listStack[listStack.length - 1].level) {
             if (listStack[listStack.length - 1].type !== type) {
-              closeListsToIndent(indent);
+              closeListsToLevel(level);
               out.push(`<${type}>`);
-              listStack.push({ type, indent });
+              listStack.push({ type, level });
             }
           } else {
-            closeListsToIndent(indent);
-            if (!listStack.length || listStack[listStack.length - 1].type !== type) {
+            closeListsToLevel(level);
+            if (!listStack.length || listStack[listStack.length - 1].level !== level || listStack[listStack.length - 1].type !== type) {
               out.push(`<${type}>`);
-              listStack.push({ type, indent });
+              listStack.push({ type, level });
             }
           }
 
