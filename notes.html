@@ -143,6 +143,45 @@
       gap: 20px;
     }
 
+    body.focus-mode .nm-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.focus-mode .nm-panel:first-child,
+    body.focus-mode .nm-toc-panel {
+      display: none;
+    }
+
+    body.focus-mode .nm-panel:last-child {
+      max-width: var(--nm-read-width, 900px);
+      margin: 0 auto;
+    }
+
+    body.focus-mode {
+      background: radial-gradient(900px 500px at 20% -10%, #161a22 0%, #0f1115 60%, #0b0c10 100%);
+    }
+
+    body.focus-mode #tocToggleBtn,
+    body.focus-mode #tocAutoBtn {
+      display: none;
+    }
+
+    body.focus-mode .nm-reader-tools .compact-hide {
+      display: none;
+    }
+
+    .nm-width-slider {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--nm-muted);
+    }
+
+    .nm-width-slider input[type="range"] {
+      accent-color: var(--nm-accent);
+    }
+
     .nm-panel {
       background: var(--nm-panel);
       border: 1px solid var(--nm-border);
@@ -218,10 +257,30 @@
 
     .nm-reader-tools {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       flex-wrap: wrap;
       margin-bottom: 8px;
+    }
+
+    .nm-tool-group {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 4px;
+      border: 1px solid var(--nm-border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .nm-reader-tools button {
+      padding: 6px 8px;
+      font-size: 11px;
+      border-radius: 999px;
+    }
+
+    .nm-reader-tools .nm-width-slider {
+      margin-left: auto;
     }
 
     .nm-reader-tools button {
@@ -514,6 +573,11 @@
       white-space: pre;
     }
 
+    .nm-preview pre.code-wrap code {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
     .nm-preview pre code .kw { color: #89ddff; }
     .nm-preview pre code .fn { color: #82aaff; }
     .nm-preview pre code .str { color: #c3e88d; }
@@ -659,20 +723,34 @@
           <div>
             <strong>内容</strong>
             <div class="nm-reader-tools">
-              <button id="fontDecBtn">A-</button>
-              <button id="fontIncBtn">A+</button>
-              <button id="lineDecBtn">行距-</button>
-              <button id="lineIncBtn">行距+</button>
-              <button id="themeToggleBtn" title="切换主题">🌙</button>
-              <button id="tocToggleBtn" title="目录">目录</button>
-              <button id="tocAutoBtn" title="目录自动折叠">折叠</button>
-              <button id="resetReaderBtn">重置</button>
+              <div class="nm-tool-group">
+                <button id="fontDecBtn">A-</button>
+                <button id="fontIncBtn">A+</button>
+                <button id="lineDecBtn" class="compact-hide">行距-</button>
+                <button id="lineIncBtn" class="compact-hide">行距+</button>
+              </div>
+              <div class="nm-tool-group compact-hide">
+                <button id="tocToggleBtn" title="目录">目录</button>
+                <button id="tocAutoBtn" title="目录自动折叠">折叠</button>
+              </div>
+              <div class="nm-tool-group compact-hide">
+                <button id="wrapToggleBtn" title="代码自动换行">换行</button>
+                <button id="themeToggleBtn" title="切换主题">🌙</button>
+              </div>
+              <label class="nm-width-slider">
+                宽度
+                <input id="widthRange" type="range" min="640" max="1200" step="40" />
+              </label>
+              <div class="nm-tool-group">
+                <button id="focusToggleBtn" title="专注阅读">🔍</button>
+                <button id="resetReaderBtn">重置</button>
+              </div>
             </div>
             <div id="preview" class="nm-preview">从左侧选择一篇笔记进行阅读。</div>
           </div>
           <div class="nm-footer">
             <span id="statusText">未加载</span>
-            <span>快捷键: <span class="shortcut-hint">J/K</span> 导航 · <span class="shortcut-hint">Ctrl+G</span> 搜索 · <span class="shortcut-hint">T</span> 主题 · <span class="shortcut-hint">Esc</span> 清除</span>
+            <span>快捷键: <span class="shortcut-hint">J/K</span> 导航 · <span class="shortcut-hint">Ctrl+G</span> 搜索 · <span class="shortcut-hint">T</span> 主题 · <span class="shortcut-hint">W</span> 换行 · <span class="shortcut-hint">F</span> 专注(🔍) · <span class="shortcut-hint">Esc</span> 清除</span>
           </div>
         </div>
       </section>
@@ -720,8 +798,11 @@
       themeToggleBtn: document.getElementById('themeToggleBtn'),
       tocToggleBtn: document.getElementById('tocToggleBtn'),
       tocAutoBtn: document.getElementById('tocAutoBtn'),
+      wrapToggleBtn: document.getElementById('wrapToggleBtn'),
+      focusToggleBtn: document.getElementById('focusToggleBtn'),
       resetReaderBtn: document.getElementById('resetReaderBtn'),
       progressBar: document.getElementById('progressBar'),
+      widthRange: document.getElementById('widthRange'),
       lightbox: document.getElementById('lightbox'),
       lightboxImg: document.getElementById('lightboxImg'),
       lightboxClose: document.getElementById('lightboxClose'),
@@ -736,18 +817,35 @@
       lineHeight: Number(localStorage.getItem('nm-line-height')) || 1.7,
       theme: localStorage.getItem('nm-theme') || 'dark',
       tocAuto: localStorage.getItem('nm-toc-auto') !== 'false',
+      codeWrap: localStorage.getItem('nm-code-wrap') === 'true',
+      focusMode: localStorage.getItem('nm-focus-mode') === 'true',
+      width: Number(localStorage.getItem('nm-read-width')) || 900,
     };
 
     function applyReaderPrefs() {
       document.documentElement.style.setProperty('--nm-font-size', `${readerPrefs.fontSize}px`);
       document.documentElement.style.setProperty('--nm-line-height', readerPrefs.lineHeight);
       document.body.classList.toggle('theme-warm', readerPrefs.theme === 'warm');
+      document.body.classList.toggle('focus-mode', readerPrefs.focusMode);
+      document.documentElement.style.setProperty('--nm-read-width', `${readerPrefs.width}px`);
       if (els.themeToggleBtn) {
         els.themeToggleBtn.textContent = readerPrefs.theme === 'warm' ? '☀️' : '🌙';
       }
       if (els.tocAutoBtn) {
         els.tocAutoBtn.textContent = readerPrefs.tocAuto ? '折叠' : '展开';
       }
+      if (els.wrapToggleBtn) {
+        els.wrapToggleBtn.textContent = readerPrefs.codeWrap ? '不换行' : '换行';
+      }
+      if (els.focusToggleBtn) {
+        els.focusToggleBtn.textContent = readerPrefs.focusMode ? '↩︎' : '🔍';
+      }
+      if (els.widthRange) {
+        els.widthRange.value = readerPrefs.width;
+      }
+      document.querySelectorAll('.nm-preview pre').forEach(pre => {
+        pre.classList.toggle('code-wrap', readerPrefs.codeWrap);
+      });
     }
 
     function updateReaderPrefs(deltaSize, deltaLine) {
@@ -996,6 +1094,16 @@
         e.preventDefault();
         els.themeToggleBtn.click();
       }
+      // w 切换代码换行
+      else if (key === 'w' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        els.wrapToggleBtn.click();
+      }
+      // f 切换专注模式
+      else if (key === 'f' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        els.focusToggleBtn.click();
+      }
     }
 
     // 笔记列表导航
@@ -1087,57 +1195,224 @@
       return output;
     }
 
-    function renderPreview(content) {
-      buildToc(content || '');
-      const codeBlocks = [];
-      let html = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-        const klass = lang ? ` class="lang-${lang}"` : '';
-        const highlighted = highlightCode(code, lang);
-        const rendered = `<pre><code${klass}>${highlighted}</code></pre>`;
-        const token = `@@CODE${codeBlocks.length}@@`;
-        codeBlocks.push(rendered);
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function renderInline(text) {
+      const codeTokens = [];
+      let html = escapeHtml(text);
+
+      html = html.replace(/`([^`]+)`/g, (_, code) => {
+        const token = `@@INLINECODE${codeTokens.length}@@`;
+        codeTokens.push(`<code>${code}</code>`);
         return token;
       });
 
-      const lines = html.split('\n');
-      const out = [];
-      let inUl = false;
-      let inOl = false;
-      const closeLists = () => {
-        if (inUl) { out.push('</ul>'); inUl = false; }
-        if (inOl) { out.push('</ol>'); inOl = false; }
-      };
-      for (const line of lines) {
-        if (/^\s*[-*+]\s+/.test(line)) {
-          if (!inUl) { closeLists(); out.push('<ul>'); inUl = true; }
-          out.push(`<li>${line.replace(/^\s*[-*+]\s+/, '')}</li>`);
-          continue;
-        }
-        if (/^\s*\d+\.\s+/.test(line)) {
-          if (!inOl) { closeLists(); out.push('<ol>'); inOl = true; }
-          out.push(`<li>${line.replace(/^\s*\d+\.\s+/, '')}</li>`);
-          continue;
-        }
-        closeLists();
-        out.push(line);
-      }
-      closeLists();
-      html = out.join('\n')
-        .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-        .replace(/^### (.*$)/gim, (_, title) => `<h3 id="${slugifyHeading(title)}">${title}</h3>`)
-        .replace(/^## (.*$)/gim, (_, title) => `<h2 id="${slugifyHeading(title)}">${title}</h2>`)
-        .replace(/^# (.*$)/gim, (_, title) => `<h1 id="${slugifyHeading(title)}">${title}</h1>`)
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, '<img alt="$1" src="$2" />')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-        .replace(/\*(.*)\*/gim, '<em>$1</em>')
-        .replace(/`([^`]+)`/gim, '<code>$1</code>')
-        .replace(/\n\n/gim, '</p><p>')
-        .replace(/\n/gim, '<br>');
-      codeBlocks.forEach((block, idx) => {
-        html = html.replace(`@@CODE${idx}@@`, block);
+      html = html
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" />')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+
+      codeTokens.forEach((block, idx) => {
+        html = html.replace(`@@INLINECODE${idx}@@`, block);
       });
-      html = `<p>${html}</p>`;
+      return html;
+    }
+
+    function parseMarkdown(content) {
+      const lines = (content || '').split('\n');
+      const out = [];
+      let inCode = false;
+      let codeLang = '';
+      let codeBuffer = [];
+      let paragraph = [];
+      const listStack = [];
+
+      const isTableSeparator = (value) => {
+        return /^\s*\|?(\s*:?-{3,}:?\s*\|)+\s*:?-{3,}:?\s*\|?\s*$/.test(value);
+      };
+
+      const splitRow = (value) => {
+        return value
+          .trim()
+          .replace(/^\|/, '')
+          .replace(/\|$/, '')
+          .split('|')
+          .map(cell => cell.trim());
+      };
+
+      const parseTable = (startIndex) => {
+        const headerCells = splitRow(lines[startIndex]);
+        const alignTokens = splitRow(lines[startIndex + 1]);
+        const aligns = alignTokens.map(token => {
+          const trimmed = token.trim();
+          const isLeft = trimmed.startsWith(':');
+          const isRight = trimmed.endsWith(':');
+          if (isLeft && isRight) return 'center';
+          if (isRight) return 'right';
+          if (isLeft) return 'left';
+          return '';
+        });
+
+        const thead = `<thead><tr>${headerCells.map((cell, idx) => {
+          const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
+          return `<th${align}>${renderInline(cell)}</th>`;
+        }).join('')}</tr></thead>`;
+
+        const bodyRows = [];
+        let i = startIndex + 2;
+        for (; i < lines.length; i += 1) {
+          const rowLine = lines[i];
+          if (!rowLine.trim() || !rowLine.includes('|')) break;
+          const cells = splitRow(rowLine);
+          bodyRows.push(`<tr>${cells.map((cell, idx) => {
+            const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
+            return `<td${align}>${renderInline(cell)}</td>`;
+          }).join('')}</tr>`);
+        }
+        const tbody = bodyRows.length ? `<tbody>${bodyRows.join('')}</tbody>` : '';
+        return { html: `<table>${thead}${tbody}</table>`, nextIndex: i - 1 };
+      };
+
+      const closeLists = () => {
+        while (listStack.length) {
+          const last = listStack.pop();
+          out.push(`</${last.type}>`);
+        }
+      };
+
+      const closeListsToIndent = (indent) => {
+        while (listStack.length && listStack[listStack.length - 1].indent >= indent) {
+          const last = listStack.pop();
+          out.push(`</${last.type}>`);
+        }
+      };
+
+      const flushParagraph = () => {
+        if (!paragraph.length) return;
+        const text = paragraph.join('<br>');
+        out.push(`<p>${renderInline(text)}</p>`);
+        paragraph = [];
+      };
+
+      for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i].replace(/\r$/, '');
+
+        if (line.startsWith('```')) {
+          if (inCode) {
+            const klass = codeLang ? ` class="lang-${codeLang}"` : '';
+            const highlighted = highlightCode(codeBuffer.join('\n'), codeLang);
+            out.push(`<pre><code${klass}>${highlighted}</code></pre>`);
+            inCode = false;
+            codeLang = '';
+            codeBuffer = [];
+          } else {
+            flushParagraph();
+            closeLists();
+            inCode = true;
+            codeLang = line.slice(3).trim();
+          }
+          continue;
+        }
+
+        if (inCode) {
+          codeBuffer.push(line);
+          continue;
+        }
+
+        if (!line.trim()) {
+          flushParagraph();
+          closeLists();
+          continue;
+        }
+
+        if (line.includes('|') && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+          flushParagraph();
+          closeLists();
+          const { html: tableHtml, nextIndex } = parseTable(i);
+          out.push(tableHtml);
+          i = nextIndex;
+          continue;
+        }
+
+        const headingMatch = line.match(/^(#{1,3})\s+(.*)$/);
+        if (headingMatch) {
+          flushParagraph();
+          closeLists();
+          const level = headingMatch[1].length;
+          const title = headingMatch[2].trim();
+          const id = slugifyHeading(title);
+          out.push(`<h${level} id="${id}">${renderInline(title)}</h${level}>`);
+          continue;
+        }
+
+        const blockquoteMatch = line.match(/^>\s+(.*)$/);
+        if (blockquoteMatch) {
+          flushParagraph();
+          closeLists();
+          out.push(`<blockquote>${renderInline(blockquoteMatch[1])}</blockquote>`);
+          continue;
+        }
+
+        if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
+          flushParagraph();
+          const isOrdered = /^\s*\d+\.\s+/.test(line);
+          const indentMatch = line.match(/^(\s*)/);
+          const indent = indentMatch ? indentMatch[1].length : 0;
+          const type = isOrdered ? 'ol' : 'ul';
+          let content = line.replace(/^\s*[-*+]\s+/, '').replace(/^\s*\d+\.\s+/, '');
+
+          if (!listStack.length || indent > listStack[listStack.length - 1].indent) {
+            out.push(`<${type}>`);
+            listStack.push({ type, indent });
+          } else if (indent === listStack[listStack.length - 1].indent) {
+            if (listStack[listStack.length - 1].type !== type) {
+              closeListsToIndent(indent);
+              out.push(`<${type}>`);
+              listStack.push({ type, indent });
+            }
+          } else {
+            closeListsToIndent(indent);
+            if (!listStack.length || listStack[listStack.length - 1].type !== type) {
+              out.push(`<${type}>`);
+              listStack.push({ type, indent });
+            }
+          }
+
+          const taskMatch = content.match(/^\[( |x|X)\]\s+(.*)$/);
+          if (taskMatch) {
+            const checked = taskMatch[1].toLowerCase() === 'x';
+            const taskText = taskMatch[2];
+            const checkbox = `<input type="checkbox" disabled${checked ? ' checked' : ''}>`;
+            out.push(`<li class="task-item">${checkbox} ${renderInline(taskText)}</li>`);
+          } else {
+            out.push(`<li>${renderInline(content)}</li>`);
+          }
+          continue;
+        }
+
+        paragraph.push(line);
+      }
+
+      if (inCode) {
+        const klass = codeLang ? ` class="lang-${codeLang}"` : '';
+        const highlighted = highlightCode(codeBuffer.join('\n'), codeLang);
+        out.push(`<pre><code${klass}>${highlighted}</code></pre>`);
+      }
+
+      flushParagraph();
+      closeLists();
+      return out.join('\n');
+    }
+
+    function renderPreview(content) {
+      buildToc(content || '');
+      let html = parseMarkdown(content || '');
       let pIndex = 0;
       html = html.replace(/<p>(.*?)<\/p>/g, (_, text) => {
         const pid = `p-${pIndex++}`;
@@ -1148,6 +1423,7 @@
       bindTocToggles();
       bindLightbox();
       bindParagraphAnchors();
+      applyReaderPrefs();
     }
 
     function bindLightbox() {
@@ -1172,7 +1448,7 @@
         p.addEventListener('click', () => {
           els.preview.querySelectorAll('p.anchor').forEach(node => node.classList.remove('active'));
           p.classList.add('active');
-          history.replaceState(null, '', `#${p.id}`);
+          history.replaceState(null, '', `${location.pathname}${location.search}#${p.id}`);
         });
       });
     }
@@ -1187,7 +1463,7 @@
       if (!id) return;
       const saved = Number(localStorage.getItem(`nm-scroll-${id}`));
       if (Number.isFinite(saved) && saved > 0) {
-        requestAnimationFrame(() => window.scrollTo({ top: saved, behavior: 'instant' }));
+        requestAnimationFrame(() => window.scrollTo({ top: saved, behavior: 'auto' }));
       }
     }
 
@@ -1218,8 +1494,22 @@
         }
       }
       renderPreview(note.content || '');
-      restoreScrollPosition(id);
+      if (!scrollToAnchorHash()) {
+        restoreScrollPosition(id);
+      }
       renderListDebounced();
+    }
+
+    function scrollToAnchorHash() {
+      const hash = decodeURIComponent(location.hash || '');
+      if (!hash.startsWith('#p-')) return false;
+      const anchor = document.getElementById(hash.slice(1));
+      if (anchor) {
+        anchor.scrollIntoView({ behavior: 'auto', block: 'start' });
+        anchor.classList.add('active');
+        return true;
+      }
+      return false;
     }
 
     els.noteList.addEventListener('click', (e) => {
@@ -1269,6 +1559,21 @@
       localStorage.setItem('nm-toc-auto', String(readerPrefs.tocAuto));
       applyReaderPrefs();
     });
+    els.wrapToggleBtn.addEventListener('click', () => {
+      readerPrefs.codeWrap = !readerPrefs.codeWrap;
+      localStorage.setItem('nm-code-wrap', String(readerPrefs.codeWrap));
+      applyReaderPrefs();
+    });
+    els.widthRange.addEventListener('input', (e) => {
+      readerPrefs.width = Number(e.target.value);
+      localStorage.setItem('nm-read-width', String(readerPrefs.width));
+      applyReaderPrefs();
+    });
+    els.focusToggleBtn.addEventListener('click', () => {
+      readerPrefs.focusMode = !readerPrefs.focusMode;
+      localStorage.setItem('nm-focus-mode', String(readerPrefs.focusMode));
+      applyReaderPrefs();
+    });
     els.resetReaderBtn.addEventListener('click', () => {
       readerPrefs.fontSize = 15;
       readerPrefs.lineHeight = 1.7;
@@ -1277,7 +1582,13 @@
       localStorage.removeItem('nm-line-height');
       localStorage.removeItem('nm-theme');
       localStorage.removeItem('nm-toc-auto');
+      localStorage.removeItem('nm-code-wrap');
+      localStorage.removeItem('nm-focus-mode');
+      localStorage.removeItem('nm-read-width');
       readerPrefs.tocAuto = true;
+      readerPrefs.codeWrap = false;
+      readerPrefs.focusMode = false;
+      readerPrefs.width = 900;
       applyReaderPrefs();
     });
 

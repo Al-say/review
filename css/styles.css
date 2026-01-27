@@ -1118,6 +1118,17 @@ footer a:hover {
     margin-bottom: 0.5rem;
 }
 
+.note-content .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.note-content .task-item input[type="checkbox"] {
+    margin-top: 0.3rem;
+    accent-color: var(--primary-color);
+}
+
 .note-content table {
     width: 100%;
     border-collapse: collapse;
@@ -1817,6 +1828,8 @@ footer a:hover {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid var(--primary-color);
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .notes-header h1 {
@@ -1828,6 +1841,7 @@ footer a:hover {
 .notes-stats {
     display: flex;
     gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .notes-stats span {
@@ -1914,6 +1928,7 @@ footer a:hover {
     padding: 1.5rem;
     cursor: pointer;
     transition: all 0.2s;
+    min-width: 0;
 }
 
 .note-card:hover {
@@ -1927,6 +1942,7 @@ footer a:hover {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
+    gap: 0.75rem;
 }
 
 .note-card-header h3 {
@@ -1934,6 +1950,8 @@ footer a:hover {
     font-size: 1.25rem;
     color: var(--text-color);
     flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .note-card-topic {
@@ -1944,6 +1962,9 @@ footer a:hover {
     font-size: 0.75rem;
     font-weight: 500;
     white-space: nowrap;
+    max-width: 45%;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .note-card-excerpt {
@@ -1954,12 +1975,15 @@ footer a:hover {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    overflow-wrap: anywhere;
 }
 
 .note-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .note-card-date {
