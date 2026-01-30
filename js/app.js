@@ -128,10 +128,24 @@ async function initApp() {
             });
         }
 
+        // 绑定主题切换按钮
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                toggleTheme();
+            });
+
+            // 更新按钮文本以反映当前主题
+            updateThemeButton();
+        }
+
         // 检查系统是否启用了高对比度模式
         if (window.matchMedia('(prefers-contrast: high)').matches) {
             document.body.classList.add('high-contrast');
         }
+
+        // 初始化导航栏滚动效果
+        initNavbarScrollEffect();
 
         console.log('Alsay Portfolio - 加载完成');
 
@@ -682,8 +696,62 @@ function toggleHighContrast() {
     }
 }
 
+// 切换主题模式
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+    // 设置主题
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+
+    // 更新按钮状态和文本
+    updateThemeButton();
+
+    // 为屏幕阅读器宣布
+    if (window.accessibilityManager) {
+        window.accessibilityManager.announceToScreenReader(
+            newTheme === 'dark' ? '深色主题已开启' : '浅色主题已开启'
+        );
+    }
+}
+
+// 更新主题按钮状态
+function updateThemeButton() {
+    const btn = document.getElementById('theme-toggle-btn');
+    if (!btn) return;
+
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const isDark = currentTheme === 'dark';
+
+    // 更新按钮图标和文本
+    const icon = btn.querySelector('svg');
+    const text = btn.querySelector('span') || btn;
+
+    if (isDark) {
+        // 深色主题 - 显示太阳图标
+        if (icon) {
+            icon.innerHTML = '<path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm-14.34 0c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/>';
+        }
+        if (text.textContent) text.textContent = '浅色';
+    } else {
+        // 浅色主题 - 显示月亮图标
+        if (icon) {
+            icon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>';
+        }
+        if (text.textContent) text.textContent = '深色';
+    }
+
+    btn.setAttribute('aria-pressed', isDark.toString());
+}
+
 // 恢复用户保存的偏好
 function restoreUserPreferences() {
+    // 恢复主题
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
     // 恢复高对比度模式
     const savedHighContrast = localStorage.getItem('high-contrast-mode') === 'true';
     if (savedHighContrast) {
@@ -695,8 +763,44 @@ function restoreUserPreferences() {
     }
 }
 
-// 启动应用
+// 初始化服务Tab切换
+function initServiceTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const service = button.getAttribute('data-service');
+
+            // 移除所有活动状态
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+
+            // 添加当前活动状态
+            button.classList.add('active');
+            const targetPane = document.getElementById(`${service}-service`);
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+        });
+    });
+}
+
+// 页面初始化完成
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Alsay MCN - 页面加载完成');
+
+    // 恢复用户偏好
     restoreUserPreferences();
-    initApp();
+
+    // 初始化导航栏滚动效果
+    initNavbarScrollEffect();
+
+    // 初始化服务Tab
+    initServiceTabs();
+
+    // 更新主题按钮状态
+    updateThemeButton();
+
+    // 其他初始化代码...
 });

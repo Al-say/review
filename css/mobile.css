@@ -12,21 +12,62 @@
         padding: 0.75rem 1rem;
     }
 
-    .nav-title {
-        font-size: 1.2rem;
+    /* 品牌区域 */
+    .nav-brand .brand-text {
+        display: none;
+    }
+
+    .brand-logo {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    /* 导航操作区域 */
+    .nav-actions {
+        gap: 0.25rem;
+    }
+
+    .nav-menu {
+        display: none;
+    }
+
+    .top-nav .cta-button {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.8rem;
     }
 
     .shortcuts-nav-btn {
         padding: 0.5rem;
+        font-size: 0.8rem;
     }
 
     .shortcuts-nav-btn svg {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 
     .shortcuts-nav-btn span {
         display: none;
+    }
+
+    .top-nav-link {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .top-nav-link svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .top-nav-link span {
+        display: none;
+    }
+
+    /* 英雄区域 */
+    .hero-section {
+        padding: 4rem 0 1rem;
     }
 
     /* 主内容区域 */

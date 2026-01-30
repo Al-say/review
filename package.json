@@ -1,7 +1,7 @@
 {
-  "name": "alsay-portfolio",
+  "name": "alsay-mcn",
   "version": "1.0.0",
-  "description": "Alsay's personal portfolio website with Apple-style design",
+  "description": "Alsay MCN - Professional multi-channel network platform providing comprehensive digital marketing solutions for enterprises",
   "type": "module",
   "scripts": {
     "prebuild": "rm -rf build",
@@ -16,10 +16,14 @@
     "url": "git+https://github.com/Al-say/review.git"
   },
   "keywords": [
-    "portfolio",
-    "personal-website",
-    "apple-style",
-    "responsive-design"
+    "MCN",
+    "multi-channel-network",
+    "digital-marketing",
+    "KOL-management",
+    "brand-marketing",
+    "content-creation",
+    "social-media",
+    "enterprise-services"
   ],
   "author": "Alsay",
   "license": "MIT",
