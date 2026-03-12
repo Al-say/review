@@ -34,6 +34,7 @@ import { router } from './router.js';
 import { store } from './store.js';
 import { SearchPanel } from './ui/search-panel.js';
 import { ShortcutsPanel } from './ui/shortcuts-panel.js';
+import { NoteDetailRenderer } from './render/note-detail.js';
 import { errorHandler } from './utils/error-handler.js';
 import { lazyLoader } from './utils/lazy-loader.js';
 import { gestureManager } from './utils/touch-gestures.js';
@@ -51,6 +52,19 @@ let renderToken = 0; // 路由渲染token，防止旧请求覆盖新页面
 function openSearchFromShortcut() {
     if (!searchPanel) return;
     searchPanel.open();
+}
+
+function initNavbarScrollEffect() {
+    const nav = document.querySelector('.top-nav');
+    if (!nav) return;
+
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+        nav.classList.toggle('scrolled', currentScrollY > 8);
+        nav.classList.toggle('hidden', currentScrollY > lastScrollY && currentScrollY > 80);
+        lastScrollY = currentScrollY;
+    }, { passive: true });
 }
 
 // 页面初始化
@@ -150,14 +164,14 @@ async function initApp() {
         console.log('Alsay Portfolio - 加载完成');
 
         // 初始化触摸手势
-        const container = document.querySelector('.container') || document.body;
-        gestureManager.add(container, {
+        const gestureContainer = document.querySelector('.container') || document.body;
+        gestureManager.add(gestureContainer, {
             swipeThreshold: 50,
             longPressDelay: 500
         });
 
         // 添加手势事件监听
-        container.addEventListener('gesture-swipe', (e) => {
+        gestureContainer.addEventListener('gesture-swipe', (e) => {
             // 左右滑动切换页面
             if (e.detail.direction === 'left') {
                 // 向左滑动，下一个
@@ -178,9 +192,9 @@ async function initApp() {
             }
         });
 
-        container.addEventListener('gesture-tap', (e) => {
+        gestureContainer.addEventListener('gesture-tap', (e) => {
             // 点击外部关闭面板
-            if (e.target === container || container.contains(e.target)) {
+            if (e.target === gestureContainer || gestureContainer.contains(e.target)) {
                 const searchPanelEl = document.getElementById('search-panel');
                 const shortcutsPanelEl = document.getElementById('shortcuts-panel');
                 if (searchPanelEl && searchPanelEl.style.display !== 'none') {
@@ -192,13 +206,13 @@ async function initApp() {
             }
         });
 
-        container.addEventListener('gesture-longpress', (e) => {
+        gestureContainer.addEventListener('gesture-longpress', (e) => {
             // 长按显示菜单
             if (e.target.closest('.note-card')) {
                 const noteId = e.target.closest('.note-card').dataset.id;
                 if (noteId) {
                     // 显示笔记操作菜单
-                    this.showNoteMenu(noteId, e);
+                    showNoteMenu(noteId, e);
                 }
             }
         });
@@ -789,6 +803,7 @@ function initServiceTabs() {
 // 页面初始化完成
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Alsay MCN - 页面加载完成');
+    initApp();
 
     // 恢复用户偏好
     restoreUserPreferences();
