@@ -1,24 +1,971 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>angt产品经理</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人时间管理工具</title>
+  <meta name="description" content="个人时间管理工具，帮助你在移动端和桌面端高效管理每日计划、任务优先级与执行节奏。">
+  <meta name="keywords" content="个人时间管理, 时间规划, 任务管理, 效率提升, 番茄钟">
+  <meta name="author" content="alsay.net">
+  <meta name="robots" content="index, follow">
+  <meta name="baiduspider" content="index, follow">
+  <meta name="applicable-device" content="pc,mobile">
+  <link rel="canonical" href="https://alsay.net/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alsay.net/">
+  <meta property="og:title" content="个人时间管理工具">
+  <meta property="og:description" content="面向中文用户的个人时间管理主页，支持日程聚焦、任务分级与执行追踪。">
+  <meta property="og:image" content="https://alsay.net/images/logo.png">
+  <meta property="og:site_name" content="个人时间管理工具">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://alsay.net/">
+  <meta name="twitter:title" content="个人时间管理工具">
+  <meta name="twitter:description" content="面向中文用户的个人时间管理主页，支持日程聚焦、任务分级与执行追踪。">
+  <meta name="twitter:image" content="https://alsay.net/images/logo.png">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://alsay.net/sitemap.xml">
+  <style>
+    :root {
+      --bg-0: #050913;
+      --bg-1: #0a1224;
+      --bg-2: #0f1b34;
+      --line: rgba(131, 175, 255, 0.25);
+      --card: rgba(9, 16, 32, 0.72);
+      --text: #e8f0ff;
+      --text-soft: #93abd2;
+      --accent: #23d7ff;
+      --accent-2: #4f6bff;
+      --ok: #2ce7b8;
+      --warn: #ff9f43;
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+      --shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+      --container: 1160px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: -40px;
+      left: 10px;
+      z-index: 100;
+      background: #c4f8ff;
+      color: #03101d;
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      transition: top 0.2s ease;
+    }
+
+    .skip-link:focus {
+      top: 10px;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "IBM Plex Sans", "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
+      background:
+        radial-gradient(680px 380px at 15% -10%, rgba(35, 215, 255, 0.2) 0%, rgba(35, 215, 255, 0) 60%),
+        radial-gradient(760px 420px at 100% 0%, rgba(79, 107, 255, 0.22) 0%, rgba(79, 107, 255, 0) 62%),
+        linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 52%, var(--bg-2) 100%);
+    }
+
+    body.menu-open {
+      overflow: hidden;
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.26;
+      background-image:
+        linear-gradient(rgba(151, 198, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(151, 198, 255, 0.06) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at center, black 45%, transparent 85%);
+    }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      z-index: 80;
+      background: linear-gradient(90deg, var(--accent), #9ff6ff 60%, var(--ok) 100%);
+      box-shadow: 0 0 12px rgba(35, 215, 255, 0.5);
+      transition: width 0.12s linear;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(119, 157, 222, 0.18);
+      background: rgba(4, 9, 18, 0.72);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar-inner {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #03101d;
+      background: linear-gradient(135deg, var(--accent), #87f2ff);
+      box-shadow: 0 0 0 2px rgba(35, 215, 255, 0.2), 0 8px 22px rgba(35, 215, 255, 0.42);
+    }
+
+    .menu-btn {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: rgba(9, 17, 34, 0.8);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav a {
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: color 0.22s ease, background 0.22s ease;
+    }
+
+    .nav a:hover {
+      color: var(--text);
+      background: rgba(35, 215, 255, 0.1);
+    }
+
+    .nav a.is-active {
+      color: #dff8ff;
+      background: rgba(35, 215, 255, 0.14);
+      border: 1px solid rgba(35, 215, 255, 0.3);
+    }
+
+    .nav .cta {
+      color: #03101d;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), #99f3ff);
+      box-shadow: 0 10px 20px rgba(35, 215, 255, 0.25);
+    }
+
+    .nav .cta:hover {
+      color: #03101d;
+      background: linear-gradient(135deg, #17c8f5, #80efff);
+    }
+
+    .page {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 30px 18px 24px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(131, 175, 255, 0.45);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-main {
+      padding: 28px 24px;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -70px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(35, 215, 255, 0.3) 0%, rgba(35, 215, 255, 0) 70%);
+      z-index: -1;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(10px); }
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(35, 215, 255, 0.35);
+      border-radius: 999px;
+      padding: 6px 12px;
+      color: #b9f4ff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: rgba(35, 215, 255, 0.08);
+    }
+
+    .hero-main h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0.2px;
+    }
+
+    .hero-main p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: clamp(15px, 2vw, 18px);
+      line-height: 1.7;
+      max-width: 64ch;
+    }
+
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 11px 16px;
+      transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    .btn-primary {
+      color: #03101d;
+      background: linear-gradient(135deg, var(--accent), #a8f5ff);
+      box-shadow: 0 12px 24px rgba(35, 215, 255, 0.28);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 15px 28px rgba(35, 215, 255, 0.34);
+    }
+
+    .btn-sub {
+      color: var(--text);
+      border: 1px solid rgba(151, 198, 255, 0.3);
+      background: rgba(14, 24, 44, 0.8);
+    }
+
+    .btn-sub:hover {
+      transform: translateY(-1px);
+      background: rgba(18, 31, 56, 0.95);
+    }
+
+    .hero-side {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      background:
+        linear-gradient(165deg, rgba(79, 107, 255, 0.16) 0%, rgba(35, 215, 255, 0.08) 80%),
+        rgba(8, 16, 32, 0.78);
+    }
+
+    .board-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      color: #d4e2ff;
+    }
+
+    .live-panel {
+      margin-top: 2px;
+      border: 1px solid rgba(131, 175, 255, 0.3);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(8, 17, 32, 0.82);
+    }
+
+    .live-label {
+      font-size: 11px;
+      color: #8ba2cc;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .live-time {
+      margin-top: 4px;
+      font-size: 24px;
+      line-height: 1.1;
+      font-weight: 800;
+      color: #d6f8ff;
+      letter-spacing: 1px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .live-date {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #9ab0d8;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(131, 175, 255, 0.26);
+      background: rgba(8, 15, 30, 0.8);
+    }
+
+    .task-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .task:nth-child(2) .task-dot { color: var(--accent); background: var(--accent); }
+    .task:nth-child(3) .task-dot { color: var(--ok); background: var(--ok); }
+    .task:nth-child(4) .task-dot { color: var(--warn); background: var(--warn); }
+
+    .task small {
+      color: #8ba2cc;
+      font-size: 12px;
+    }
+
+    .task b {
+      font-size: 12px;
+      color: #a6bcde;
+      border: 1px solid rgba(131, 175, 255, 0.28);
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(12, 22, 42, 0.8);
+    }
+
+    .pulse-ring {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      justify-self: center;
+      border: 4px solid rgba(35, 215, 255, 0.16);
+      border-top-color: var(--accent);
+      animation: spin 2.2s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .stats {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid rgba(131, 175, 255, 0.26);
+      border-radius: var(--radius-lg);
+      padding: 14px 12px;
+      text-align: center;
+      background: rgba(8, 15, 30, 0.72);
+      box-shadow: var(--shadow);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .sections {
+      margin-top: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .section {
+      border: 1px solid rgba(131, 175, 255, 0.24);
+      border-radius: var(--radius-xl);
+      background: rgba(8, 15, 30, 0.72);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+
+    .section-kicker {
+      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: 0.6px;
+      color: #8ba3ca;
+      text-transform: uppercase;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .feature {
+      border: 1px solid rgba(131, 175, 255, 0.22);
+      border-radius: 12px;
+      padding: 14px;
+      background: rgba(10, 20, 38, 0.8);
+      transform: translateY(8px);
+      opacity: 0;
+      animation: rise 0.55s ease forwards;
+    }
+
+    .feature:nth-child(2) { animation-delay: 120ms; }
+    .feature:nth-child(3) { animation-delay: 220ms; }
+
+    @keyframes rise {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .feature h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: #d6e8ff;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .step {
+      border-radius: 14px;
+      color: #f2f7ff;
+      padding: 14px 12px;
+      min-height: 132px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(131, 175, 255, 0.26);
+      background: rgba(10, 20, 40, 0.84);
+    }
+
+    .step::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      bottom: -24px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(79, 107, 255, 0.18);
+    }
+
+    .step b {
+      display: inline-flex;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      align-items: center;
+      justify-content: center;
+      background: rgba(35, 215, 255, 0.18);
+      border: 1px solid rgba(35, 215, 255, 0.25);
+      font-size: 12px;
+      margin-bottom: 7px;
+      color: #c9f7ff;
+    }
+
+    .step h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .step p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #a9bcda;
+    }
+
+    .meta {
+      border: 1px solid rgba(131, 175, 255, 0.26);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(160deg, rgba(11, 19, 36, 0.9) 0%, rgba(17, 29, 52, 0.95) 100%);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .meta h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: #e4f0ff;
+    }
+
+    .meta-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 4px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #9cb3d6;
+    }
+
+    .meta a {
+      color: #bdeeff;
+      text-decoration: none;
+    }
+
+    .meta a:hover {
+      text-decoration: underline;
+    }
+
+    .chip-row {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border-radius: 999px;
+      border: 1px solid rgba(131, 175, 255, 0.28);
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #cae0ff;
+      background: rgba(10, 21, 42, 0.74);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid #7de9ff;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .menu-btn {
+        display: inline-flex;
+      }
+
+      .nav {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 62px;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        padding: 8px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(5, 11, 22, 0.95);
+        box-shadow: var(--shadow);
+      }
+
+      .nav.open {
+        display: flex;
+      }
+
+      .nav a {
+        padding: 11px 10px;
+      }
+
+      .hero-main {
+        padding: 22px 18px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid,
+      .flow {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h3>angt产品经理</h3>
-        </div>
-        <div class="chat-box" id="chat-box">
-            <!-- Chat messages will be appended here -->
-        </div>
-        <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Type your message...">
-            <button id="send-btn">Send</button>
-        </div>
+  <a class="skip-link" href="#mainContent">跳转到主要内容</a>
+  <div id="scrollProgress" class="progress" aria-hidden="true"></div>
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark">TM</span>
+        <span>个人时间管理工具</span>
+      </a>
+      <button id="menuBtn" class="menu-btn" aria-expanded="false" aria-controls="mainNav">菜单</button>
+      <nav id="mainNav" class="nav" aria-label="主导航">
+        <a href="#features">核心能力</a>
+        <a href="#flow">使用流程</a>
+        <a href="#about">网站信息</a>
+        <a class="cta" href="notes.html">进入笔记管理</a>
+      </nav>
     </div>
-    <script src="script.js"></script>
+  </header>
+
+  <main id="mainContent" class="page">
+    <section class="hero">
+      <article class="card hero-main reveal">
+        <span class="eyebrow">TECH MODE · FOCUS LOOP</span>
+        <h1>把你的时间系统化，像调度任务一样推进人生项目</h1>
+        <p>
+          这是一个科技风的个人时间管理主页。先定义关键任务，再按节奏执行，
+          最后复盘沉淀。移动端用于快速捕捉，桌面端用于深度规划和回顾。
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="notes.html">开始今天的时间计划</a>
+          <a class="btn btn-sub" href="#flow">查看执行流程</a>
+        </div>
+      </article>
+
+      <aside class="card hero-side reveal">
+        <p class="board-title">今日执行面板</p>
+        <div class="live-panel" aria-live="polite">
+          <div class="live-label">系统时间</div>
+          <div class="live-time" id="liveTime">--:--:--</div>
+          <div class="live-date" id="liveDate">---- -- --</div>
+        </div>
+        <div class="task">
+          <span class="task-dot" aria-hidden="true"></span>
+          <div>
+            <small>09:30 - 11:00</small>
+            <div>需求拆解 + 优先级标注</div>
+          </div>
+          <b>核心</b>
+        </div>
+        <div class="task">
+          <span class="task-dot" aria-hidden="true"></span>
+          <div>
+            <small>14:00 - 15:00</small>
+            <div>任务推进与阻塞记录</div>
+          </div>
+          <b>推进</b>
+        </div>
+        <div class="task">
+          <span class="task-dot" aria-hidden="true"></span>
+          <div>
+            <small>19:30 - 20:00</small>
+            <div>晚间复盘与次日预排</div>
+          </div>
+          <b>复盘</b>
+        </div>
+        <div class="pulse-ring" aria-hidden="true"></div>
+      </aside>
+    </section>
+
+    <section class="stats reveal">
+      <div class="stat">
+        <strong>3 层</strong>
+        <span>目标 / 执行 / 复盘</span>
+      </div>
+      <div class="stat">
+        <strong>2 端</strong>
+        <span>手机快速记录 + 桌面深度管理</span>
+      </div>
+      <div class="stat">
+        <strong>1 套</strong>
+        <span>持续迭代的个人时间系统</span>
+      </div>
+    </section>
+
+    <section id="features" class="section reveal">
+      <p class="section-kicker">Capabilities</p>
+      <h2>核心能力</h2>
+      <div class="feature-grid">
+        <article class="feature">
+          <h3>任务分层</h3>
+          <p>按影响力和时效性拆解任务，优先聚焦关键产出，降低碎片事务干扰。</p>
+        </article>
+        <article class="feature">
+          <h3>节奏管理</h3>
+          <p>通过固定时段推进核心任务，减少切换损耗，提高专注密度与完成质量。</p>
+        </article>
+        <article class="feature">
+          <h3>复盘闭环</h3>
+          <p>记录完成结果和阻塞点，转化为可复用策略，让明天比今天更可控。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="flow" class="section reveal">
+      <p class="section-kicker">Workflow</p>
+      <h2>推荐使用流程</h2>
+      <div class="flow">
+        <article class="step">
+          <b>1</b>
+          <h4>晨间定义关键任务</h4>
+          <p>明确今天必须完成的 1-3 个目标和验收标准。</p>
+        </article>
+        <article class="step">
+          <b>2</b>
+          <h4>按时段推进执行</h4>
+          <p>用专注时段推进高优先级任务，并实时记录进展。</p>
+        </article>
+        <article class="step">
+          <b>3</b>
+          <h4>中途动态校准</h4>
+          <p>根据实际进度调整任务顺序，删除低价值动作。</p>
+        </article>
+        <article class="step">
+          <b>4</b>
+          <h4>晚间复盘收束</h4>
+          <p>沉淀经验、定位问题，输出次日可执行计划。</p>
+        </article>
+      </div>
+    </section>
+
+    <footer id="about" class="meta reveal">
+      <p class="section-kicker">Compliance</p>
+      <h2>网站信息</h2>
+      <ul class="meta-list">
+        <li>安全检测能力由 雷池 WAF 驱动</li>
+        <li>备案号：皖ICP备2025082417号-1</li>
+        <li>网站名称：个人时间管理工具</li>
+        <li>网站域名：alsay.net</li>
+        <li>服务类型：网站 | 网站语言：中文简体</li>
+        <li>联系我们：<a href="mailto:me@alsay.net">me@alsay.net</a></li>
+        <li>&copy; 2026 个人时间管理工具</li>
+      </ul>
+      <div class="chip-row">
+        <span class="chip">科技风界面</span>
+        <span class="chip">移动端优先</span>
+        <span class="chip">桌面端深度管理</span>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const menuBtn = document.getElementById("menuBtn");
+      const nav = document.getElementById("mainNav");
+      const progress = document.getElementById("scrollProgress");
+      const liveTime = document.getElementById("liveTime");
+      const liveDate = document.getElementById("liveDate");
+      const navLinks = nav ? Array.from(nav.querySelectorAll("a[href^='#']")) : [];
+      const sections = ["features", "flow", "about"]
+        .map(function (id) { return document.getElementById(id); })
+        .filter(Boolean);
+
+      function closeMenu() {
+        if (!nav || !menuBtn) return;
+        nav.classList.remove("open");
+        menuBtn.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("menu-open");
+      }
+
+      if (menuBtn && nav) {
+        menuBtn.addEventListener("click", function () {
+          const open = nav.classList.toggle("open");
+          menuBtn.setAttribute("aria-expanded", String(open));
+          document.body.classList.toggle("menu-open", open);
+        });
+
+        nav.addEventListener("click", function (event) {
+          if (event.target.tagName.toLowerCase() !== "a") return;
+          closeMenu();
+        });
+
+        document.addEventListener("click", function (event) {
+          if (!nav.classList.contains("open")) return;
+          if (event.target === menuBtn || nav.contains(event.target)) return;
+          closeMenu();
+        });
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key !== "Escape") return;
+          closeMenu();
+        });
+      }
+
+      function updateProgress() {
+        if (!progress) return;
+        const doc = document.documentElement;
+        const total = doc.scrollHeight - doc.clientHeight;
+        const percent = total > 0 ? (doc.scrollTop / total) * 100 : 0;
+        progress.style.width = String(Math.max(0, Math.min(100, percent))) + "%";
+      }
+
+      function updateClock() {
+        if (!liveTime || !liveDate) return;
+        const now = new Date();
+        const time = now.toLocaleTimeString("zh-CN", { hour12: false });
+        const date = now.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", weekday: "long" });
+        liveTime.textContent = time;
+        liveDate.textContent = date;
+      }
+
+      function updateActiveNav() {
+        if (!sections.length || !navLinks.length) return;
+        const marker = window.scrollY + 140;
+        let activeId = "";
+
+        sections.forEach(function (section) {
+          if (section.offsetTop <= marker) activeId = section.id;
+        });
+
+        navLinks.forEach(function (link) {
+          const match = link.getAttribute("href") === "#" + activeId;
+          link.classList.toggle("is-active", match);
+          if (match) {
+            link.setAttribute("aria-current", "true");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
+      }
+
+      const nodes = document.querySelectorAll(".reveal");
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("in");
+            io.unobserve(entry.target);
+          });
+        }, { threshold: 0.14 });
+        nodes.forEach(function (n) { io.observe(n); });
+      } else {
+        nodes.forEach(function (n) { n.classList.add("in"); });
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+      updateProgress();
+      updateActiveNav();
+      window.addEventListener("scroll", function () {
+        updateProgress();
+        updateActiveNav();
+      }, { passive: true });
+    })();
+  </script>
 </body>
 </html>
