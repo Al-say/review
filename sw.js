@@ -1,35 +1,49 @@
 // service-worker.js - Service Worker for PWA
-const CACHE_NAME = 'alsay-notes-v1';
-const API_CACHE_NAME = 'alsay-notes-api-v1';
-const STATIC_CACHE_URLS = [
-  '/',
-  '/index.html',
-  '/notes.html',
-  '/css/styles.css',
-  '/css/mobile.css',
-  '/js/app.js',
-  '/js/router.js',
-  '/js/store.js',
-  '/js/data.js',
-  '/js/utils.js',
-  '/js/typing.js',
-  '/js/ui/search-panel.js',
-  '/js/ui/shortcuts-panel.js',
-  '/js/render/note-detail.js',
-  '/js/utils/error-handler.js',
-  '/js/utils/loading-manager.js',
-  '/js/utils/lazy-loader.js',
-  '/js/utils/touch-gestures.js',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+const CACHE_NAME = 'alsay-notes-v2';
+const API_CACHE_NAME = 'alsay-notes-api-v2';
+const STATIC_ASSETS = [
+  './',
+  './index.html',
+  './notes.html',
+  './style.css',
+  './script.js',
+  './css/styles.css',
+  './css/mobile.css',
+  './css/high-contrast.css',
+  './js/app.js',
+  './js/router.js',
+  './js/store.js',
+  './js/data.js',
+  './js/utils.js',
+  './js/typing.js',
+  './js/script.js',
+  './js/ui/search-panel.js',
+  './js/ui/shortcuts-panel.js',
+  './js/search/engine.js',
+  './js/render/timeline-view.js',
+  './js/render/graph-view.js',
+  './js/render/note-detail.js',
+  './js/utils/loading-manager.js',
+  './js/utils/touch-gestures.js',
+  './js/utils/search-optimizer.js',
+  './js/utils/accessibility.js',
+  './js/utils/error-handler.js',
+  './js/utils/lazy-loader.js',
+  './js/utils/pwa-handler.js',
+  './manifest.json',
+  './images/logo.png',
+  './data/search.json'
 ];
+const API_URLS = ['./data/search.json'];
+const SCOPE_URL = new URL(self.registration.scope);
+const OFFLINE_FALLBACK_URL = new URL('./notes.html', self.registration.scope).pathname;
 
-// API URLs to cache
-const API_URLS = [
-  '/search-index.json',
-  '/graph-data.json'
-];
+function toScopedPath(relativePath) {
+  return new URL(relativePath, self.registration.scope).pathname;
+}
+
+const STATIC_CACHE_URLS = STATIC_ASSETS.map(toScopedPath);
+const API_CACHE_PATHS = API_URLS.map(toScopedPath);
 
 // Install event
 self.addEventListener('install', (event) => {
@@ -76,7 +90,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Handle API requests
-  if (API_URLS.some(apiUrl => url.pathname === apiUrl)) {
+  if (API_CACHE_PATHS.includes(url.pathname)) {
     event.respondWith(
       caches.match(event.request)
         .then((cachedResponse) => {
@@ -94,7 +108,7 @@ self.addEventListener('fetch', (event) => {
             });
           }).catch(() => {
             // If both cache and network fail, return offline page
-            return caches.match('/');
+            return caches.match(OFFLINE_FALLBACK_URL);
           });
         })
     );
@@ -132,7 +146,7 @@ self.addEventListener('fetch', (event) => {
         .catch(() => {
           // If both cache and network fail, return offline page
           if (event.request.destination === 'document') {
-            return caches.match('/');
+            return caches.match(OFFLINE_FALLBACK_URL);
           }
           return new Response('Offline', { status: 503 });
         })
@@ -152,8 +166,8 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     const options = {
       body: event.data.text(),
-      icon: '/icons/icon-192.png',
-      badge: '/icons/badge.png',
+      icon: toScopedPath('./images/logo.png'),
+      badge: toScopedPath('./images/logo.png'),
       vibrate: [100, 50, 100],
       data: {
         dateOfArrival: Date.now(),
@@ -174,12 +188,12 @@ self.addEventListener('notificationclick', (event) => {
   if (event.action === 'view') {
     // Open the app
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow(new URL('./notes.html', self.registration.scope).href)
     );
   } else {
     // Default action
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow(new URL('./notes.html', self.registration.scope).href)
     );
   }
 });
@@ -257,7 +271,9 @@ async function clearPendingNotes() {
 self.addEventListener('online', () => {
   console.log('App is online');
   // Trigger sync when back online
-  self.registration.sync.register('sync-notes');
+  if ('sync' in self.registration) {
+    self.registration.sync.register('sync-notes');
+  }
 });
 
 self.addEventListener('offline', () => {

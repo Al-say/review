@@ -3,6 +3,7 @@ export class PWAHandler {
     constructor() {
         this.deferredPrompt = null;
         this.isInstalled = false;
+        this.hasReloadedForControllerChange = false;
         this.init();
     }
 
@@ -37,7 +38,8 @@ export class PWAHandler {
     // 注册 Service Worker
     async registerServiceWorker() {
         try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
+            const serviceWorkerUrl = new URL('sw.js', window.location.href);
+            const registration = await navigator.serviceWorker.register(serviceWorkerUrl.pathname);
             console.log('Service Worker registered:', registration);
 
             // 等待 Service Worker 激活
@@ -57,7 +59,10 @@ export class PWAHandler {
             // 监听 Service Worker 控制权获取
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 console.log('Controller changed');
-                window.location.reload();
+                if (!this.hasReloadedForControllerChange) {
+                    this.hasReloadedForControllerChange = true;
+                    window.location.reload();
+                }
             });
         } catch (error) {
             console.error('Service Worker registration failed:', error);
@@ -89,7 +94,7 @@ export class PWAHandler {
         const installButton = document.getElementById('install-button');
         if (installButton && !this.isInstalled) {
             installButton.style.display = 'flex';
-            installButton.addEventListener('click', () => this.install());
+            installButton.onclick = () => this.install();
         }
     }
 
