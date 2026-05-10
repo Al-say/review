@@ -54,19 +54,6 @@ function openSearchFromShortcut() {
     searchPanel.open();
 }
 
-function initNavbarScrollEffect() {
-    const nav = document.querySelector('.top-nav');
-    if (!nav) return;
-
-    let lastScrollY = window.scrollY;
-    window.addEventListener('scroll', () => {
-        const currentScrollY = window.scrollY;
-        nav.classList.toggle('scrolled', currentScrollY > 8);
-        nav.classList.toggle('hidden', currentScrollY > lastScrollY && currentScrollY > 80);
-        lastScrollY = currentScrollY;
-    }, { passive: true });
-}
-
 // 页面初始化
 async function initApp() {
     console.log('Alsay Portfolio - 初始化中...');
@@ -164,14 +151,13 @@ async function initApp() {
         console.log('Alsay Portfolio - 加载完成');
 
         // 初始化触摸手势
-        const gestureContainer = document.querySelector('.container') || document.body;
-        gestureManager.add(gestureContainer, {
+        gestureManager.add(container, {
             swipeThreshold: 50,
             longPressDelay: 500
         });
 
         // 添加手势事件监听
-        gestureContainer.addEventListener('gesture-swipe', (e) => {
+        container.addEventListener('gesture-swipe', (e) => {
             // 左右滑动切换页面
             if (e.detail.direction === 'left') {
                 // 向左滑动，下一个
@@ -192,9 +178,9 @@ async function initApp() {
             }
         });
 
-        gestureContainer.addEventListener('gesture-tap', (e) => {
+        container.addEventListener('gesture-tap', (e) => {
             // 点击外部关闭面板
-            if (e.target === gestureContainer || gestureContainer.contains(e.target)) {
+            if (e.target === container || container.contains(e.target)) {
                 const searchPanelEl = document.getElementById('search-panel');
                 const shortcutsPanelEl = document.getElementById('shortcuts-panel');
                 if (searchPanelEl && searchPanelEl.style.display !== 'none') {
@@ -206,7 +192,7 @@ async function initApp() {
             }
         });
 
-        gestureContainer.addEventListener('gesture-longpress', (e) => {
+        container.addEventListener('gesture-longpress', (e) => {
             // 长按显示菜单
             if (e.target.closest('.note-card')) {
                 const noteId = e.target.closest('.note-card').dataset.id;
@@ -803,7 +789,6 @@ function initServiceTabs() {
 // 页面初始化完成
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Alsay MCN - 页面加载完成');
-    initApp();
 
     // 恢复用户偏好
     restoreUserPreferences();
