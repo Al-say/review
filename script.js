@@ -1,31 +1,20 @@
-// Simple chat UI behavior for index.html
-document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('user-input');
-  const sendBtn = document.getElementById('send-btn');
-  const chatBox = document.getElementById('chat-box');
+document.addEventListener("DOMContentLoaded", () => {
+  const links = document.querySelectorAll('a[href^="#"]');
 
-  if (!input || !sendBtn || !chatBox) return;
+  links.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const targetId = link.getAttribute("href");
+      if (!targetId || targetId === "#") {
+        return;
+      }
 
-  function appendMessage(role, text) {
-    const item = document.createElement('div');
-    item.className = `msg msg-${role}`;
-    item.textContent = text;
-    chatBox.appendChild(item);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+      const target = document.querySelector(targetId);
+      if (!target) {
+        return;
+      }
 
-  function send() {
-    const value = input.value.trim();
-    if (!value) return;
-    appendMessage('user', value);
-    input.value = '';
-  }
-
-  sendBtn.addEventListener('click', send);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      send();
-    }
+      event.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   });
 });
