@@ -109,6 +109,16 @@ export async function loadNoteContent(noteId) {
     try {
         const content = await fetchText(note.path);
 
+        if (note.path.endsWith('.html')) {
+            const { metadata, contentHtml } = parseArticleHtml(content);
+
+            return {
+                ...note,
+                ...metadata,
+                contentHtml
+            };
+        }
+
         // 解析 Front Matter
         const { metadata, content: bodyContent } = parseFrontMatter(content);
 
@@ -121,6 +131,34 @@ export async function loadNoteContent(noteId) {
         console.error(`加载笔记内容失败 ${noteId}:`, error);
         return null;
     }
+}
+
+function parseArticleHtml(content) {
+    const metadataMatch = content.match(/<script id="note-metadata" type="application\/json">([\s\S]*?)<\/script>/i);
+    const articleMatch = content.match(/<article id="note-article" class="note-article">([\s\S]*?)<\/article>/i);
+    let metadata = {};
+
+    if (metadataMatch?.[1]) {
+        try {
+            metadata = JSON.parse(decodeHtmlEntities(metadataMatch[1].trim()));
+        } catch (error) {
+            console.warn('解析文章元数据失败:', error);
+        }
+    }
+
+    return {
+        metadata,
+        contentHtml: articleMatch?.[1]?.trim() || ''
+    };
+}
+
+function decodeHtmlEntities(value) {
+    return value
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
 }
 
 // 解析 Front Matter

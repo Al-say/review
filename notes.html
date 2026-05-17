@@ -705,7 +705,7 @@
     <header class="nm-header">
       <div class="nm-title">
         <h1>Notes Library</h1>
-        <p>浏览与阅读 content/notes 下的 Markdown 笔记</p>
+                <p>浏览与阅读 content/articles 下的 HTML 文章</p>
       </div>
       <div class="nm-actions">
         <button id="loadIndexBtn">重新加载索引</button>
@@ -972,40 +972,61 @@
       }).join('');
     }
 
-    function slugifyHeading(text) {
-      return text
-        .toLowerCase()
+function slugifyHeading(text) {
+  return text
+    .toLowerCase()
         .trim()
         .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9\-\u4e00-\u9fa5]/g, '')
-        .replace(/\-+/g, '-');
+    .replace(/[^a-z0-9\-\u4e00-\u9fa5]/g, '')
+    .replace(/\-+/g, '-');
+}
+
+function parseArticleDocument(html) {
+  const metadataMatch = html.match(/<script id="note-metadata" type="application\/json">([\s\S]*?)<\/script>/i);
+  const articleMatch = html.match(/<article id="note-article" class="note-article">([\s\S]*?)<\/article>/i);
+  let metadata = {};
+
+  if (metadataMatch?.[1]) {
+    try {
+      metadata = JSON.parse(metadataMatch[1].trim());
+    } catch (error) {
+      console.warn('解析文章元数据失败:', error);
+    }
+  }
+
+  return {
+    metadata,
+    contentHtml: articleMatch?.[1]?.trim() || ''
+  };
+}
+
+function extractHeadingsFromPreview() {
+  const slugCounts = new Map();
+
+  return Array.from(els.preview.querySelectorAll('h1, h2, h3')).map((heading, index) => {
+    const title = heading.textContent.trim();
+    const base = slugifyHeading(title) || `heading-${index + 1}`;
+    const count = slugCounts.get(base) || 0;
+    slugCounts.set(base, count + 1);
+    const id = count === 0 ? base : `${base}-${count}`;
+
+    if (!heading.id) {
+      heading.id = id;
     }
 
-    function extractHeadings(content) {
-      const lines = content.split('\n');
-      const items = [];
-      const slugCounts = new Map();
-      const uniqueSlug = (title) => {
-        const base = slugifyHeading(title);
-        const count = slugCounts.get(base) || 0;
-        slugCounts.set(base, count + 1);
-        return count === 0 ? base : `${base}-${count}`;
-      };
-      lines.forEach(line => {
-        const match = /^(#{1,3})\s+(.*)$/.exec(line.trim());
-        if (!match) return;
-        const level = match[1].length;
-        const title = match[2].trim();
-        const id = uniqueSlug(title);
-        items.push({ level, title, id });
-      });
-      return items;
-    }
+    return {
+      level: Number(heading.tagName.slice(1)),
+      title,
+      id: heading.id
+    };
+  });
+}
 
-    function buildToc(items) {
-      if (!items.length) {
-        els.toc.style.display = 'none';
-        els.toc.innerHTML = '';
+function buildToc() {
+  const items = extractHeadingsFromPreview();
+  if (!items.length) {
+    els.toc.style.display = 'none';
+    els.toc.innerHTML = '';
         return;
       }
       const groups = [];
@@ -1285,225 +1306,22 @@
       return html;
     }
 
-    function parseMarkdown(content) {
-      const lines = (content || '').split('\n');
-      const out = [];
-      let inCode = false;
-      let codeLang = '';
-      let codeBuffer = [];
-      let paragraph = [];
-      const listStack = [];
-
-      const isTableSeparator = (value) => {
-        return /^\s*\|?(\s*:?-{3,}:?\s*\|)+\s*:?-{3,}:?\s*\|?\s*$/.test(value);
-      };
-
-      const splitRow = (value) => {
-        const row = value.trim().replace(/^\|/, '').replace(/\|$/, '');
-        const cells = [];
-        let buffer = '';
-        let escaped = false;
-        for (const ch of row) {
-          if (escaped) {
-            buffer += ch;
-            escaped = false;
-            continue;
-          }
-          if (ch === '\\') {
-            escaped = true;
-            continue;
-          }
-          if (ch === '|') {
-            cells.push(buffer.trim());
-            buffer = '';
-            continue;
-          }
-          buffer += ch;
-        }
-        cells.push(buffer.trim());
-        return cells;
-      };
-
-      const normalizeAlign = (token) => {
-        const trimmed = token.trim();
-        const left = trimmed.startsWith(':');
-        const right = trimmed.endsWith(':');
-        if (left && right) return 'center';
-        if (right) return 'right';
-        if (left) return 'left';
-        return '';
-      };
-
-      const parseTable = (startIndex) => {
-        const headerCells = splitRow(lines[startIndex]);
-        const alignTokens = splitRow(lines[startIndex + 1]);
-        const aligns = headerCells.map((_, idx) => normalizeAlign(alignTokens[idx] || ''));
-
-        const thead = `<thead><tr>${headerCells.map((cell, idx) => {
-          const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
-          return `<th${align}>${renderInline(cell)}</th>`;
-        }).join('')}</tr></thead>`;
-
-        const bodyRows = [];
-        let i = startIndex + 2;
-        for (; i < lines.length; i += 1) {
-          const rowLine = lines[i];
-          if (!rowLine.trim() || !rowLine.includes('|')) break;
-          const cells = splitRow(rowLine);
-          bodyRows.push(`<tr>${cells.map((cell, idx) => {
-            const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
-            return `<td${align}>${renderInline(cell)}</td>`;
-          }).join('')}</tr>`);
-        }
-        const tbody = bodyRows.length ? `<tbody>${bodyRows.join('')}</tbody>` : '';
-        return { html: `<table>${thead}${tbody}</table>`, nextIndex: i - 1 };
-      };
-
-      const closeLists = () => {
-        while (listStack.length) {
-          const last = listStack.pop();
-          out.push(`</${last.type}>`);
-        }
-      };
-
-      const closeListsToLevel = (level) => {
-        while (listStack.length && listStack[listStack.length - 1].level >= level) {
-          const last = listStack.pop();
-          out.push(`</${last.type}>`);
-        }
-      };
-
-      const flushParagraph = () => {
-        if (!paragraph.length) return;
-        const text = paragraph.join('<br>');
-        out.push(`<p>${renderInline(text)}</p>`);
-        paragraph = [];
-      };
-
-      for (let i = 0; i < lines.length; i += 1) {
-        const line = lines[i].replace(/\r$/, '');
-
-        if (line.startsWith('```')) {
-          if (inCode) {
-            const klass = codeLang ? ` class="lang-${codeLang}"` : '';
-            const highlighted = highlightCode(codeBuffer.join('\n'), codeLang);
-            out.push(`<pre><code${klass}>${highlighted}</code></pre>`);
-            inCode = false;
-            codeLang = '';
-            codeBuffer = [];
-          } else {
-            flushParagraph();
-            closeLists();
-            inCode = true;
-            codeLang = line.slice(3).trim();
-          }
-          continue;
-        }
-
-        if (inCode) {
-          codeBuffer.push(line);
-          continue;
-        }
-
-        if (!line.trim()) {
-          flushParagraph();
-          closeLists();
-          continue;
-        }
-
-        if (line.includes('|') && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
-          flushParagraph();
-          closeLists();
-          const { html: tableHtml, nextIndex } = parseTable(i);
-          out.push(tableHtml);
-          i = nextIndex;
-          continue;
-        }
-
-        const headingMatch = line.match(/^(#{1,3})\s+(.*)$/);
-        if (headingMatch) {
-          flushParagraph();
-          closeLists();
-          const level = headingMatch[1].length;
-          const title = headingMatch[2].trim();
-          const id = slugifyHeading(title);
-          out.push(`<h${level} id="${id}">${renderInline(title)}</h${level}>`);
-          continue;
-        }
-
-        const blockquoteMatch = line.match(/^>\s+(.*)$/);
-        if (blockquoteMatch) {
-          flushParagraph();
-          closeLists();
-          out.push(`<blockquote>${renderInline(blockquoteMatch[1])}</blockquote>`);
-          continue;
-        }
-
-        if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
-          flushParagraph();
-          const isOrdered = /^\s*\d+\.\s+/.test(line);
-          const indentMatch = line.match(/^(\s*)/);
-          const indentRaw = indentMatch ? indentMatch[1] : '';
-          const indentCount = indentRaw.replace(/\t/g, '  ').length;
-          const level = indentCount % 2 === 0 ? indentCount / 2 : 0;
-          const type = isOrdered ? 'ol' : 'ul';
-          let content = line.replace(/^\s*[-*+]\s+/, '').replace(/^\s*\d+\.\s+/, '');
-
-          if (!listStack.length || level > listStack[listStack.length - 1].level) {
-            out.push(`<${type}>`);
-            listStack.push({ type, level });
-          } else if (level === listStack[listStack.length - 1].level) {
-            if (listStack[listStack.length - 1].type !== type) {
-              closeListsToLevel(level);
-              out.push(`<${type}>`);
-              listStack.push({ type, level });
-            }
-          } else {
-            closeListsToLevel(level);
-            if (!listStack.length || listStack[listStack.length - 1].level !== level || listStack[listStack.length - 1].type !== type) {
-              out.push(`<${type}>`);
-              listStack.push({ type, level });
-            }
-          }
-
-          const taskMatch = content.match(/^\[( |x|X)\]\s+(.*)$/);
-          if (taskMatch) {
-            const checked = taskMatch[1].toLowerCase() === 'x';
-            const taskText = taskMatch[2];
-            const checkbox = `<input type="checkbox" disabled${checked ? ' checked' : ''}>`;
-            out.push(`<li class="task-item">${checkbox} ${renderInline(taskText)}</li>`);
-          } else {
-            out.push(`<li>${renderInline(content)}</li>`);
-          }
-          continue;
-        }
-
-        paragraph.push(line);
-      }
-
-      if (inCode) {
-        const klass = codeLang ? ` class="lang-${codeLang}"` : '';
-        const highlighted = highlightCode(codeBuffer.join('\n'), codeLang);
-        out.push(`<pre><code${klass}>${highlighted}</code></pre>`);
-      }
-
-      flushParagraph();
-      closeLists();
-      return out.join('\n');
+function attachParagraphAnchors() {
+  els.preview.querySelectorAll('p').forEach((paragraph, index) => {
+    if (!paragraph.id) {
+      paragraph.id = `p-${index}`;
     }
+    paragraph.classList.add('anchor');
+  });
+}
 
-    function renderPreview(content) {
-      buildToc(content || '');
-      let html = parseMarkdown(content || '');
-      let pIndex = 0;
-      html = html.replace(/<p>(.*?)<\/p>/g, (_, text) => {
-        const pid = `p-${pIndex++}`;
-        return `<p id="${pid}" class="anchor">${text}</p>`;
-      });
-      els.preview.innerHTML = html;
-      initScrollSpy();
-      bindTocToggles();
-      bindLightbox();
+function renderPreview(contentHtml) {
+  els.preview.innerHTML = contentHtml || '<p class="muted">暂无内容。</p>';
+  attachParagraphAnchors();
+  buildToc();
+  initScrollSpy();
+  bindTocToggles();
+  bindLightbox();
       bindParagraphAnchors();
       applyReaderPrefs();
     }
@@ -1563,19 +1381,22 @@
         <span>更新: ${note.updatedAt || '-'}</span>
       `;
       els.detailTags.innerHTML = (note.tags || []).map(tag => `<span class="nm-tag">${tag}</span>`).join('');
-      if (!note.content && note.path) {
-        try {
-          const res = await fetch(urlOf(note.path), { cache: 'no-store' });
-          if (!res.ok) throw new Error('无法读取 Markdown 文件');
-          note.content = await res.text();
-        } catch (err) {
-          console.error(err);
-          els.preview.innerHTML = '<div class="nm-loading" role="status" aria-live="assertive">读取 Markdown 失败，请检查路径。</div>';
-          renderListDebounced();
-          return;
-        }
-      }
-      renderPreview(note.content || '');
+  if (!note.contentHtml && note.path) {
+    try {
+      const res = await fetch(urlOf(note.path), { cache: 'no-store' });
+      if (!res.ok) throw new Error('无法读取文章文件');
+      const article = parseArticleDocument(await res.text());
+      Object.assign(note, article.metadata, {
+        contentHtml: article.contentHtml
+      });
+    } catch (err) {
+      console.error(err);
+      els.preview.innerHTML = '<div class="nm-loading" role="status" aria-live="assertive">读取文章失败，请检查路径。</div>';
+      renderListDebounced();
+      return;
+    }
+  }
+  renderPreview(note.contentHtml || '');
       if (!scrollToAnchorHash()) {
         restoreScrollPosition(id);
       }

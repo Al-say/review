@@ -38,7 +38,7 @@ async function testStabilityImprovements() {
         console.log('✅ loadSearchIndex 工作正常，版本:', searchIndex.version, '项目数:', searchIndex.items?.length || 0);
 
         // 测试 5: 笔记内容加载
-        const noteContent = await fetchText('content/notes/skills-overview.md');
+  const noteContent = await fetchText('content/articles/skills-overview.html');
         console.log('✅ fetchText 工作正常，内容长度:', noteContent.length);
 
         console.log('🎉 所有稳定性改进测试通过！');

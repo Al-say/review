@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docker 容器化最佳实践</title>
+    <meta name="description" content="">
+  </head>
+  <body>
+    <script id="note-metadata" type="application/json">{
+  &quot;title&quot;: &quot;Docker 容器化最佳实践&quot;,
+  &quot;topic&quot;: &quot;DevOps&quot;,
+  &quot;tags&quot;: &quot;docker, container, devops&quot;,
+  &quot;updated&quot;: &quot;2026-01-27&quot;
+}</script>
+    <article id="note-article" class="note-article">
+      <h1>Docker 容器化最佳实践</h1>
+      <p>Docker 已成为现代软件开发和部署的标准工具。本文总结了使用 Docker 时的最佳实践，帮助你构建更安全、高效的容器化应用。</p>
+      <h2>1. Dockerfile 优化</h2>
+      <h3>使用多阶段构建</h3>
+      <pre><code class="language-dockerfile"># 构建阶段
+      FROM node:16-alpine AS builder
+      WORKDIR /app
+      COPY package*.json ./
+      RUN npm ci --only=production
+      
+      # 生产阶段
+      FROM node:16-alpine
+      RUN apk add --no-cache dumb-init
+      WORKDIR /app
+      COPY --from=builder /app/node_modules ./node_modules
+      COPY . .
+      USER node
+      EXPOSE 3000
+      ENTRYPOINT [&quot;dumb-init&quot;, &quot;--&quot;]
+      CMD [&quot;node&quot;, &quot;server.js&quot;]</code></pre>
+      <h3>层缓存优化</h3>
+      <pre><code class="language-dockerfile">FROM ubuntu:20.04
+      
+      # 先复制依赖文件，利用缓存
+      COPY requirements.txt .
+      RUN pip install -r requirements.txt
+      
+      # 再复制源代码
+      COPY . .</code></pre>
+      <h2>2. 安全最佳实践</h2>
+      <h3>非 root 用户运行</h3>
+      <pre><code class="language-dockerfile">FROM node:16-alpine
+      RUN addgroup -g 1001 -S nodejs
+      RUN adduser -S nextjs -u 1001
+      USER nextjs</code></pre>
+      <h3>最小化攻击面</h3>
+      <pre><code class="language-dockerfile">FROM alpine:latest
+      RUN apk add --no-cache ca-certificates
+      COPY myapp /myapp
+      USER nobody
+      ENTRYPOINT [&quot;/myapp&quot;]</code></pre>
+      <h3>扫描镜像漏洞</h3>
+      <pre><code class="language-bash"># 使用 Trivy 扫描
+      docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+        aquasecurity/trivy:latest image myimage:latest
+      
+      # 使用 Clair
+      docker run --rm -p 6060:6060 quay.io/coreos/clair:latest</code></pre>
+      <h2>3. 镜像大小优化</h2>
+      <h3>使用 .dockerignore</h3>
+      <pre><code>node_modules
+      npm-debug.log
+      .git
+      .gitignore
+      README.md
+      .env
+      .nyc_output
+      coverage</code></pre>
+      <h3>链式 RUN 命令</h3>
+      <pre><code class="language-dockerfile">RUN apt-get update &amp;&amp; apt-get install -y \
+          package1 \
+          package2 \
+          package3 \
+       &amp;&amp; rm -rf /var/lib/apt/lists/*</code></pre>
+      <h3>使用 distroless 镜像</h3>
+      <pre><code class="language-dockerfile">FROM golang:1.17 AS build
+      WORKDIR /go/src/app
+      COPY . .
+      RUN go build -o myapp .
+      
+      FROM gcr.io/distroless/base
+      COPY --from=build /go/src/app/myapp /
+      CMD [&quot;/myapp&quot;]</code></pre>
+      <h2>4. 容器编排</h2>
+      <h3>Docker Compose 配置</h3>
+      <pre><code class="language-yaml">version: &#39;3.8&#39;
+      services:
+        web:
+          build: .
+          ports:
+            - &quot;3000:3000&quot;
+          environment:
+            - NODE_ENV=production
+          depends_on:
+            - db
+          networks:
+            - webnet
+      
+        db:
+          image: postgres:13
+          environment:
+            - POSTGRES_PASSWORD=mysecretpassword
+          volumes:
+            - db-data:/var/lib/postgresql/data
+          networks:
+            - webnet
+      
+      volumes:
+        db-data:
+      
+      networks:
+        webnet:</code></pre>
+      <h3>健康检查</h3>
+      <pre><code class="language-dockerfile">HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+        CMD curl -f http://localhost:3000/health || exit 1</code></pre>
+      <h2>5. 开发环境优化</h2>
+      <h3>开发用 Dockerfile</h3>
+      <pre><code class="language-dockerfile">FROM node:16-alpine
+      
+      # 安装开发依赖
+      RUN apk add --no-cache git
+      
+      # 设置工作目录
+      WORKDIR /app
+      
+      # 复制 package.json 并安装依赖
+      COPY package*.json ./
+      RUN npm install
+      
+      # 复制源代码
+      COPY . .
+      
+      # 暴露端口
+      EXPOSE 3000
+      
+      # 启动命令
+      CMD [&quot;npm&quot;, &quot;run&quot;, &quot;dev&quot;]</code></pre>
+      <h3>使用 bind mounts 进行热重载</h3>
+      <pre><code class="language-bash">docker run -v $(pwd):/app -p 3000:3000 myapp</code></pre>
+      <h2>6. 性能优化</h2>
+      <h3>资源限制</h3>
+      <pre><code class="language-yaml">services:
+        web:
+          deploy:
+            resources:
+              limits:
+                cpus: &#39;0.50&#39;
+                memory: 512M
+              reservations:
+                cpus: &#39;0.25&#39;
+                memory: 256M</code></pre>
+      <h3>使用合适的基础镜像</h3>
+      <pre><code class="language-dockerfile"># 选择合适的基础镜像
+      FROM python:3.9-slim  # 而不是 python:3.9
+      
+      # 或者使用 Alpine
+      FROM python:3.9-alpine</code></pre>
+      <h2>7. 日志管理</h2>
+      <h3>结构化日志</h3>
+      <pre><code class="language-javascript">// 使用 JSON 格式日志
+      console.log(JSON.stringify({
+        level: &#39;info&#39;,
+        message: &#39;User logged in&#39;,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      }));</code></pre>
+      <h3>日志轮转</h3>
+      <pre><code class="language-dockerfile"># 使用 logrotate
+      RUN apt-get update &amp;&amp; apt-get install -y logrotate
+      COPY logrotate.conf /etc/logrotate.d/app</code></pre>
+      <h2>8. 数据持久化</h2>
+      <h3>命名卷</h3>
+      <pre><code class="language-yaml">services:
+        db:
+          image: postgres:13
+          volumes:
+            - postgres_data:/var/lib/postgresql/data
+      
+      volumes:
+        postgres_data:</code></pre>
+      <h3>备份策略</h3>
+      <pre><code class="language-bash"># 备份卷
+      docker run --rm -v postgres_data:/data -v $(pwd):/backup \
+        alpine tar czf /backup/backup.tar.gz -C /data .</code></pre>
+      <h2>9. 网络配置</h2>
+      <h3>使用用户定义网络</h3>
+      <pre><code class="language-yaml">networks:
+        mynetwork:
+          driver: bridge
+          ipam:
+            config:
+              - subnet: 172.20.0.0/16</code></pre>
+      <h3>端口映射策略</h3>
+      <pre><code class="language-yaml"># 开发环境
+      ports:
+        - &quot;3000:3000&quot;
+      
+      # 生产环境（使用反向代理）
+      # 不暴露端口，直接通过网络连接</code></pre>
+      <h2>10. CI/CD 集成</h2>
+      <h3>多阶段构建在 CI/CD 中的应用</h3>
+      <pre><code class="language-yaml">stages:
+        - build
+        - test
+        - deploy
+      
+      build:
+        stage: build
+        script:
+          - docker build --target builder -t myapp:build .
+          - docker build --target production -t myapp:latest .
+      
+      test:
+        stage: test
+        script:
+          - docker run myapp:latest npm test
+      
+      deploy:
+        stage: deploy
+        script:
+          - docker push myapp:latest</code></pre>
+      <h2>总结</h2>
+      <p>Docker 容器化带来了诸多好处，但要充分发挥其潜力需要遵循最佳实践：</p>
+      <ol>
+      <li><strong>安全第一</strong>：使用非 root 用户、最小化镜像</li>
+      <li><strong>性能优化</strong>：多阶段构建、层缓存、资源限制</li>
+      <li><strong>可维护性</strong>：结构化日志、健康检查、文档化</li>
+      <li><strong>开发体验</strong>：热重载、开发环境优化</li>
+      <li><strong>生产就绪</strong>：编排、监控、备份策略</li>
+      </ol>
+      <p>通过这些实践，你可以构建出更安全、更高效、更易维护的容器化应用。</p>
+      <p><span class="tag">#docker</span> <span class="tag">#container</span> <span class="tag">#devops</span> <span class="tag">#best-practices</span></p>
+    </article>
+  </body>
+</html>

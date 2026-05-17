@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>React Hooks 最佳实践</title>
+    <meta name="description" content="">
+  </head>
+  <body>
+    <script id="note-metadata" type="application/json">{
+  &quot;title&quot;: &quot;React Hooks 最佳实践&quot;,
+  &quot;topic&quot;: &quot;前端开发&quot;,
+  &quot;tags&quot;: &quot;react, hooks, javascript&quot;,
+  &quot;updated&quot;: &quot;2026-01-27&quot;
+}</script>
+    <article id="note-article" class="note-article">
+      <h1>React Hooks 最佳实践</h1>
+      <p>React Hooks 是 React 16.8 引入的新特性，让函数组件也能拥有状态和生命周期。本文总结了使用 Hooks 时的最佳实践。</p>
+      <h2>1. 使用 ESLint 插件</h2>
+      <pre><code class="language-bash">npm install eslint-plugin-react-hooks --save-dev</code></pre>
+      <p>在 <code>.eslintrc.js</code> 中配置：</p>
+      <pre><code class="language-javascript">{
+        &quot;plugins&quot;: [&quot;react-hooks&quot;],
+        &quot;rules&quot;: {
+          &quot;react-hooks/rules-of-hooks&quot;: &quot;error&quot;,
+          &quot;react-hooks/exhaustive-deps&quot;: &quot;warn&quot;
+        }
+      }</code></pre>
+      <h2>2. 自定义 Hooks</h2>
+      <p>将可复用的逻辑提取到自定义 Hooks 中：</p>
+      <pre><code class="language-javascript">// useLocalStorage.js
+      function useLocalStorage(key, initialValue) {
+        const [storedValue, setStoredValue] = useState(() =&gt; {
+          try {
+            const item = window.localStorage.getItem(key);
+            return item ? JSON.parse(item) : initialValue;
+          } catch (error) {
+            console.log(error);
+            return initialValue;
+          }
+        });
+      
+        const setValue = (value) =&gt; {
+          try {
+            const valueToStore = value instanceof Function ? value(storedValue) : value;
+            setStoredValue(valueToStore);
+            window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          } catch (error) {
+            console.log(error);
+          }
+        };
+      
+        return [storedValue, setValue];
+      }</code></pre>
+      <h2>3. useEffect 依赖管理</h2>
+      <h3>✅ 正确做法</h3>
+      <pre><code class="language-javascript">useEffect(() =&gt; {
+        const subscription = props.source.subscribe();
+        return () =&gt; {
+          subscription.unsubscribe();
+        };
+      }, [props.source]); // 包含所有依赖</code></pre>
+      <h3>❌ 错误做法</h3>
+      <pre><code class="language-javascript">useEffect(() =&gt; {
+        const subscription = props.source.subscribe();
+        return () =&gt; {
+          subscription.unsubscribe();
+        };
+      }, []); // 缺少依赖，可能导致 bug</code></pre>
+      <h2>4. useCallback 和 useMemo</h2>
+      <h3>性能优化</h3>
+      <pre><code class="language-javascript">const memoizedCallback = useCallback(
+        () =&gt; {
+          doSomething(a, b);
+        },
+        [a, b],
+      );
+      
+      const memoizedValue = useMemo(() =&gt; computeExpensiveValue(a, b), [a, b]);</code></pre>
+      <h3>避免过度使用</h3>
+      <p>只有在必要时才使用 <code>useCallback</code> 和 <code>useMemo</code>，过度的优化可能适得其反。</p>
+      <h2>5. Hooks 规则</h2>
+      <h3>✅ 只能在 React 函数中调用</h3>
+      <pre><code class="language-javascript">function MyComponent() {
+        const [count, setCount] = useState(0); // ✅
+        return &lt;div&gt;{count}&lt;/div&gt;;
+      }</code></pre>
+      <h3>❌ 不要在循环、条件或嵌套函数中调用</h3>
+      <pre><code class="language-javascript">if (condition) {
+        const [count, setCount] = useState(0); // ❌
+      }</code></pre>
+      <h2>6. useReducer vs useState</h2>
+      <h3>使用 useReducer 的场景</h3>
+      <ul>
+      <li>复杂的状态逻辑</li>
+      <li>多个子组件共享状态</li>
+      <li>下一个状态依赖于前一个状态</li>
+      </ul>
+      <pre><code class="language-javascript">const [state, dispatch] = useReducer(reducer, initialState);</code></pre>
+      <h2>7. 自定义 Hooks 命名约定</h2>
+      <p>以 <code>use</code> 开头：</p>
+      <pre><code class="language-javascript">function useWindowSize() {
+        // ...
+      }
+      
+      function useDebounce(value, delay) {
+        // ...
+      }</code></pre>
+      <h2>8. 错误处理</h2>
+      <pre><code class="language-javascript">function useAsync(asyncFunction, immediate = true) {
+        const [status, setStatus] = useState(&#39;idle&#39;);
+        const [value, setValue] = useState(null);
+        const [error, setError] = useState(null);
+      
+        const execute = useCallback(() =&gt; {
+          setStatus(&#39;pending&#39;);
+          setValue(null);
+          setError(null);
+      
+          return asyncFunction()
+            .then((response) =&gt; {
+              setValue(response);
+              setStatus(&#39;success&#39;);
+            })
+            .catch((error) =&gt; {
+              setError(error);
+              setStatus(&#39;error&#39;);
+            });
+        }, [asyncFunction]);
+      
+        useEffect(() =&gt; {
+          if (immediate) {
+            execute();
+          }
+        }, [execute, immediate]);
+      
+        return { execute, status, value, error };
+      }</code></pre>
+      <h2>9. 测试 Hooks</h2>
+      <p>使用 <code>@testing-library/react-hooks</code>：</p>
+      <pre><code class="language-javascript">import { renderHook, act } from &#39;@testing-library/react-hooks&#39;;
+      
+      test(&#39;should increment counter&#39;, () =&gt; {
+        const { result } = renderHook(() =&gt; useCounter());
+      
+        act(() =&gt; {
+          result.current.increment();
+        });
+      
+        expect(result.current.count).toBe(1);
+      });</code></pre>
+      <h2>10. 常见陷阱</h2>
+      <h3>陷阱 1: 依赖数组不完整</h3>
+      <pre><code class="language-javascript">useEffect(() =&gt; {
+        fetchUser(userId); // userId 没有在依赖中
+      }, []); // ❌</code></pre>
+      <h3>陷阱 2: 直接修改状态</h3>
+      <pre><code class="language-javascript">const [todos, setTodos] = useState([]);
+      
+      const addTodo = (todo) =&gt; {
+        todos.push(todo); // ❌ 直接修改
+        setTodos(todos);
+      };</code></pre>
+      <h3>陷阱 3: 条件调用 Hooks</h3>
+      <pre><code class="language-javascript">if (user) {
+        const [name, setName] = useState(&#39;&#39;); // ❌
+      }</code></pre>
+      <h2>总结</h2>
+      <p>React Hooks 让函数组件更加强大，但需要遵循规则和最佳实践。记住：</p>
+      <ol>
+      <li>只在顶层调用 Hooks</li>
+      <li>只在 React 函数中调用 Hooks</li>
+      <li>正确管理依赖</li>
+      <li>使用自定义 Hooks 提高复用性</li>
+      <li>编写测试确保可靠性</li>
+      </ol>
+      <p>通过遵循这些实践，你可以写出更健壮、更易维护的 React 应用。</p>
+      <p><span class="tag">#react</span> <span class="tag">#hooks</span> <span class="tag">#javascript</span> <span class="tag">#frontend</span></p>
+    </article>
+  </body>
+</html>

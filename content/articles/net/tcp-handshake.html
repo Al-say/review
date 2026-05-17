@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TCP 三次握手详解</title>
+    <meta name="description" content="">
+  </head>
+  <body>
+    <script id="note-metadata" type="application/json">{
+  &quot;title&quot;: &quot;TCP 三次握手详解&quot;,
+  &quot;topic&quot;: &quot;计算机网络&quot;,
+  &quot;tags&quot;: &quot;tcp, network, protocol&quot;,
+  &quot;updated&quot;: &quot;2026-05-17&quot;
+}</script>
+    <article id="note-article" class="note-article">
+      <h1>TCP 三次握手详解</h1>
+      <p>TCP（Transmission Control Protocol）建立连接时并不是“打个招呼就开始传数据”，而是要先经过一个短暂但很关键的确认过程。这个过程就是三次握手，它决定了双方是否都具备收发能力、初始序号是否同步，也直接影响排障时对超时、重传、半连接和 SYN 攻击的判断。</p>
+      <p>如果你只记住一句话，可以把三次握手理解成：<strong>客户端确认自己能发，服务端确认自己能收能发，客户端再确认服务端的回复自己确实收到了。</strong></p>
+      <h2>三次握手到底在确认什么？</h2>
+      <p>建立一个可靠连接之前，TCP 需要先确认三件事：</p>
+      <ol>
+      <li>双方的发送与接收路径是否可用。</li>
+      <li>双方是否愿意建立这条连接。</li>
+      <li>双方后续传输时使用的初始序号（Sequence Number）是什么。</li>
+      </ol>
+      <p>这里最容易被忽略的是第三点。TCP 是面向字节流且要求可靠交付的协议，后续每个字节都依赖序号来确认、重传和排序，所以连接建立时必须先把起点对齐。</p>
+      <h2>握手过程</h2>
+      <h3>1. 第一次握手（SYN）</h3>
+      <p>客户端向服务器发送一个 <code>SYN</code> 报文，请求建立连接，并告诉服务端自己的初始序号 <code>seq=x</code>。此时客户端进入 <code>SYN_SENT</code> 状态。</p>
+      <pre><code class="language-text">客户端 → 服务器: SYN=1, seq=x</code></pre>
+      <p>这一步说明客户端至少具备发送能力，但还不能说明服务端是否收到，也不能说明服务端是否愿意建立连接。</p>
+      <h3>2. 第二次握手（SYN + ACK）</h3>
+      <p>服务器收到客户端的 <code>SYN</code> 后，如果同意建立连接，就回复一个同时带有 <code>SYN</code> 和 <code>ACK</code> 的报文：</p>
+      <ul>
+      <li><code>ACK=1, ack=x+1</code> 表示客户端的 SYN 已收到；</li>
+      <li><code>seq=y</code> 表示服务器自己的初始序号。</li>
+      </ul>
+      <p>服务器此时进入 <code>SYN_RCVD</code> 状态。</p>
+      <pre><code class="language-text">服务器 → 客户端: SYN=1, ACK=1, seq=y, ack=x+1</code></pre>
+      <p>到这一步，服务器已经确认：</p>
+      <ol>
+      <li>客户端具备发送能力。</li>
+      <li>自己到客户端的回复链路至少有机会发出去。</li>
+      </ol>
+      <p>但服务端仍然不能确定客户端是否真的收到了这个确认，所以连接还不能算完全建立。</p>
+      <h3>3. 第三次握手（ACK）</h3>
+      <p>客户端收到服务端的 <code>SYN+ACK</code> 后，再发回一个普通 <code>ACK</code> 报文：</p>
+      <pre><code class="language-text">客户端 → 服务器: ACK=1, seq=x+1, ack=y+1</code></pre>
+      <p>客户端发送这个 ACK 后进入 <code>ESTABLISHED</code> 状态。服务器收到该 ACK 后，也进入 <code>ESTABLISHED</code> 状态。到这里，双方都确认：</p>
+      <ol>
+      <li>自己发出的报文对方能收到。</li>
+      <li>对方发出的报文自己能收到。</li>
+      <li>双方都拿到了彼此的初始序号。</li>
+      </ol>
+      <h2><code>seq</code> 和 <code>ack</code> 在这里分别表示什么？</h2>
+      <ul>
+      <li><code>seq</code> 是当前报文段第一个字节的序号。</li>
+      <li><code>ack</code> 是“期望收到对方下一个字节的序号”。</li>
+      </ul>
+      <p>所以在握手里看到 <code>ack=x+1</code>，本质上就是在说：“你刚才那个带 <code>seq=x</code> 的 SYN 我收到了，下一次你应该从 <code>x+1</code> 开始发。”</p>
+      <p>SYN 本身虽然不携带应用数据，但在 TCP 规则里也会占用一个序号，这就是为什么 ACK 会对 SYN 的序号加一。</p>
+      <h2>为什么需要三次握手？</h2>
+      <p>最核心的原因不是“流程完整”，而是要避免旧连接请求、丢包重传和链路不对称导致的错误连接。</p>
+      <h3>场景分析</h3>
+      <p>假设客户端先发出一个 <code>SYN</code>，但这个报文因为网络拥塞滞留了很久。客户端迟迟等不到响应，于是超时重发，又成功和服务器建立了一个新连接。</p>
+      <p>如果协议只需要两次握手，那么那个很久以后才到达的旧 <code>SYN</code> 一旦被服务器收到，服务器就可能误以为客户端又想新建一条连接，从而白白分配资源，形成“历史请求触发的新连接”。</p>
+      <p>三次握手多出来的最后一次 ACK，就是客户端用来明确表态的步骤：只有当客户端真的收到了服务端的回应，并愿意继续，服务端才会把连接最终确认为 <code>ESTABLISHED</code>。</p>
+      <h2>为什么不是两次握手？</h2>
+      <p>两次握手的问题在于：服务端只能确认“客户端发过来过一个请求”，但无法确认“自己的确认是否真的到达了客户端”。</p>
+      <p>换句话说，如果只有：</p>
+      <ol>
+      <li>客户端发 SYN；</li>
+      <li>服务端回 SYN+ACK；</li>
+      </ol>
+      <p>那服务端就必须在第二步后直接认为连接建立成功。这会带来两个问题：</p>
+      <ol>
+      <li>服务端可能因为历史 SYN 或伪造 SYN 建立无效连接。</li>
+      <li>客户端如果根本没收到第二步报文，双方状态就不一致。</li>
+      </ol>
+      <p>TCP 作为可靠传输协议，不能接受这种状态不一致。</p>
+      <h2>为什么不是四次握手？</h2>
+      <p>因为三次已经够了。</p>
+      <p>第二次握手里，服务器完全可以把“确认客户端的 SYN”和“发送自己的 SYN”合并成同一个报文，也就是 <code>SYN+ACK</code>。既然能合并，就没有必要拆成两步，否则只是额外增加一次往返延迟。</p>
+      <p>要注意的是，<strong>连接建立是三次握手，连接断开通常是四次挥手</strong>。这两个过程解决的问题不同，不能混在一起理解。</p>
+      <h2>状态变迁</h2>
+      <table><thead><tr><th>阶段</th><th>客户端状态</th><th>服务器状态</th><th>含义</th></tr></thead><tbody><tr><td>初始</td><td>CLOSED</td><td>LISTEN</td><td>客户端未连接，服务端等待连接</td></tr><tr><td>1 次握手后</td><td>SYN_SENT</td><td>LISTEN</td><td>客户端已发出请求，等待确认</td></tr><tr><td>2 次握手后</td><td>SYN_SENT</td><td>SYN_RCVD</td><td>服务端已收到请求并回应，等待最终 ACK</td></tr><tr><td>3 次握手后</td><td>ESTABLISHED</td><td>ESTABLISHED</td><td>双方连接正式建立</td></tr></tbody></table>
+      <p>这里最值得排障时关注的是 <code>SYN_RCVD</code>。如果服务器长时间堆积大量 <code>SYN_RCVD</code>，通常意味着：</p>
+      <ul>
+      <li>客户端没有把最后一个 ACK 发回来；</li>
+      <li>中间网络有丢包；</li>
+      <li>或者正在遭受 SYN Flood 一类的攻击。</li>
+      </ul>
+      <h2>常见问题</h2>
+      <h3>1. 服务端在第二次握手后为什么不能直接发数据？</h3>
+      <p>因为此时服务端还不知道客户端是否收到了自己的 <code>SYN+ACK</code>。如果贸然发送数据，连接状态可能在双方视角下并不一致。</p>
+      <h3>2. 第三次握手丢了会怎样？</h3>
+      <p>客户端会认为连接已经建立，并可能开始发送数据；服务端因为没有收到最终 ACK，会继续重发 <code>SYN+ACK</code>。客户端如果收到了重传的 <code>SYN+ACK</code>，通常会再次发送 ACK，最终仍有机会建立成功。</p>
+      <h3>3. SYN 洪泛攻击是什么？</h3>
+      <p>攻击者批量发送大量 SYN，请求建立连接，但故意不完成第三次握手。这样服务器会维持大量半连接，消耗队列和内存资源，最终影响正常用户。</p>
+      <h2>防御措施</h2>
+      <ol>
+      <li><strong>SYN Cookie</strong>：不急着为半连接分配完整状态，而是把关键信息编码进序号，等客户端真正回 ACK 再恢复状态。</li>
+      <li><strong>限制 SYN 速率</strong>：在负载均衡器、防火墙或内核层面对异常速率做限流。</li>
+      <li><strong>调整半连接队列</strong>：适度增大 backlog 和相关内核参数，提升高峰期承载能力。</li>
+      <li><strong>观察连接状态分布</strong>：如果 <code>SYN_RCVD</code>、重传率、丢包率异常，就需要进一步抓包定位。</li>
+      </ol>
+      <h2>实际排障时怎么看？</h2>
+      <p>理解三次握手的价值，最终还是为了排障。实际工作里常见的检查方式有两类：</p>
+      <h3>1. 看连接状态</h3>
+      <pre><code class="language-bash">ss -ant | grep :443</code></pre>
+      <p>如果你看到大量 <code>SYN_SENT</code>，通常说明客户端一直在发起请求但收不到回应；如果看到大量 <code>SYN_RCVD</code>，通常说明服务端回了包但收不到客户端最终 ACK。</p>
+      <h3>2. 直接抓包</h3>
+      <pre><code class="language-bash">tcpdump -i any &#39;tcp port 443 and (tcp[tcpflags] &amp; (tcp-syn|tcp-ack) != 0)&#39;</code></pre>
+      <p>抓包后重点看三件事：</p>
+      <ol>
+      <li>SYN 有没有发出去。</li>
+      <li>SYN+ACK 有没有回来。</li>
+      <li>最后一个 ACK 有没有成功到达服务端。</li>
+      </ol>
+      <p>这样比抽象背概念更有效，因为你能直接把状态机和线上现象对应起来。</p>
+      <h2>总结</h2>
+      <p>TCP 三次握手的本质，是用最少的往返次数确认双向通信能力并同步初始序号。它既避免了历史请求导致的误连接，也为后续的可靠传输打下了基础。</p>
+      <p>如果你在做网络排障，真正有用的不是死记“哪三次”，而是知道每一次在确认什么、丢了之后会出现什么现象、系统里又会留下哪些状态痕迹。</p>
+      <h2>相关阅读</h2>
+      <ul>
+      <li><a href="notes.html?note=react-hooks-best-practices" class="wiki-link">react-hooks-best-practices</a> - 前端开发最佳实践</li>
+      <li><a href="notes.html?note=docker-best-practices" class="wiki-link">docker-best-practices</a> - 容器化部署实践</li>
+      </ul>
+      <p><span class="tag">#tcp</span> <span class="tag">#network</span> <span class="tag">#protocol</span></p>
+    </article>
+  </body>
+</html>
